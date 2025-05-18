@@ -1,0 +1,36 @@
+.spe-chat-container {
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+  height: 100%;
+}
+
+.chat-modal-embedded-chat {
+  border: 1px solid #ddd;
+  border-radius: 8px;
+  background-color: white;
+}
+
+.chat-flyout-embedded-chat {
+  border: 1px solid #ddd;
+  border-radius: 8px;
+  background-color: white;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+  height: 100%;
+}
+
+.chat-panel-embedded-chat {
+  border: 1px solid #ddd;
+  border-radius: 8px;
+  background-color: white;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+  height: 100%;
+  max-width: 100%;
+}
+
+/* Optimization for wider chat panels */
+@media (min-width: 1024px) {
+  .chat-panel-embedded-chat {
+    padding: 0 10px;
+  }
+}

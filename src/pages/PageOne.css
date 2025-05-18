@@ -1,0 +1,381 @@
+/* SharePoint Embedded Home Page Styles */
+@import '../styles/base.css';
+
+.home-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  min-height: calc(100vh - 80px);
+  background: linear-gradient(135deg, var(--background-light) 0%, #ffffff 100%);
+  padding: var(--spacing-xl) var(--spacing-lg);
+}
+
+.home-content {
+  text-align: center;
+  max-width: 900px;
+  padding: var(--spacing-xl);
+  background-color: rgba(255, 255, 255, 0.9);
+  border-radius: var(--border-radius-lg);
+  box-shadow: var(--shadow-lg);
+  backdrop-filter: blur(10px);
+  border-left: 5px solid var(--primary-color);
+  margin-bottom: 40px;
+}
+
+.home-headline {
+  font-size: 3rem;
+  color: var(--secondary-color);
+  margin-bottom: var(--spacing-lg);
+  font-weight: 700;
+  line-height: 1.2;
+  background: linear-gradient(90deg, var(--primary-color), var(--secondary-color));
+  background-clip: text;
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+.home-text {
+  font-size: var(--font-size-lg);
+  color: var(--text-color);
+  line-height: 1.6;
+  max-width: 800px;
+  margin: 0 auto;
+}
+
+/* Home Search Container Styles */
+.home-search-container {
+  width: 100%;
+  max-width: 1000px;
+  padding: var(--spacing-lg);
+  background-color: rgba(255, 255, 255, 0.95);
+  border-radius: var(--border-radius-lg);
+  box-shadow: var(--shadow-md);
+  margin-top: 20px;
+  margin-bottom: 40px;
+}
+
+.search-section-title {
+  text-align: center;
+  margin-bottom: 20px;
+  color: var(--primary-color);
+  font-size: 1.8rem;
+}
+
+/* Login card styles within search page */
+.home-search-container .login-card {
+  background-color: white;
+  border-radius: var(--border-radius-lg);
+  box-shadow: var(--shadow-md);
+  padding: var(--spacing-xl);
+  max-width: 450px;
+  margin: 0 auto;
+  text-align: center;
+}
+
+.home-search-container .login-card h1 {
+  color: var(--primary-color);
+  margin-bottom: 12px;
+}
+
+.home-search-container .login-subtitle {
+  color: var(--text-color);
+  font-size: 18px;
+  margin-bottom: 24px;
+}
+
+.home-search-container .login-button {
+  width: 100%;
+  padding: var(--spacing-md);
+  background-color: var(--primary-color);
+  color: white;
+  border: none;
+  border-radius: var(--border-radius-md);
+  font-weight: 500;
+  font-size: var(--font-size-md);
+  cursor: pointer;
+  transition: background-color 0.2s ease;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  margin-top: 16px;
+}
+
+.home-search-container .login-button:hover {
+  background-color: var(--primary-dark);
+}
+
+.home-search-container .login-footer {
+  margin-top: var(--spacing-lg);
+  font-size: 14px;
+  color: #666;
+}
+
+/* Login card styles when no heading is present */
+.home-search-container > .search-page-content .login-card {
+  margin-top: 32px;
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+  .home-container {
+    padding: var(--spacing-md);
+  }
+  
+  .home-content {
+    padding: var(--spacing-lg);
+  }
+  
+  .home-headline {
+    font-size: 2rem;
+  }
+  
+  .home-text {
+    font-size: var(--font-size-md);
+  }
+  
+  .home-search-container {
+    padding: var(--spacing-md);
+  }
+}
+
+/* Search Result Styles (specific to home page) */
+.home-container .search-page-content {
+  border-radius: var(--border-radius-md);
+  background-color: #ffffff;
+}
+
+.home-container .search-input {
+  border: 2px solid #333;
+  border-radius: var(--border-radius-sm);
+  transition: all 0.2s ease;
+  height: 48px;
+  padding: 12px 16px;
+  box-sizing: border-box;
+  font-size: 16px;
+  flex: 1;
+  background-color: #ffffff;
+  color: #000000;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+
+.home-container .search-input::placeholder {
+  color: #555555;
+  opacity: 1;
+}
+
+/* For Safari and Firefox */
+.home-container .search-input::-webkit-input-placeholder {
+  color: #555555;
+  opacity: 1;
+}
+
+.home-container .search-input::-moz-placeholder {
+  color: #555555;
+  opacity: 1;
+}
+
+.home-container .search-bar {
+  display: flex;
+  align-items: center;
+  margin-bottom: 0;
+}
+
+.home-container .search-input:focus {
+  border-color: var(--primary-color);
+  box-shadow: 0 0 0 3px rgba(0, 120, 212, 0.3);
+  outline: none;
+}
+
+.home-container .search-button {
+  background-color: var(--primary-color);
+  color: white;
+  border: none;
+  border-radius: var(--border-radius-sm);
+  padding: 8px 16px;
+  margin-top: 12px;
+  margin-left: auto;
+  cursor: pointer;
+  transition: background-color 0.2s ease;
+  height: 42px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 16px;
+  align-self: flex-end;
+  width: auto;
+}
+
+.home-container .search-button:hover {
+  background-color: var(--primary-dark);
+  transform: translateY(-1px);
+  box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+
+.home-container .search-button:active {
+  transform: translateY(0);
+  box-shadow: none;
+}
+
+/* Loading and error states */
+.home-container .search-loading {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 2rem 0;
+  color: var(--text-color-light);
+}
+
+.home-container .spinner {
+  border: 4px solid rgba(0, 0, 0, 0.1);
+  border-radius: 50%;
+  border-top: 4px solid var(--primary-color);
+  width: 30px;
+  height: 30px;
+  animation: spin 1s linear infinite;
+  margin-bottom: 1rem;
+}
+
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
+.home-container .search-error {
+  color: var(--error-color);
+  padding: 1rem;
+  text-align: center;
+  border: 1px solid var(--error-light);
+  border-radius: var(--border-radius-sm);
+  background-color: #fff5f5;
+  margin: 1rem 0;
+}
+
+/* Login message */
+.login-message {
+  text-align: center;
+  padding: 2rem;
+  background-color: #f9f9f9;
+  border-radius: var(--border-radius-sm);
+  margin: 1rem 0;
+}
+
+.login-link {
+  color: var(--primary-color);
+  text-decoration: none;
+  font-weight: 600;
+  transition: color 0.2s ease;
+}
+
+.login-link:hover {
+  color: var(--primary-dark);
+  text-decoration: underline;
+}
+
+/* Search button container positioning */
+.search-button-container {
+  display: flex;
+  justify-content: flex-end;
+  margin-top: 12px;
+}
+
+/* Add button styling for the repositioned button */
+.search-button-container .search-button {
+  background-color: var(--primary-color);
+  color: white;
+  border: none;
+  border-radius: var(--border-radius-sm);
+  padding: 10px 20px;
+  cursor: pointer;
+  transition: background-color 0.2s ease, transform 0.2s ease, box-shadow 0.2s ease;
+  font-size: 16px;
+  font-weight: 500;
+  display: flex;
+  align-items: center;
+}
+
+.search-button-container .search-button:hover {
+  background-color: var(--primary-dark);
+  transform: translateY(-1px);
+  box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+
+.search-button-container .search-button:active {
+  transform: translateY(0);
+  box-shadow: none;
+}
+
+/* Search form styling */
+.home-container .search-form {
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+}
+
+/* Search results styling */
+.search-results-container {
+  margin-top: 20px;
+}
+
+.search-result-item {
+  padding: 16px;
+  border: 1px solid #eee;
+  border-radius: 4px;
+  margin-bottom: 16px;
+  background-color: #fff;
+  transition: box-shadow 0.2s, border-color 0.2s;
+}
+
+.search-result-item:hover {
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  border-color: #ddd;
+}
+
+.search-result-header {
+  display: flex;
+  align-items: flex-start;
+  margin-bottom: 8px;
+}
+
+.search-result-title {
+  font-size: 18px;
+  font-weight: 500;
+  margin: 0;
+  line-height: 1.3;
+}
+
+.search-result-title a {
+  color: #0078d4;
+  text-decoration: none;
+}
+
+.search-result-title a:hover {
+  text-decoration: underline;
+}
+
+.search-result-summary {
+  margin-bottom: 12px;
+  color: #555;
+  line-height: 1.5;
+  font-size: 14px;
+}
+
+.search-result-meta {
+  display: flex;
+  font-size: 13px;
+  color: #666;
+}
+
+.highlight-term {
+  background-color: #fff2cc;
+  color: #333;
+  font-weight: 500;
+  padding: 0 2px;
+  border-radius: 2px;
+}
+
+.truncation-mark {
+  color: #777;
+  font-style: italic;
+  margin: 0 2px;
+}

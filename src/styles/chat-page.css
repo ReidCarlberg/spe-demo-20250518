@@ -1,0 +1,43 @@
+/* Chat Page Styles */
+@import './base.css';
+
+.alert {
+  padding: var(--spacing-md) var(--spacing-lg);
+  border-radius: var(--border-radius-md);
+  margin-bottom: var(--spacing-lg);
+}
+
+.alert-warning {
+  background-color: #fff3cd;
+  border: 1px solid #ffecb5;
+  color: #856404;
+}
+
+.alert-empty-container {
+  background-color: #f8d7da;
+  border: 1px solid #f5c6cb;
+  color: #721c24;
+  padding: 1rem;
+  border-radius: 0.25rem;
+  margin-bottom: 1rem;
+  font-weight: 500;
+  display: flex;
+  align-items: center;
+}
+
+.alert-empty-container::before {
+  content: "⚠️";
+  margin-right: 0.5rem;
+  font-size: 1.2em;
+}
+
+.alert p {
+  margin: 0;
+}
+
+.h2 {
+  font-size: var(--font-size-xl);
+  font-weight: 500;
+  color: var(--secondary-color);
+  margin-bottom: var(--spacing-lg);
+}

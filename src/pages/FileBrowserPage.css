@@ -1,0 +1,314 @@
+/* FileBrowserPage CSS */
+.file-browser-wrapper {
+  display: flex;
+  width: 100%;
+  transition: margin-right 0.3s ease;
+  position: relative; /* Added for absolute positioning of child elements */
+}
+
+.file-browser-wrapper.with-chat-panel {
+  margin-right: 525px; /* Increased by 50% from 350px */
+}
+
+.file-browser-wrapper.with-chat-panel.panel-collapsed {
+  margin-right: 40px;
+}
+
+.file-browser-container {
+  padding: 20px;
+  max-width: 1200px;
+  margin: 0 auto;
+  width: 100%;
+}
+
+.file-browser-header {
+  margin-bottom: 20px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.file-browser-title {
+  flex-grow: 1;
+}
+
+.file-browser-header h1 {
+  margin: 0 0 5px 0;
+  font-size: 24px;
+  color: #333;
+}
+
+.file-browser-subtitle {
+  margin: 0;
+  color: #666;
+  font-size: 16px;
+}
+
+.chat-header-button {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  background-color: #0078d4;
+  color: white;
+  border: none;
+  border-radius: 4px;
+  padding: 8px 16px;
+  font-size: 14px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.chat-header-button:hover {
+  background-color: #106ebe;
+}
+
+.chat-header-button:active {
+  background-color: #005a9e;
+}
+
+.chat-header-button.active {
+  background-color: #005a9e;
+  box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.25);
+}
+
+.chat-header-button:disabled {
+  background-color: #ccc;
+  cursor: not-allowed;
+}
+
+.chat-header-button i {
+  font-size: 16px;
+}
+
+/* Search styles */
+.file-browser-search {
+  margin-bottom: 20px;
+}
+
+.search-input-container {
+  display: flex;
+  position: relative;
+  max-width: 500px;
+}
+
+.search-input {
+  flex: 1;
+  padding: 10px;
+  padding-right: 60px;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+  font-size: 14px;
+}
+
+.search-input:focus {
+  outline: none;
+  border-color: #4d194d;
+  box-shadow: 0 0 0 2px rgba(77, 25, 77, 0.1);
+}
+
+.search-button {
+  position: absolute;
+  right: 0;
+  top: 0;
+  height: 100%;
+  width: 40px;
+  background-color: #4d194d;
+  color: white;
+  border: none;
+  border-radius: 0 4px 4px 0;
+  cursor: pointer;
+}
+
+.search-button:hover {
+  background-color: #6b226b;
+}
+
+.search-clear-button {
+  position: absolute;
+  right: 40px;
+  top: 0;
+  height: 100%;
+  width: 30px;
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  color: #888;
+}
+
+.search-clear-button:hover {
+  color: #333;
+}
+
+.search-results-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 15px;
+  padding-bottom: 10px;
+  border-bottom: 1px solid #eee;
+}
+
+.search-results-header h3 {
+  margin: 0;
+  font-size: 16px;
+  color: #333;
+}
+
+.search-result-item {
+  background-color: #f9f9f9;
+}
+
+.search-result-item .file-path {
+  display: block;
+  font-size: 12px;
+  color: #666;
+  margin-top: 4px;
+}
+
+/* Chat restore button - positioned at the top right to match the chat panel header */
+.chat-restore-button {
+  position: fixed;
+  top: 15px; /* Match the padding of chat-panel-header */
+  right: 0;
+  width: 40px; /* Match the width when collapsed from persistent-chat.css */
+  height: 40px;
+  background-color: #f8f9fa; /* Match header background */
+  color: #666;
+  border: none;
+  box-shadow: -2px 0 5px rgba(0, 0, 0, 0.1);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  z-index: 99;
+  transition: all 0.2s ease;
+  animation: fadeIn 0.3s ease-in-out;
+}
+
+/* Tooltip for the chat restore button */
+.chat-restore-tooltip {
+  position: absolute;
+  background-color: #333;
+  color: white;
+  padding: 5px 10px;
+  border-radius: 4px;
+  font-size: 12px;
+  left: -90px;
+  white-space: nowrap;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.2s ease;
+}
+
+.chat-restore-button:hover .chat-restore-tooltip,
+.chat-restore-button:focus .chat-restore-tooltip {
+  opacity: 1;
+}
+
+/* Add a small arrow to the tooltip */
+.chat-restore-tooltip::after {
+  content: '';
+  position: absolute;
+  top: 50%;
+  right: -4px;
+  margin-top: -4px;
+  border-width: 4px 0 4px 4px;
+  border-style: solid;
+  border-color: transparent transparent transparent #333;
+}
+
+/* Keyboard shortcut notification */
+.shortcut-notification {
+  position: fixed;
+  top: 20px;
+  right: 20px;
+  background-color: rgba(0, 0, 0, 0.8);
+  color: white;
+  padding: 10px 15px;
+  border-radius: 4px;
+  z-index: 1000;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  animation: slideIn 0.3s ease-out;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.2);
+}
+
+.shortcut-notification i {
+  font-size: 16px;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateX(-10px); }
+  to { opacity: 1; transform: translateX(0); }
+}
+
+@keyframes slideIn {
+  from { transform: translateY(-20px); opacity: 0; }
+  to { transform: translateY(0); opacity: 1; }
+}
+
+.chat-restore-button:hover,
+.chat-restore-button:focus {
+  background-color: #e9ecef;
+  color: #333;
+  transform: none;
+  outline: none;
+}
+
+.chat-restore-button:focus-visible {
+  box-shadow: 0 0 0 2px rgba(0, 0, 0, 0.2);
+}
+
+.chat-restore-button i {
+  font-size: 16px;
+}
+
+/* Mobile responsiveness */
+@media (max-width: 768px) {
+  .chat-restore-button {
+    top: 10px;
+    width: 36px;
+    height: 36px;
+  }
+  
+  .chat-restore-button i {
+    font-size: 14px;
+  }
+}
+
+/* Responsive design for smaller screens */
+@media (max-width: 768px) {
+  .file-browser-header {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 15px;
+  }
+  
+  .file-browser-title {
+    width: 100%;
+  }
+  
+  .chat-header-button {
+    align-self: flex-start;
+  }
+}
+
+/* Additional responsive design for persistent chat panel */
+@media (max-width: 1024px) {
+  .file-browser-wrapper.with-chat-panel {
+    margin-right: 450px; /* Adjusted for the wider panel */
+  }
+}
+
+@media (max-width: 768px) {
+  .file-browser-wrapper.with-chat-panel,
+  .file-browser-wrapper.with-chat-panel.panel-collapsed {
+    margin-right: 0;
+  }
+  
+  .file-browser-container {
+    padding: 15px;
+  }
+}

@@ -1,0 +1,22 @@
+/* 
+  Main application styles
+  Import all component styles here for a single point of entry
+*/
+
+/* Base and shared styles */
+@import './base.css';
+
+/* Layout and navigation */
+@import './layout.css';
+
+/* Authentication related */
+@import './auth.css';
+
+/* SharePoint Embedded */
+@import './spe.css';
+
+/* General pages */
+@import './pages.css';
+
+/* PDF Preview component */
+@import './pdf-preview.css';

@@ -1,0 +1,5 @@
+/* App specific styles that are not included in the consolidated files */
+
+.app-container {
+  background-color: #f8f9fa;
+}

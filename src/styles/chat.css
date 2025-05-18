@@ -1,0 +1,331 @@
+@import './base.css';
+
+.spe-chat-container {
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: var(--spacing-md);
+  background-color: var(--background-color);
+  border-radius: var(--border-radius-md);
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+}
+
+.spe-chat-container h3 {
+  margin-top: 0;
+  margin-bottom: var(--spacing-md);
+  color: var(--text-dark);
+  font-size: var(--font-size-lg);
+}
+
+.chat-loading,
+.chat-error {
+  padding: var(--spacing-lg);
+  text-align: center;
+  background-color: var(--background-light);
+  border-radius: var(--border-radius-md);
+  margin: var(--spacing-md) 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  min-height: 200px;
+}
+
+.chat-loading i,
+.chat-error i {
+  font-size: 2rem;
+  margin-bottom: var(--spacing-md);
+}
+
+.chat-loading {
+  color: var(--primary-color);
+}
+
+.chat-loading-subtitle {
+  font-size: 0.85rem;
+  color: var(--text-light);
+  margin-top: 0.5rem;
+  opacity: 0.8;
+}
+
+.chat-error {
+  color: var(--error-color);
+}
+
+/* Chat Error Styles */
+.chat-error-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 2rem;
+  background-color: #f8f8f8;
+  border-radius: 8px;
+  text-align: center;
+  max-width: 600px;
+  margin: 2rem auto;
+}
+
+.chat-error-icon {
+  font-size: 3rem;
+  color: #d14343;
+  margin-bottom: 1rem;
+}
+
+.chat-error-title {
+  font-size: 1.5rem;
+  margin-bottom: 1rem;
+  color: #333;
+}
+
+.chat-error-message {
+  color: #555;
+  margin-bottom: 1.5rem;
+}
+
+.chat-error-actions {
+  display: flex;
+  gap: 1rem;
+  margin-bottom: 2rem;
+}
+
+.chat-error-retry-btn,
+.chat-error-help-btn {
+  padding: 0.5rem 1rem;
+  border-radius: 4px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-weight: 500;
+  transition: all 0.2s ease;
+}
+
+.chat-error-retry-btn {
+  background-color: var(--primary-color);
+  color: white;
+  border: none;
+}
+
+.chat-error-retry-btn:hover {
+  background-color: var(--primary-color-dark);
+}
+
+.chat-error-help-btn {
+  background-color: white;
+  color: var(--text-dark);
+  border: 1px solid #ddd;
+}
+
+.chat-error-help-btn:hover {
+  background-color: #f0f0f0;
+}
+
+.chat-error-tips {
+  background-color: #f0f7ff;
+  padding: 1rem;
+  border-radius: 4px;
+  text-align: left;
+  width: 100%;
+}
+
+.chat-error-tips h4 {
+  font-size: 1rem;
+  margin-top: 0;
+  margin-bottom: 0.5rem;
+  color: #333;
+}
+
+.chat-error-tips ul {
+  margin: 0;
+  padding-left: 1.5rem;
+}
+
+.chat-error-tips li {
+  margin-bottom: 0.25rem;
+  font-size: 0.9rem;
+  color: #555;
+}
+
+.chat-retry-button {
+  margin-top: var(--spacing-md);
+  padding: var(--spacing-xs) var(--spacing-md);
+  background-color: var(--primary-color);
+  color: white;
+  border: none;
+  border-radius: var(--border-radius-md);
+  cursor: pointer;
+  transition: background-color 0.2s ease;
+}
+
+.chat-retry-button:hover {
+  background-color: var(--primary-color-dark);
+}
+
+.spe-chat-toggle {
+  position: fixed;
+  bottom: 20px;
+  right: 20px;
+  width: 60px;
+  height: 60px;
+  border-radius: 50%;
+  background-color: var(--primary-color);
+  color: white;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  cursor: pointer;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+  border: none;  z-index: 100;
+  transition: all 0.3s ease;
+}
+
+.spe-chat-toggle:hover {
+  background-color: var(--primary-color-dark);
+  transform: scale(1.05);
+}
+
+.spe-chat-toggle:focus {
+  outline: 2px solid var(--primary-color-dark);
+  outline-offset: 2px;
+}
+
+.spe-chat-toggle i {
+  font-size: 24px;
+}
+
+.spe-chat-modal {
+  position: fixed;
+  bottom: 90px;
+  right: 20px;
+  width: 400px;
+  height: 600px;
+  background-color: white;
+  border-radius: var(--border-radius-lg);
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2);
+  z-index: 99;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  animation: chat-modal-fade-in 0.3s ease;
+}
+
+@keyframes chat-modal-fade-in {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.spe-chat-modal-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: var(--spacing-sm) var(--spacing-md);
+  background-color: var(--primary-color);
+  color: white;
+}
+
+.spe-chat-modal-header h4 {
+  margin: 0;
+  font-size: var(--font-size-md);
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.spe-chat-modal-header h4::before {
+  content: '';
+  display: inline-block;
+  width: 8px;
+  height: 8px;
+  background-color: #4caf50;
+  border-radius: 50%;
+}
+
+.spe-chat-modal-header button {
+  background: none;
+  border: none;
+  color: white;
+  cursor: pointer;
+  font-size: 18px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 30px;
+  height: 30px;
+  border-radius: 50%;
+  transition: background-color 0.2s ease;
+}
+
+.spe-chat-modal-content {
+  flex: 1;
+  overflow: hidden;
+}
+
+@media (max-width: 768px) {
+  .spe-chat-modal {
+    width: 90%;
+    height: 80%;
+    bottom: 80px;
+    right: 5%;
+  }
+}
+
+.spe-chat-toggle.loading {
+  animation: pulse 1.5s infinite;
+}
+
+.spe-chat-toggle.error {
+  background-color: var(--error-color) !important;
+}
+
+.spe-chat-toggle.error:hover {
+  background-color: #b83232 !important;
+}
+
+.spe-chat-toggle .retry-label {
+  position: absolute;
+  background: rgba(0,0,0,0.7);
+  color: white;
+  padding: 3px 8px;
+  border-radius: 4px;
+  font-size: 0.75rem;
+  top: -25px;
+  left: 50%;
+  transform: translateX(-50%);
+  white-space: nowrap;
+  animation: fadeIn 0.2s ease-in;
+}
+
+@keyframes pulse {
+  0% {
+    transform: scale(1);
+    opacity: 1;
+  }
+  50% {
+    transform: scale(1.05);
+    opacity: 0.8;
+  }
+  100% {
+    transform: scale(1);
+    opacity: 1;
+  }
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateX(-50%) translateY(5px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(-50%) translateY(0);
+  }
+}

@@ -1,0 +1,38 @@
+{
+  "name": "my-vite-app",
+  "private": true,
+  "version": "0.0.0",
+  "type": "module",
+  "scripts": {
+    "dev": "vite",
+    "build": "vite build",
+    "lint": "eslint .",
+    "preview": "vite preview"
+  },
+  "dependencies": {
+    "@azure/msal-browser": "^4.12.0",
+    "@azure/msal-react": "^3.0.12",
+    "@fluentui/font-icons-mdl2": "^8.5.61",
+    "@fluentui/react": "^8.122.17",
+    "@fluentui/react-components": "^9.63.0",
+    "@fluentui/react-icons": "^2.0.300",
+    "@fluentui/style-utilities": "^8.12.1",
+    "@fluentui/utilities": "^8.15.21",
+    "@fortawesome/fontawesome-free": "^6.7.2",
+    "@microsoft/sharepointembedded-copilotchat-react": "https://download.microsoft.com/download/e2d6b1ec-7168-4787-b8de-4a9862f10744/microsoft-sharepointembedded-copilotchat-react-1.0.8.tgz",
+    "react": "^18.3.1",
+    "react-dom": "^18.3.1",
+    "react-router-dom": "^7.6.0"
+  },
+  "devDependencies": {
+    "@eslint/js": "^9.25.0",
+    "@types/react": "^18.2.67",
+    "@types/react-dom": "^18.2.22",
+    "@vitejs/plugin-react": "^4.4.1",
+    "eslint": "^9.25.0",
+    "eslint-plugin-react-hooks": "^5.2.0",
+    "eslint-plugin-react-refresh": "^0.4.19",
+    "globals": "^16.0.0",
+    "vite": "^6.3.5"
+  }
+}

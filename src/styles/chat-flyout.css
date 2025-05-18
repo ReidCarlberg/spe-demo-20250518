@@ -1,0 +1,118 @@
+/* Chat Flyout styles */
+.chat-flyout-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: rgba(0, 0, 0, 0.5);
+  display: flex;
+  justify-content: flex-end;
+  align-items: stretch;
+  z-index: 1000;
+  opacity: 0;
+  visibility: hidden;
+  transition: opacity 0.3s ease, visibility 0.3s ease;
+}
+
+.chat-flyout-overlay.open {
+  opacity: 1;
+  visibility: visible;
+}
+
+.chat-flyout-overlay.closing {
+  opacity: 0;
+  visibility: hidden;
+}
+
+.chat-flyout-container {
+  width: 600px; /* Increased by 50% from 400px */
+  max-width: 90vw;
+  height: 100vh;
+  background-color: #fff;
+  display: flex;
+  flex-direction: column;
+  box-shadow: -5px 0 15px rgba(0, 0, 0, 0.1);
+  transform: translateX(100%);
+  transition: transform 0.3s ease-in-out;
+}
+
+.chat-flyout-container.open {
+  transform: translateX(0);
+}
+
+.chat-flyout-container.closing {
+  transform: translateX(100%);
+}
+
+.chat-flyout-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 15px 20px;
+  border-bottom: 1px solid #e5e5e5;
+  background-color: #f8f9fa;
+}
+
+.chat-flyout-header h3 {
+  margin: 0;
+  font-size: 18px;
+  font-weight: 600;
+  color: #333;
+}
+
+.chat-flyout-close {
+  background: none;
+  border: none;
+  font-size: 20px;
+  color: #666;
+  cursor: pointer;
+  padding: 5px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+}
+
+.chat-flyout-close:hover {
+  background-color: rgba(0, 0, 0, 0.05);
+  color: #333;
+}
+
+.chat-flyout-content {
+  flex: 1;
+  padding: 20px;
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+}
+
+.chat-flyout-embedded-chat {
+  flex: 1;
+  border: 1px solid #ddd;
+  border-radius: 8px;
+  background-color: white;
+  margin-bottom: 15px;
+}
+
+.chat-flyout-footer {
+  padding: 10px 0;
+  text-align: center;
+  color: #666;
+  font-size: 12px;
+}
+
+/* Mobile responsive adjustments */
+@media (max-width: 600px) {
+  .chat-flyout-container {
+    width: 85vw;
+  }
+  
+  .chat-flyout-header {
+    padding: 10px 15px;
+  }
+  
+  .chat-flyout-content {
+    padding: 15px;
+  }
+}
