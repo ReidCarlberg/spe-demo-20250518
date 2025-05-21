@@ -1,7 +1,7 @@
 // filepath: c:\Users\carlb\vscodelive\my-vite-app\src\pages\PageOne.jsx
 import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
-import { speService } from '../speService';
+import { speService } from '../services';
 import { useAuth } from '../AuthContext';
 import '../styles/search-modal.css';
 import '../styles/search-page.css';

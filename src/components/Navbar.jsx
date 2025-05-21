@@ -2,7 +2,7 @@ import { Link, useLocation } from 'react-router-dom';
 import { useAuth } from '../AuthContext';
 import { useState } from 'react';
 import SearchModal from './SearchModal';
-import './Navbar.css';
+import { DebugModeToggle } from './debug';
 import './Navbar.css';
 
 const Navbar = () => {
@@ -52,10 +52,10 @@ const Navbar = () => {
             </li>
           </>
         ) : null}
-      </ul>
-        <div className="auth-buttons">
+      </ul>        <div className="auth-buttons">
         {isAuthenticated ? (
           <>
+            <DebugModeToggle />
             <button 
               className="button button-secondary" 
               onClick={handleLogout}
@@ -73,6 +73,7 @@ const Navbar = () => {
           </Link>
         )}
       </div>
+      <DebugModeToggle />
     </nav>
   );
 };

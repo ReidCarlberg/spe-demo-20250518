@@ -1,0 +1,610 @@
+/**
+ * Debug Panel Styles
+ */
+
+/* API Call Notification */
+.api-call-notification {
+  position: fixed;
+  bottom: 20px;
+  right: 20px;
+  display: flex;
+  align-items: center;
+  background-color: #fff;
+  border-radius: 6px;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+  padding: 10px 15px;
+  max-width: 300px;
+  cursor: pointer;
+  z-index: 9998;
+  transition: transform 0.3s, opacity 0.3s;
+  animation: slideIn 0.3s ease-out;
+  border-left: 4px solid #2196F3;
+}
+
+.api-call-notification.success {
+  border-left-color: #4CAF50;
+}
+
+.api-call-notification.error {
+  border-left-color: #F44336;
+}
+
+.api-call-notification:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+}
+
+.api-call-notification-icon {
+  margin-right: 12px;
+  font-size: 18px;
+}
+
+.api-call-notification.success .api-call-notification-icon {
+  color: #4CAF50;
+}
+
+.api-call-notification.error .api-call-notification-icon {
+  color: #F44336;
+}
+
+.api-call-notification-content {
+  flex: 1;
+  overflow: hidden;
+}
+
+.api-call-notification-title {
+  font-weight: 600;
+  font-size: 14px;
+  margin-bottom: 2px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.api-call-notification-status {
+  font-size: 12px;
+  color: #666;
+}
+
+@keyframes slideIn {
+  0% {
+    transform: translateY(20px);
+    opacity: 0;
+  }
+  100% {
+    transform: translateY(0);
+    opacity: 1;
+  }
+}
+
+/* Debug Mode Toggle */
+.debug-mode-toggle {
+  display: flex;
+  align-items: center;
+  position: relative;
+  margin-left: 10px;
+}
+
+.debug-toggle-label {
+  display: flex;
+  align-items: center;
+  cursor: pointer;
+  user-select: none;
+  padding: 4px 8px;
+  border-radius: 4px;
+  transition: background-color 0.2s;
+}
+
+.debug-toggle-label:hover {
+  background-color: rgba(0, 0, 0, 0.1);
+}
+
+.debug-toggle-icon {
+  margin-right: 8px;
+  color: #555;
+}
+
+.debug-toggle-text {
+  margin-right: 8px;
+  font-size: 14px;
+  color: #333;
+}
+
+.debug-toggle-switch {
+  position: relative;
+  display: inline-block;
+  width: 36px;
+  height: 20px;
+}
+
+.debug-toggle-switch input {
+  opacity: 0;
+  width: 0;
+  height: 0;
+}
+
+.debug-toggle-slider {
+  position: absolute;
+  cursor: pointer;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: #ccc;
+  border-radius: 20px;
+  transition: .3s;
+}
+
+.debug-toggle-slider:before {
+  position: absolute;
+  content: "";
+  height: 16px;
+  width: 16px;
+  left: 2px;
+  bottom: 2px;
+  background-color: white;
+  border-radius: 50%;
+  transition: .3s;
+}
+
+input:checked + .debug-toggle-slider {
+  background-color: #2196F3;
+}
+
+input:checked + .debug-toggle-slider:before {
+  transform: translateX(16px);
+}
+
+.debug-mode-active-indicator {
+  display: flex;
+  align-items: center;
+  margin-left: 8px;
+  position: relative;
+}
+
+.debug-mode-dot {
+  width: 8px;
+  height: 8px;
+  background-color: #4CAF50;
+  border-radius: 50%;
+  animation: pulse 2s infinite;
+}
+
+.debug-mode-tooltip {
+  position: absolute;
+  top: 20px;
+  left: 0;
+  background-color: #333;
+  color: white;
+  padding: 5px 10px;
+  border-radius: 4px;
+  font-size: 12px;
+  white-space: nowrap;
+  visibility: hidden;
+  opacity: 0;
+  transition: opacity 0.2s;
+  z-index: 9999;
+}
+
+.debug-mode-active-indicator:hover .debug-mode-tooltip {
+  visibility: visible;
+  opacity: 1;
+}
+
+@keyframes pulse {
+  0% { opacity: 0.6; }
+  50% { opacity: 1; }
+  100% { opacity: 0.6; }
+}
+
+/* Debug Panel */
+.api-debug-panel {
+  position: fixed;
+  display: flex;
+  flex-direction: column;
+  background-color: #f8f9fa;
+  border: 1px solid #ddd;
+  border-radius: 6px;
+  box-shadow: 0 2px 15px rgba(0, 0, 0, 0.15);
+  overflow: hidden;
+  z-index: 9999;
+  min-width: 400px;
+  min-height: 300px;
+}
+
+.api-debug-panel-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 8px 12px;
+  background-color: #f0f0f0;
+  border-bottom: 1px solid #ddd;
+  cursor: move;
+  user-select: none;
+}
+
+.api-debug-panel-title {
+  display: flex;
+  align-items: center;
+  font-weight: 600;
+  font-size: 14px;
+  color: #333;
+}
+
+.api-debug-panel-title i {
+  margin-right: 8px;
+  color: #2196F3;
+}
+
+.api-debug-panel-controls {
+  display: flex;
+  align-items: center;
+}
+
+.api-debug-filter {
+  margin-right: 8px;
+  padding: 2px 6px;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+  font-size: 12px;
+  background-color: white;
+}
+
+.api-debug-clear-button,
+.api-debug-close-button {
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 4px 8px;
+  color: #666;
+  border-radius: 4px;
+  transition: background-color 0.2s;
+}
+
+.api-debug-clear-button:hover,
+.api-debug-close-button:hover {
+  background-color: rgba(0, 0, 0, 0.1);
+}
+
+.api-debug-close-button {
+  margin-left: 4px;
+}
+
+.api-debug-panel-content {
+  display: flex;
+  flex: 1;
+  overflow: hidden;
+}
+
+.api-debug-left-pane {
+  width: 40%;
+  overflow-y: auto;
+  border-right: 1px solid #ddd;
+  max-height: 100%;
+}
+
+.api-debug-right-pane {
+  width: 60%;
+  overflow-y: auto;
+  max-height: 100%;
+}
+
+.api-debug-panel-resize-handle {
+  position: absolute;
+  right: 0;
+  bottom: 0;
+  width: 15px;
+  height: 15px;
+  cursor: se-resize;
+  color: #aaa;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+/* Request List */
+.api-debug-request-list {
+  height: 100%;
+  overflow-y: auto;
+}
+
+.api-debug-request-list ul {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.api-debug-request-item {
+  display: grid;
+  grid-template-columns: 60px 1fr 60px 80px 60px;
+  padding: 8px 10px;
+  font-size: 12px;
+  border-bottom: 1px solid #eee;
+  cursor: pointer;
+  transition: background-color 0.1s;
+}
+
+.api-debug-request-item:hover {
+  background-color: #f0f0f0;
+}
+
+.api-debug-request-item.selected {
+  background-color: #e3f2fd;
+}
+
+.api-debug-request-item.success .api-debug-request-status {
+  color: #4CAF50;
+}
+
+.api-debug-request-item.error .api-debug-request-status {
+  color: #F44336;
+}
+
+.api-debug-request-item.redirect .api-debug-request-status {
+  color: #FF9800;
+}
+
+.api-debug-request-method {
+  font-weight: 600;
+  text-transform: uppercase;
+}
+
+.api-debug-request-url {
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.api-debug-request-status {
+  text-align: center;
+}
+
+.api-debug-request-time,
+.api-debug-request-duration {
+  white-space: nowrap;
+  text-align: right;
+  color: #777;
+}
+
+.api-debug-no-requests {
+  padding: 20px;
+  text-align: center;
+  color: #777;
+  font-style: italic;
+}
+
+/* Request Detail */
+.api-debug-detail {
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+}
+
+.api-debug-detail-header {
+  padding: 10px;
+  border-bottom: 1px solid #eee;
+  background-color: #f9f9f9;
+}
+
+.api-debug-detail-url {
+  display: flex;
+  align-items: center;
+  margin-bottom: 5px;
+  font-size: 13px;
+  word-break: break-all;
+}
+
+.api-debug-method {
+  padding: 2px 6px;
+  border-radius: 3px;
+  margin-right: 8px;
+  font-weight: 600;
+  font-size: 11px;
+  text-transform: uppercase;
+}
+
+.api-debug-method.get {
+  background-color: #E3F2FD;
+  color: #1565C0;
+}
+
+.api-debug-method.post {
+  background-color: #E8F5E9;
+  color: #2E7D32;
+}
+
+.api-debug-method.put {
+  background-color: #FFF8E1;
+  color: #F57F17;
+}
+
+.api-debug-method.patch {
+  background-color: #FFF8E1;
+  color: #F57F17;
+}
+
+.api-debug-method.delete {
+  background-color: #FFEBEE;
+  color: #C62828;
+}
+
+.api-debug-detail-status {
+  margin-top: 5px;
+  display: flex;
+}
+
+.api-debug-status {
+  padding: 2px 6px;
+  border-radius: 3px;
+  font-weight: 600;
+  font-size: 11px;
+}
+
+.api-debug-status.success {
+  background-color: #E8F5E9;
+  color: #2E7D32;
+}
+
+.api-debug-status.error {
+  background-color: #FFEBEE;
+  color: #C62828;
+}
+
+.api-debug-tabs {
+  display: flex;
+  border-bottom: 1px solid #eee;
+}
+
+.api-debug-tab {
+  padding: 8px 16px;
+  background: none;
+  border: none;
+  border-bottom: 2px solid transparent;
+  cursor: pointer;
+  font-size: 13px;
+  color: #666;
+  transition: all 0.2s;
+}
+
+.api-debug-tab:hover {
+  color: #333;
+  background-color: #f0f0f0;
+}
+
+.api-debug-tab.active {
+  color: #2196F3;
+  border-bottom-color: #2196F3;
+}
+
+.api-debug-tab-content {
+  flex: 1;
+  overflow-y: auto;
+  padding: 10px;
+}
+
+.api-debug-detail-placeholder {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  height: 100%;
+  color: #aaa;
+  text-align: center;
+}
+
+.api-debug-detail-placeholder i {
+  font-size: 24px;
+  margin-bottom: 10px;
+}
+
+.api-debug-section {
+  margin-bottom: 15px;
+}
+
+.api-debug-section-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 5px;
+}
+
+.api-debug-section-header h4 {
+  font-size: 13px;
+  color: #666;
+  margin: 0;
+}
+
+.api-debug-copy-button {
+  background: none;
+  border: none;
+  padding: 4px 6px;
+  cursor: pointer;
+  color: #666;
+  border-radius: 3px;
+  transition: background-color 0.2s;
+}
+
+.api-debug-copy-button:hover {
+  background-color: #eee;
+}
+
+.api-debug-code {
+  background-color: #f5f5f5;
+  padding: 8px;
+  border-radius: 4px;
+  overflow: auto;
+  font-family: monospace;
+  font-size: 12px;
+  margin: 0;
+  max-height: 200px;
+}
+
+.api-debug-error {
+  padding: 8px;
+  background-color: #FFEBEE;
+  border-radius: 4px;
+  color: #C62828;
+  font-family: monospace;
+  font-size: 12px;
+}
+
+.api-debug-timing-content {
+  padding: 10px;
+}
+
+.api-debug-timing-item {
+  display: flex;
+  margin-bottom: 10px;
+  font-size: 13px;
+}
+
+.api-debug-timing-label {
+  width: 80px;
+  font-weight: 600;
+  color: #666;
+}
+
+.api-debug-timing-chart {
+  background-color: #f5f5f5;
+  border-radius: 4px;
+  height: 20px;
+  margin-top: 10px;
+  overflow: hidden;
+}
+
+.api-debug-timing-bar {
+  height: 100%;
+  transition: width 0.3s;
+}
+
+.api-debug-timing-bar.success {
+  background-color: #4CAF50;
+}
+
+.api-debug-timing-bar.error {
+  background-color: #F44336;
+}
+
+/* Empty state */
+.api-debug-empty {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  height: 100%;
+  padding: 20px;
+  text-align: center;
+  color: #777;
+}
+
+.api-debug-empty i {
+  font-size: 30px;
+  margin-bottom: 15px;
+  color: #999;
+}
+
+.api-debug-empty-hint {
+  font-size: 12px;
+  opacity: 0.7;
+  margin-top: 8px;
+}

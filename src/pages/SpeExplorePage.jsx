@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { useAuth } from '../AuthContext';
-import { speService } from '../speService';
+import { speService } from '../services';
 
 const SpeExplorePage = () => {
   const { isAuthenticated, loading, accessToken } = useAuth();

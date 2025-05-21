@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { useParams, useNavigate, Link } from 'react-router-dom';
-import { speService } from '../speService';
+import { speService } from '../services';
 import { 
   Button, 
   Spinner, 

@@ -12,6 +12,9 @@
 /* Authentication related */
 @import './auth.css';
 
+/* Debug panel */
+@import './debug-panel.css';
+
 /* SharePoint Embedded */
 @import './spe.css';
 

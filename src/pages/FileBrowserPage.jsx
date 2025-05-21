@@ -1,7 +1,7 @@
 import { useState, useEffect, useRef } from 'react';
 import { useNavigate, useParams, Link } from 'react-router-dom';
 import { useAuth } from '../AuthContext';
-import { speService } from '../speService';
+import { speService } from '../services';
 import FilePreview from '../components/FilePreview';
 import PersistentChatPanel from '../components/PersistentChatPanel';
 import './FileBrowserPage.css';

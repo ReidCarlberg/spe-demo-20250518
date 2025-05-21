@@ -2,12 +2,12 @@
   "name": "my-vite-app",
   "private": true,
   "version": "0.0.0",
-  "type": "module",
-  "scripts": {
+  "type": "module",  "scripts": {
     "dev": "vite",
     "build": "vite build",
     "lint": "eslint .",
-    "preview": "vite preview"
+    "preview": "vite preview",
+    "test:debug": "node -e \"console.log('Debug mode tests can be run in the browser console with window.runDebugModeTest()')\""
   },
   "dependencies": {
     "@azure/msal-browser": "^4.12.0",
