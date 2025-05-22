@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { useDebugMode } from '../../hooks/useDebugMode';
 import '../../styles/debug-panel.css';
 
@@ -9,27 +9,30 @@ const ApiCallNotification = () => {
   const [isVisible, setIsVisible] = useState(false);
   const [lastCall, setLastCall] = useState(null);
   const { setIsPanelVisible } = useDebugMode();
+  // Create a memoized event handler
+  const handleApiCall = useCallback((event) => {
+    const call = event.detail;
+    
+    setLastCall(call);
+    setIsVisible(true);
+    
+    // Hide notification after 3 seconds
+    const timerId = setTimeout(() => {
+      setIsVisible(false);
+    }, 3000);
+    
+    // Clear timeout if component unmounts or a new call comes in
+    return () => clearTimeout(timerId);
+  }, [setLastCall, setIsVisible]);
   
   useEffect(() => {
-    // Listen for API call events
-    const handleApiCall = (event) => {
-      const call = event.detail;
-      
-      setLastCall(call);
-      setIsVisible(true);
-      
-      // Hide notification after 3 seconds
-      setTimeout(() => {
-        setIsVisible(false);
-      }, 3000);
-    };
-    
+    // Listen for API call events  
     window.addEventListener('api-debug-call', handleApiCall);
     
     return () => {
       window.removeEventListener('api-debug-call', handleApiCall);
     };
-  }, []);
+  }, [handleApiCall]);
   
   if (!isVisible || !lastCall) return null;
   
@@ -48,12 +51,11 @@ const ApiCallNotification = () => {
   const getStatusClass = () => {
     return lastCall.isError ? 'error' : 'success';
   };
-  
   // Handle click to open the debug panel
-  const handleClick = () => {
+  const handleClick = useCallback(() => {
     setIsPanelVisible(true);
     setIsVisible(false);
-  };
+  }, [setIsPanelVisible, setIsVisible]);
   
   return (
     <div 

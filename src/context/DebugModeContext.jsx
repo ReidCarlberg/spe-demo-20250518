@@ -1,4 +1,4 @@
-import { createContext, useState, useEffect, useRef } from "react";
+import { createContext, useState, useEffect, useRef, useCallback } from "react";
 import { setupApiDebugger } from '../utils/serviceWrapper';
 import { enableApiDebugging, disableApiDebugging } from '../utils/apiDebugService';
 
@@ -75,7 +75,7 @@ export const DebugModeProvider = ({ children }) => {
       }
       disableApiDebugging();
     };
-  }, [isDebugModeActive]);
+  }, [isDebugModeActive, captureApiCall, apiCalls.length, setIsPanelVisible, setApiCalls]);
   
   // Save panel position to localStorage when it changes
   useEffect(() => {
@@ -101,15 +101,15 @@ export const DebugModeProvider = ({ children }) => {
     return () => {
       window.removeEventListener("keydown", handleKeyDown);
     };
-  }, [isDebugModeActive]);
+  }, [isDebugModeActive, setIsPanelVisible]);
   
   // Add new API call to history
-  const captureApiCall = (callData) => {
+  const captureApiCall = useCallback((callData) => {
     if (!isDebugModeActive) return;
     
     const call = {
       ...callData,
-      id: `api-call-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
+      id: `api-call-${Date.now()}-${Math.random().toString(36).substring(2, 9)}`,
     };
     
     setApiCalls(prev => {
@@ -123,12 +123,12 @@ export const DebugModeProvider = ({ children }) => {
       const event = new CustomEvent('api-debug-call', { detail: call });
       window.dispatchEvent(event);
     }
-  };
+  }, [isDebugModeActive, isPanelVisible]);
   
   // Toggle debug mode
-  const toggleDebugMode = () => {
+  const toggleDebugMode = useCallback(() => {
     setIsDebugModeActive(prev => !prev);
-  };
+  }, []);
   
   return (
     <DebugModeContext.Provider value={{
@@ -136,7 +136,7 @@ export const DebugModeProvider = ({ children }) => {
       toggleDebugMode,
       apiCalls,
       captureApiCall,
-      clearApiCalls: () => setApiCalls([]),
+      clearApiCalls: useCallback(() => setApiCalls([]), []),
       selectedCall,
       setSelectedCall,
       isPanelVisible,

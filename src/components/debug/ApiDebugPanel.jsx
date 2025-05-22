@@ -1,6 +1,5 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect, useRef, useContext, useCallback } from 'react';
 import { createPortal } from 'react-dom';
-import { useContext } from 'react';
 import { DebugModeContext } from '../../context/DebugModeContext';
 import RequestList from './RequestList';
 import RequestDetail from './RequestDetail';
@@ -37,8 +36,7 @@ const ApiDebugPanel = () => {
   // Resize state
   const [isResizing, setIsResizing] = useState(false);
   const [resizeStart, setResizeStart] = useState({ x: 0, y: 0, width: 0, height: 0 });
-  
-  // Create a portal for the debug panel
+    // Create a portal for the debug panel
   const [portalContainer, setPortalContainer] = useState(null);
   
   // Initialize portal container
@@ -49,7 +47,10 @@ const ApiDebugPanel = () => {
     setPortalContainer(container);
     
     return () => {
-      document.body.removeChild(container);
+      // Only try to remove if it's still a child of the body
+      if (document.body.contains(container)) {
+        document.body.removeChild(container);
+      }
     };
   }, []);
   
@@ -57,21 +58,21 @@ const ApiDebugPanel = () => {
   if (!isDebugModeActive || !isPanelVisible || !portalContainer) {
     return null;
   }
-  
   // Start dragging
-  const handleDragStart = (e) => {
+  const handleDragStart = useCallback((e) => {
     e.preventDefault();
     setIsDragging(true);
     
-    const rect = panelRef.current.getBoundingClientRect();
-    setDragOffset({
-      x: e.clientX - rect.left,
-      y: e.clientY - rect.top
-    });
-  };
-  
-  // Handle dragging
-  const handleDrag = (e) => {
+    if (panelRef.current) {
+      const rect = panelRef.current.getBoundingClientRect();
+      setDragOffset({
+        x: e.clientX - rect.left,
+        y: e.clientY - rect.top
+      });
+    }
+  }, [setIsDragging, setDragOffset]);
+  // Define event handlers with useCallback to prevent recreating on every render
+  const handleDrag = useCallback((e) => {
     if (!isDragging) return;
     
     const newPosition = {
@@ -84,15 +85,13 @@ const ApiDebugPanel = () => {
     newPosition.y = Math.max(0, Math.min(newPosition.y, window.innerHeight - panelSize.height));
     
     setPanelPosition(newPosition);
-  };
-  
-  // Stop dragging
-  const handleDragEnd = () => {
+  }, [isDragging, dragOffset, panelSize.width, panelSize.height, setPanelPosition]);
+    // Stop dragging
+  const handleDragEnd = useCallback(() => {
     setIsDragging(false);
-  };
-  
+  }, [setIsDragging]);
   // Start resizing
-  const handleResizeStart = (e) => {
+  const handleResizeStart = useCallback((e) => {
     e.preventDefault();
     setIsResizing(true);
     
@@ -102,10 +101,9 @@ const ApiDebugPanel = () => {
       width: panelSize.width,
       height: panelSize.height
     });
-  };
-  
-  // Handle resizing
-  const handleResize = (e) => {
+  }, [setIsResizing, panelSize.width, panelSize.height]);
+    // Handle resizing
+  const handleResize = useCallback((e) => {
     if (!isResizing) return;
     
     const newWidth = Math.max(300, resizeStart.width + (e.clientX - resizeStart.x));
@@ -115,12 +113,11 @@ const ApiDebugPanel = () => {
       width: newWidth,
       height: newHeight
     });
-  };
-  
-  // Stop resizing
-  const handleResizeEnd = () => {
+  }, [isResizing, resizeStart, setPanelSize]);
+    // Stop resizing
+  const handleResizeEnd = useCallback(() => {
     setIsResizing(false);
-  };
+  }, [setIsResizing]);
   
   // Setup global event listeners for drag and resize
   useEffect(() => {
@@ -140,23 +137,20 @@ const ApiDebugPanel = () => {
       window.removeEventListener('mousemove', handleResize);
       window.removeEventListener('mouseup', handleResizeEnd);
     };
-  }, [isDragging, isResizing]);
-  
+  }, [isDragging, isResizing, handleDrag, handleDragEnd, handleResize, handleResizeEnd]);
   // Handle filter change
-  const handleFilterChange = (e) => {
+  const handleFilterChange = useCallback((e) => {
     setFilter(e.target.value);
-  };
-  
-  // Close the panel
-  const handleClose = () => {
+  }, [setFilter]);
+    // Close the panel
+  const handleClose = useCallback(() => {
     setIsPanelVisible(false);
-  };
-  
-  // Clear all API calls
-  const handleClear = () => {
+  }, [setIsPanelVisible]);
+    // Clear all API calls
+  const handleClear = useCallback(() => {
     clearApiCalls();
     setSelectedCall(null);
-  };
+  }, [clearApiCalls, setSelectedCall]);
   
   // Apply current filter
   const filteredCalls = filter === 'all' 

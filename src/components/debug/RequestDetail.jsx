@@ -24,17 +24,19 @@ const RequestDetail = ({ call }) => {
       return '[Unable to format data]';
     }
   };
-  
-  // Copy content to clipboard
-  const copyToClipboard = (text) => {
+    // Copy content to clipboard
+  const copyToClipboard = (text, event) => {
+    // Get the button that was clicked
+    const copyBtn = event.currentTarget;
+    
     navigator.clipboard.writeText(text)
       .then(() => {
         // Show brief feedback that it was copied
-        const copyBtn = document.querySelector('.api-debug-copy-button');
         if (copyBtn) {
+          const originalContent = copyBtn.innerHTML;
           copyBtn.innerHTML = '<i class="fas fa-check"></i>';
           setTimeout(() => {
-            copyBtn.innerHTML = '<i class="fas fa-copy"></i>';
+            copyBtn.innerHTML = originalContent;
           }, 1000);
         }
       })
@@ -102,10 +104,9 @@ const RequestDetail = ({ call }) => {
           <div className="api-debug-request-content">
             <div className="api-debug-section">
               <div className="api-debug-section-header">
-                <h4>Headers</h4>
-                <button 
+                <h4>Headers</h4>                <button 
                   className="api-debug-copy-button"
-                  onClick={() => copyToClipboard(formatJson(call.requestHeaders))}
+                  onClick={(e) => copyToClipboard(formatJson(call.requestHeaders), e)}
                   aria-label="Copy headers to clipboard"
                 >
                   <i className="fas fa-copy"></i>
@@ -119,13 +120,13 @@ const RequestDetail = ({ call }) => {
             {call.requestBody && (
               <div className="api-debug-section">
                 <div className="api-debug-section-header">
-                  <h4>Body</h4>
-                  <button 
+                  <h4>Body</h4>                  <button 
                     className="api-debug-copy-button"
-                    onClick={() => copyToClipboard(
+                    onClick={(e) => copyToClipboard(
                       typeof call.requestBody === 'string' 
                         ? call.requestBody 
-                        : formatJson(call.requestBody)
+                        : formatJson(call.requestBody),
+                      e
                     )}
                     aria-label="Copy body to clipboard"
                   >
@@ -158,10 +159,9 @@ const RequestDetail = ({ call }) => {
             {call.responseHeaders && (
               <div className="api-debug-section">
                 <div className="api-debug-section-header">
-                  <h4>Headers</h4>
-                  <button 
+                  <h4>Headers</h4>                  <button 
                     className="api-debug-copy-button"
-                    onClick={() => copyToClipboard(formatJson(call.responseHeaders))}
+                    onClick={(e) => copyToClipboard(formatJson(call.responseHeaders), e)}
                     aria-label="Copy headers to clipboard"
                   >
                     <i className="fas fa-copy"></i>
@@ -176,13 +176,13 @@ const RequestDetail = ({ call }) => {
             {call.responseBody && (
               <div className="api-debug-section">
                 <div className="api-debug-section-header">
-                  <h4>Body</h4>
-                  <button 
+                  <h4>Body</h4>                  <button 
                     className="api-debug-copy-button"
-                    onClick={() => copyToClipboard(
+                    onClick={(e) => copyToClipboard(
                       typeof call.responseBody === 'string' 
                         ? call.responseBody 
-                        : formatJson(call.responseBody)
+                        : formatJson(call.responseBody),
+                      e
                     )}
                     aria-label="Copy body to clipboard"
                   >
