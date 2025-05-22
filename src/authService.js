@@ -1,15 +1,49 @@
 import { PublicClientApplication, InteractionRequiredAuthError } from "@azure/msal-browser";
 import { msalConfig, loginRequest, spoConfig } from "./authConfig";
 
-// Create the MSAL instance
-export const msalInstance = new PublicClientApplication(msalConfig);
+// Create the MSAL instance - specify system options for better behavior
+export const msalInstance = new PublicClientApplication({
+  ...msalConfig,
+  system: {
+    allowNativeBroker: false,
+    windowHashTimeout: 10000,
+    iframeHashTimeout: 10000,
+    asyncPopups: false
+  }
+});
 
-// Handle the redirect promise and catch any errors
-if (msalInstance.getAllAccounts().length === 0) {
-  msalInstance.handleRedirectPromise().catch((error) => {
-    console.error("Redirect error: ", error);
-  });
-}
+// Initialize the MSAL instance with proper error handling
+export const initializeMsal = async () => {
+  try {
+    // Check if already initialized to prevent double initialization
+    if (msalInstance.getActiveAccount) {
+      console.log("MSAL instance already initialized");
+      
+      // Still handle any pending redirects
+      await msalInstance.handleRedirectPromise().catch((error) => {
+        console.error("Redirect error: ", error);
+      });
+      
+      return true;
+    }
+    
+    console.log("Initializing MSAL instance...");
+    // Initialize the MSAL application
+    await msalInstance.initialize();
+    
+    // Handle the redirect promise after initialization
+    await msalInstance.handleRedirectPromise().catch((error) => {
+      console.error("Redirect error: ", error);
+    });
+    
+    console.log("MSAL initialization completed successfully");
+    return true;
+  } catch (error) {
+    console.error("MSAL initialization error:", error);
+    // Throw the error to be caught by the calling function
+    throw new Error(`MSAL initialization failed: ${error.message}`);
+  }
+};
 
 // Login function
 export const signIn = async () => {

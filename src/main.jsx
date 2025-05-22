@@ -1,7 +1,7 @@
 import { StrictMode } from 'react'
 import { createRoot } from 'react-dom/client'
 import { MsalProvider } from '@azure/msal-react'
-import { msalInstance } from './authService'
+import { msalInstance, initializeMsal } from './authService'
 import './styles/index.css'
 import App from './App.jsx'
 import '@fortawesome/fontawesome-free/css/all.css'
@@ -12,10 +12,60 @@ linkElement.rel = 'stylesheet';
 linkElement.href = '/styles/consolidated.css';
 document.head.appendChild(linkElement);
 
-createRoot(document.getElementById('root')).render(
-  <StrictMode>
-    <MsalProvider instance={msalInstance}>
-      <App />
-    </MsalProvider>
-  </StrictMode>,
-)
+// Root element for the app
+const rootElement = document.getElementById('root');
+const root = createRoot(rootElement);
+
+// Show loading state initially
+root.render(
+  <div className="loading-container" style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '100vh', flexDirection: 'column' }}>
+    <h2>Initializing Application...</h2>
+    <div className="loading-spinner" style={{ width: '50px', height: '50px', border: '5px solid #f3f3f3', borderTop: '5px solid #3498db', borderRadius: '50%', animation: 'spin 1s linear infinite' }}></div>
+  </div>
+);
+
+// Add loading animation
+const style = document.createElement('style');
+style.textContent = `
+  @keyframes spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+  }
+`;
+document.head.appendChild(style);
+
+// Initialize MSAL before rendering the app
+(async () => {
+  try {
+    console.log("Starting MSAL initialization...");
+    // Wait for MSAL to initialize
+    await initializeMsal();
+    console.log("MSAL initialization complete, rendering app");
+    
+    // Render the app with initialized MSAL instance
+    root.render(
+      <StrictMode>
+        <MsalProvider instance={msalInstance}>
+          <App />
+        </MsalProvider>
+      </StrictMode>
+    );
+  } catch (error) {
+    console.error("Error initializing the application:", error);
+    
+    // Render a fallback UI if MSAL fails to initialize
+    root.render(
+      <div className="auth-error" style={{ padding: '20px', maxWidth: '500px', margin: '0 auto', textAlign: 'center' }}>
+        <h2>Authentication Error</h2>
+        <p>There was a problem initializing the authentication system.</p>
+        <p className="error-details">{error.message}</p>
+        <button 
+          onClick={() => window.location.reload()} 
+          style={{ padding: '8px 16px', background: '#0078d4', color: 'white', border: 'none', borderRadius: '4px', cursor: 'pointer', marginTop: '15px' }}
+        >
+          Refresh Page
+        </button>
+      </div>
+    );
+  }
+})();
