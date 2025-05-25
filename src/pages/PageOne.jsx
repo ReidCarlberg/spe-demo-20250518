@@ -148,36 +148,37 @@ const PageOne = () => {
 
     return (
       <div className="search-results-container">
-        {results.value[0].hitsContainers.map((container, containerIndex) => (
-          <div key={containerIndex} className="hits-container">
-            {container.hits.map((hit, hitIndex) => {
-              // Get the resource so we can access all properties
-              const resource = hit.resource;
-              if (!resource) return null;
-              
-              // Format the display of the search result based on entity type
-              const title = resource.name || resource.displayName || 'Untitled';
-              const summary = hit.summary ? formatSummary(hit.summary) : '';
-              const date = resource.lastModifiedDateTime ? new Date(resource.lastModifiedDateTime).toLocaleDateString() : '';
-              const previewUrl = resource.webUrl || '';
-              
-              // For driveItems (files)
-              const isFolder = resource.folder || (resource.contentClass === 'folder');
-              const itemType = isFolder ? 'Folder' : (resource.file?.mimeType || '');
-              const fileExtension = resource.name ? resource.name.split('.').pop().toLowerCase() : '';
-              
-              // Get containerId and itemId for navigation
-              const containerId = resource.parentReference?.driveId || '';
-              const itemId = resource.id || '';
-              
-              // Build edit URL using the new function
-              const editUrl = buildEditUrlFromHit(hit);
-              
-              return (
-                <div key={hitIndex} className="search-result-item">                  <div className="search-result-header">
-                    
-                    {/* Title with link */}
-                    <h3 className="search-result-title">
+        {Array.isArray(results.value?.[0]?.hitsContainers) &&
+          results.value[0].hitsContainers.map((container, containerIndex) => (
+            <div key={containerIndex} className="hits-container">
+              {Array.isArray(container.hits) && container.hits.map((hit, hitIndex) => {
+                // Get the resource so we can access all properties
+                const resource = hit.resource;
+                if (!resource) return null;
+                
+                // Format the display of the search result based on entity type
+                const title = resource.name || resource.displayName || 'Untitled';
+                const summary = hit.summary ? formatSummary(hit.summary) : '';
+                const date = resource.lastModifiedDateTime ? new Date(resource.lastModifiedDateTime).toLocaleDateString() : '';
+                const previewUrl = resource.webUrl || '';
+                
+                // For driveItems (files)
+                const isFolder = resource.folder || (resource.contentClass === 'folder');
+                const itemType = isFolder ? 'Folder' : (resource.file?.mimeType || '');
+                const fileExtension = resource.name ? resource.name.split('.').pop().toLowerCase() : '';
+                
+                // Get containerId and itemId for navigation
+                const containerId = resource.parentReference?.driveId || '';
+                const itemId = resource.id || '';
+                
+                // Build edit URL using the new function
+                const editUrl = buildEditUrlFromHit(hit);
+                
+                return (
+                  <div key={hitIndex} className="search-result-item">                  <div className="search-result-header">
+                      
+                      {/* Title with link */}
+                      <h3 className="search-result-title">
                       {/* First try to get SharePoint edit URL */}
                       {(() => {
                         const sharePointEditUrl = buildEditUrlFromHit(hit);

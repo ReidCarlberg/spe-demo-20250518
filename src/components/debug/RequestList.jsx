@@ -6,14 +6,26 @@ import '../../styles/debug-panel.css';
  */
 const RequestList = ({ calls, selectedCall, onSelectCall }) => {
   // Format URL to show only the path, with query params shortened
+
   const formatUrl = (urlString) => {
-    try {
-      const url = new URL(urlString);
-      const pathParts = url.pathname.split('/');
-      const lastPath = pathParts[pathParts.length - 1];
-      return lastPath ? lastPath : url.pathname.slice(-15);
-    } catch (e) {
-      return urlString.slice(-15);
+    if (typeof urlString === 'string') {
+      try {
+        const url = new URL(urlString);
+        const pathParts = url.pathname.split('/');
+        const lastPath = pathParts[pathParts.length - 1];
+        return lastPath ? lastPath : url.pathname.slice(-15);
+      } catch (e) {
+        // Not a valid URL string, fallback to last 15 chars
+        return urlString.slice(-15);
+      }
+    } else if (urlString && typeof urlString === 'object' && urlString.url) {
+      // If it's an object with a url property, try to use that
+      return formatUrl(urlString.url);
+    } else if (urlString !== undefined && urlString !== null) {
+      // Fallback: try to stringify
+      return String(urlString).slice(-15);
+    } else {
+      return '[no url]';
     }
   };
   

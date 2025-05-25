@@ -33,11 +33,11 @@ export const AuthProvider = ({ children }) => {
     checkMsalInitialization();
   }, []);
   
+
   // Check authentication status on mount and when accounts change
   useEffect(() => {
+    if (!isMsalInitialized) return;
     const checkAuthStatus = () => {
-      if (!isMsalInitialized) return;
-      
       const authenticated = accounts.length > 0;
       setIsAuthenticated(authenticated);
       if (authenticated) {
@@ -45,14 +45,14 @@ export const AuthProvider = ({ children }) => {
       }
       setLoading(false);
     };
-
     checkAuthStatus();
   }, [accounts, isMsalInitialized]);
 
   // Get an access token when authenticated
   useEffect(() => {
+    if (!isMsalInitialized) return;
     const getToken = async () => {
-      if (isAuthenticated && isMsalInitialized) {
+      if (isAuthenticated) {
         try {
           const token = await getTokenSilent();
           setAccessToken(token);
@@ -62,17 +62,16 @@ export const AuthProvider = ({ children }) => {
         }
       }
     };
-
     getToken();
   }, [isAuthenticated, isMsalInitialized]);
 
   // Login function
+
   const login = useCallback(async () => {
     if (!isMsalInitialized) {
       setError('Authentication service not initialized properly');
       return;
     }
-    
     setLoading(true);
     setError(null);
     try {
@@ -86,12 +85,12 @@ export const AuthProvider = ({ children }) => {
   }, [instance, isMsalInitialized]);
 
   // Logout function
+
   const logout = useCallback(async () => {
     if (!isMsalInitialized) {
       setError('Authentication service not initialized properly');
       return;
     }
-    
     setLoading(true);
     try {
       await instance.logoutPopup({
@@ -102,7 +101,7 @@ export const AuthProvider = ({ children }) => {
       setError(error.message || 'Logout failed');
     } finally {
       setLoading(false);
-    }  
+    }
   }, [instance, isMsalInitialized]);
 
   // Auth context value

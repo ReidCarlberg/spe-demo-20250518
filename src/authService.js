@@ -68,24 +68,39 @@ export const signOut = async () => {
   }
 };
 
-// Get the active account
+
+// Get the active account, but only if MSAL is initialized
 export const getAccount = () => {
+  // Defensive: check for internal _isInitialized property if available
+  if (msalInstance && msalInstance._isInitialized === false) {
+    return null;
+  }
+  // If getAllAccounts is not available, MSAL is not ready
+  if (!msalInstance.getAllAccounts) {
+    return null;
+  }
   const accounts = msalInstance.getAllAccounts();
   if (accounts.length === 0) {
     return null;
   }
-  
   // If there are multiple accounts, choose the first one
   return accounts[0];
 };
 
-// Acquire a token silently for Graph API
+
+// Acquire a token silently for Graph API, but only if MSAL is initialized
 export const getTokenSilent = async () => {
+  // Defensive: check for internal _isInitialized property if available
+  if (msalInstance && msalInstance._isInitialized === false) {
+    return null;
+  }
+  if (!msalInstance.getAllAccounts) {
+    return null;
+  }
   const account = getAccount();
   if (!account) {
     return null;
   }
-  
   try {
     const response = await msalInstance.acquireTokenSilent({
       ...loginRequest,

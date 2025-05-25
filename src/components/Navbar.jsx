@@ -73,7 +73,6 @@ const Navbar = () => {
           </Link>
         )}
       </div>
-      <DebugModeToggle />
     </nav>
   );
 };

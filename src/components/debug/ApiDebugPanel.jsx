@@ -53,48 +53,29 @@ const ApiDebugPanel = () => {
       }
     };
   }, []);
-  
-  // Don't render anything if debug mode is not active or panel is not visible
-  if (!isDebugModeActive || !isPanelVisible || !portalContainer) {
-    return null;
-  }
-  // Start dragging
-  const handleDragStart = useCallback((e) => {
-    e.preventDefault();
-    setIsDragging(true);
-    
-    if (panelRef.current) {
-      const rect = panelRef.current.getBoundingClientRect();
-      setDragOffset({
-        x: e.clientX - rect.left,
-        y: e.clientY - rect.top
-      });
-    }
-  }, [setIsDragging, setDragOffset]);
-  // Define event handlers with useCallback to prevent recreating on every render
+
+  // All hooks must be called before any return!
+  // --- All hooks and handlers below ---
+  // Drag/resize/portal event handlers
   const handleDrag = useCallback((e) => {
     if (!isDragging) return;
-    
     const newPosition = {
       x: e.clientX - dragOffset.x,
       y: e.clientY - dragOffset.y
     };
-    
     // Constrain to viewport
     newPosition.x = Math.max(0, Math.min(newPosition.x, window.innerWidth - panelSize.width));
     newPosition.y = Math.max(0, Math.min(newPosition.y, window.innerHeight - panelSize.height));
-    
     setPanelPosition(newPosition);
   }, [isDragging, dragOffset, panelSize.width, panelSize.height, setPanelPosition]);
-    // Stop dragging
+
   const handleDragEnd = useCallback(() => {
     setIsDragging(false);
   }, [setIsDragging]);
-  // Start resizing
+
   const handleResizeStart = useCallback((e) => {
     e.preventDefault();
     setIsResizing(true);
-    
     setResizeStart({
       x: e.clientX,
       y: e.clientY,
@@ -102,35 +83,31 @@ const ApiDebugPanel = () => {
       height: panelSize.height
     });
   }, [setIsResizing, panelSize.width, panelSize.height]);
-    // Handle resizing
+
   const handleResize = useCallback((e) => {
     if (!isResizing) return;
-    
     const newWidth = Math.max(300, resizeStart.width + (e.clientX - resizeStart.x));
     const newHeight = Math.max(200, resizeStart.height + (e.clientY - resizeStart.y));
-    
     setPanelSize({
       width: newWidth,
       height: newHeight
     });
   }, [isResizing, resizeStart, setPanelSize]);
-    // Stop resizing
+
   const handleResizeEnd = useCallback(() => {
     setIsResizing(false);
   }, [setIsResizing]);
-  
+
   // Setup global event listeners for drag and resize
   useEffect(() => {
     if (isDragging) {
       window.addEventListener('mousemove', handleDrag);
       window.addEventListener('mouseup', handleDragEnd);
     }
-    
     if (isResizing) {
       window.addEventListener('mousemove', handleResize);
       window.addEventListener('mouseup', handleResizeEnd);
     }
-    
     return () => {
       window.removeEventListener('mousemove', handleDrag);
       window.removeEventListener('mouseup', handleDragEnd);
@@ -138,27 +115,33 @@ const ApiDebugPanel = () => {
       window.removeEventListener('mouseup', handleResizeEnd);
     };
   }, [isDragging, isResizing, handleDrag, handleDragEnd, handleResize, handleResizeEnd]);
-  // Handle filter change
+
+  // Other handlers
   const handleFilterChange = useCallback((e) => {
     setFilter(e.target.value);
   }, [setFilter]);
-    // Close the panel
+
   const handleClose = useCallback(() => {
     setIsPanelVisible(false);
   }, [setIsPanelVisible]);
-    // Clear all API calls
+
   const handleClear = useCallback(() => {
     clearApiCalls();
     setSelectedCall(null);
   }, [clearApiCalls, setSelectedCall]);
-  
+
   // Apply current filter
   const filteredCalls = filter === 'all' 
     ? apiCalls 
     : filter === 'success'
       ? apiCalls.filter(call => !call.isError)
       : apiCalls.filter(call => call.isError);
-  
+
+  // --- Conditional return must come after all hooks ---
+  if (!isDebugModeActive || !isPanelVisible || !portalContainer) {
+    return null;
+  }
+
   return createPortal(
     <div 
       className="api-debug-panel"
@@ -173,7 +156,13 @@ const ApiDebugPanel = () => {
       <div 
         className="api-debug-panel-header" 
         ref={dragRef}
-        onMouseDown={handleDragStart}
+        onMouseDown={(e) => {
+          setIsDragging(true);
+          setDragOffset({
+            x: e.clientX - panelPosition.x,
+            y: e.clientY - panelPosition.y
+          });
+        }}
       >
         <div className="api-debug-panel-title">
           <i className="fas fa-bug"></i>
