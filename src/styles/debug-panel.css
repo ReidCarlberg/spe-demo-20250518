@@ -197,43 +197,118 @@ input:checked + .debug-toggle-slider:before {
   100% { opacity: 0.6; }
 }
 
-/* Debug Panel */
-.api-debug-panel {
+/* Debug Panel - Flyout Design */
+.api-debug-panel-flyout {
   position: fixed;
+  top: 0;
+  left: 0;
+  width: 450px;
+  height: 100vh;
+  background-color: #f8f9fa;
+  border-right: 1px solid #ddd;
+  box-shadow: 2px 0 10px rgba(0, 0, 0, 0.15);
+  z-index: 9999;
   display: flex;
   flex-direction: column;
-  background-color: #f8f9fa;
-  border: 1px solid #ddd;
-  border-radius: 6px;
-  box-shadow: 0 2px 15px rgba(0, 0, 0, 0.15);
-  overflow: hidden;
-  z-index: 9999;
-  min-width: 400px;
-  min-height: 300px;
+  animation: slideInFromLeft 0.3s ease-out;
+}
+
+@keyframes slideInFromLeft {
+  0% {
+    transform: translateX(-100%);
+    opacity: 0;
+  }
+  100% {
+    transform: translateX(0);
+    opacity: 1;
+  }
+}
+
+.api-debug-panel-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  background-color: rgba(0, 0, 0, 0.2);
+  z-index: 9998;
+  backdrop-filter: blur(2px);
+  animation: fadeIn 0.3s ease-out;
+}
+
+@keyframes fadeIn {
+  0% {
+    opacity: 0;
+  }
+  100% {
+    opacity: 1;
+  }
+}
+
+.api-debug-panel-toggle {
+  position: fixed;
+  left: 10px;
+  top: 50%;
+  transform: translateY(-50%);
+  background-color: #2196F3;
+  color: white;
+  border: none;
+  border-radius: 0 8px 8px 0;
+  padding: 12px 8px;
+  cursor: pointer;
+  z-index: 9997;
+  box-shadow: 2px 0 8px rgba(0, 0, 0, 0.2);
+  transition: all 0.3s ease;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  min-height: 60px;
+  justify-content: center;
+}
+
+.api-debug-panel-toggle:hover {
+  background-color: #1976D2;
+  box-shadow: 2px 0 12px rgba(0, 0, 0, 0.3);
+  transform: translateY(-50%) translateX(2px);
+}
+
+.api-debug-panel-toggle i {
+  font-size: 16px;
+  margin-bottom: 4px;
+}
+
+.api-debug-panel-toggle-text {
+  font-size: 10px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  writing-mode: vertical-lr;
+  text-orientation: mixed;
 }
 
 .api-debug-panel-header {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  padding: 8px 12px;
-  background-color: #f0f0f0;
+  padding: 12px 16px;
+  background-color: #ffffff;
   border-bottom: 1px solid #ddd;
-  cursor: move;
   user-select: none;
+  flex-shrink: 0;
 }
 
 .api-debug-panel-title {
   display: flex;
   align-items: center;
   font-weight: 600;
-  font-size: 14px;
+  font-size: 16px;
   color: #333;
 }
 
 .api-debug-panel-title i {
-  margin-right: 8px;
+  margin-right: 10px;
   color: #2196F3;
+  font-size: 18px;
 }
 
 .api-debug-panel-controls {
@@ -242,11 +317,11 @@ input:checked + .debug-toggle-slider:before {
 }
 
 .api-debug-filter {
-  margin-right: 8px;
-  padding: 2px 6px;
+  margin-right: 10px;
+  padding: 4px 8px;
   border: 1px solid #ddd;
   border-radius: 4px;
-  font-size: 12px;
+  font-size: 13px;
   background-color: white;
 }
 
@@ -255,51 +330,43 @@ input:checked + .debug-toggle-slider:before {
   background: none;
   border: none;
   cursor: pointer;
-  padding: 4px 8px;
+  padding: 6px 10px;
   color: #666;
   border-radius: 4px;
-  transition: background-color 0.2s;
+  transition: all 0.2s;
+  font-size: 14px;
 }
 
 .api-debug-clear-button:hover,
 .api-debug-close-button:hover {
   background-color: rgba(0, 0, 0, 0.1);
+  color: #333;
 }
 
 .api-debug-close-button {
-  margin-left: 4px;
+  margin-left: 6px;
 }
 
 .api-debug-panel-content {
   display: flex;
   flex: 1;
   overflow: hidden;
+  background-color: #ffffff;
 }
 
 .api-debug-left-pane {
-  width: 40%;
+  width: 45%;
   overflow-y: auto;
   border-right: 1px solid #ddd;
   max-height: 100%;
+  background-color: #fafafa;
 }
 
 .api-debug-right-pane {
-  width: 60%;
+  width: 55%;
   overflow-y: auto;
   max-height: 100%;
-}
-
-.api-debug-panel-resize-handle {
-  position: absolute;
-  right: 0;
-  bottom: 0;
-  width: 15px;
-  height: 15px;
-  cursor: se-resize;
-  color: #aaa;
-  display: flex;
-  justify-content: center;
-  align-items: center;
+  background-color: #ffffff;
 }
 
 /* Request List */
@@ -592,19 +659,135 @@ input:checked + .debug-toggle-slider:before {
   align-items: center;
   justify-content: center;
   height: 100%;
-  padding: 20px;
+  padding: 40px 20px;
   text-align: center;
   color: #777;
+  background-color: #fafafa;
 }
 
 .api-debug-empty i {
-  font-size: 30px;
-  margin-bottom: 15px;
-  color: #999;
+  font-size: 48px;
+  margin-bottom: 20px;
+  color: #2196F3;
+  opacity: 0.7;
+}
+
+.api-debug-empty p {
+  margin: 0 0 8px 0;
+  font-size: 16px;
+  font-weight: 500;
 }
 
 .api-debug-empty-hint {
-  font-size: 12px;
-  opacity: 0.7;
+  font-size: 14px;
+  opacity: 0.8;
   margin-top: 8px;
+  max-width: 280px;
+  line-height: 1.4;
+}
+
+/* Responsive design for smaller screens */
+@media (max-width: 768px) {
+  .api-debug-panel-flyout {
+    width: 100vw;
+  }
+  
+  .api-debug-panel-toggle {
+    left: 5px;
+    padding: 10px 6px;
+    min-height: 50px;
+  }
+  
+  .api-debug-panel-toggle i {
+    font-size: 14px;
+  }
+  
+  .api-debug-panel-toggle-text {
+    font-size: 9px;
+  }
+  
+  .api-debug-panel-content {
+    flex-direction: column;
+  }
+  
+  .api-debug-left-pane {
+    width: 100%;
+    height: 40%;
+    border-right: none;
+    border-bottom: 1px solid #ddd;
+  }
+  
+  .api-debug-right-pane {
+    width: 100%;
+    height: 60%;
+  }
+}
+
+@media (max-width: 480px) {
+  .api-debug-panel-flyout {
+    width: 100vw;
+  }
+  
+  .api-debug-panel-header {
+    padding: 10px 12px;
+  }
+  
+  .api-debug-panel-title {
+    font-size: 14px;
+  }
+  
+  .api-debug-panel-title i {
+    font-size: 16px;
+    margin-right: 8px;
+  }
+  
+  .api-debug-filter {
+    font-size: 12px;
+    padding: 3px 6px;
+    margin-right: 8px;
+  }
+  
+  .api-debug-clear-button,
+  .api-debug-close-button {
+    padding: 5px 8px;
+    font-size: 12px;
+  }
+}
+
+/* Animation for the toggle button */
+@keyframes slideIn {
+  0% {
+    transform: translateY(-50%) translateX(-20px);
+    opacity: 0;
+  }
+  100% {
+    transform: translateY(-50%) translateX(0);
+    opacity: 1;
+  }
+}
+
+.api-debug-panel-toggle {
+  animation: slideIn 0.5s ease-out;
+}
+
+/* Better scrollbar styling for the flyout */
+.api-debug-left-pane::-webkit-scrollbar,
+.api-debug-right-pane::-webkit-scrollbar {
+  width: 6px;
+}
+
+.api-debug-left-pane::-webkit-scrollbar-track,
+.api-debug-right-pane::-webkit-scrollbar-track {
+  background: #f1f1f1;
+}
+
+.api-debug-left-pane::-webkit-scrollbar-thumb,
+.api-debug-right-pane::-webkit-scrollbar-thumb {
+  background: #c1c1c1;
+  border-radius: 3px;
+}
+
+.api-debug-left-pane::-webkit-scrollbar-thumb:hover,
+.api-debug-right-pane::-webkit-scrollbar-thumb:hover {
+  background: #a8a8a8;
 }

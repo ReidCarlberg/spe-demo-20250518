@@ -6,6 +6,74 @@
  */
 
 /**
+ * Wraps service methods for debugging without intercepting fetch arguments
+ * @param {Function} serviceMethod - The original service method to wrap
+ * @param {Function} captureCallData - Function to capture API call data
+ * @param {string} methodName - Name of the method being wrapped
+ * @returns {Function} Wrapped service method
+ */
+export const withServiceDebugging = (serviceMethod, captureCallData, methodName) => {
+  return async (...args) => {
+    // If no capture function provided, just pass through
+    if (typeof captureCallData !== 'function') {
+      return serviceMethod(...args);
+    }
+
+    // Start tracking timing
+    const startTime = performance.now();
+    
+    // Prepare call data object
+    const callData = {
+      url: `speService.${methodName}()`,
+      method: methodName,
+      requestHeaders: {},
+      requestBody: args.length > 0 ? `Arguments: ${args.length}` : 'No arguments',
+      timestamp: new Date().toISOString(),
+    };
+    
+    try {
+      // Call the original service method
+      const result = await serviceMethod(...args);
+      
+      // Calculate time taken
+      const endTime = performance.now();
+      const duration = endTime - startTime;
+      
+      // Enhance call data with response info
+      callData.status = 200;
+      callData.statusText = 'OK';
+      callData.duration = duration;
+      callData.isError = false;
+      callData.responseBody = 'Service method completed successfully';
+      
+      // Capture the completed call data
+      captureCallData(callData);
+      
+      // Return the original result
+      return result;
+    } catch (error) {
+      // Calculate failure time
+      const endTime = performance.now();
+      const duration = endTime - startTime;
+      
+      // Capture error information
+      callData.error = error.message;
+      callData.stack = error.stack;
+      callData.isError = true;
+      callData.duration = duration;
+      callData.status = 500;
+      callData.statusText = 'Error';
+      
+      // Record the failed call
+      captureCallData(callData);
+      
+      // Re-throw the original error
+      throw error;
+    }
+  };
+};
+
+/**
  * Intercepts and logs API calls when debug mode is active
  * @param {Function} apiCall - The original API function to wrap
  * @param {Function} captureCallData - Function to capture API call data
@@ -34,8 +102,11 @@ export const withApiDebugging = (apiCall, captureCallData) => {
     
     // If we couldn't determine the URL, just pass through
     if (!url) {
+      console.log('⚠️ withApiDebugging: No URL found, passing through', args);
       return apiCall(...args);
     }
+
+    console.log('🔍 Intercepting fetch call:', url, options.method || 'GET');
 
     // Start tracking timing
     const startTime = performance.now();
@@ -130,11 +201,14 @@ export const interceptFetch = (captureCallData) => {
   // Store the original fetch
   const originalFetch = window.fetch;
   
+  console.log('🔧 Setting up fetch interceptor for debug mode');
+  
   // Replace global fetch with intercepted version
   window.fetch = withApiDebugging(originalFetch, captureCallData);
   
   // Return function to restore original fetch
   return () => {
+    console.log('🔧 Removing fetch interceptor');
     window.fetch = originalFetch;
   };
 };

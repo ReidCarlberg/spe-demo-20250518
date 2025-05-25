@@ -9,6 +9,13 @@ const ApiCallNotification = () => {
   const [isVisible, setIsVisible] = useState(false);
   const [lastCall, setLastCall] = useState(null);
   const { setIsPanelVisible } = useDebugMode();
+  
+  // Handle click to open the debug panel
+  const handleClick = useCallback(() => {
+    setIsPanelVisible(true);
+    setIsVisible(false);
+  }, [setIsPanelVisible, setIsVisible]);
+  
   // Create a memoized event handler
   const handleApiCall = useCallback((event) => {
     const call = event.detail;
@@ -51,11 +58,6 @@ const ApiCallNotification = () => {
   const getStatusClass = () => {
     return lastCall.isError ? 'error' : 'success';
   };
-  // Handle click to open the debug panel
-  const handleClick = useCallback(() => {
-    setIsPanelVisible(true);
-    setIsVisible(false);
-  }, [setIsPanelVisible, setIsVisible]);
   
   return (
     <div 

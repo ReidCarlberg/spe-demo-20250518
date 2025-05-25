@@ -5,7 +5,6 @@
  */
 
 import { speService } from '../speService';
-import { withApiDebugging } from './apiInterceptor';
 
 let debuggingEnabled = false;
 let captureCallFn = null;
@@ -27,24 +26,6 @@ export const disableApiDebugging = () => {
   captureCallFn = null;
 };
 
-/**
- * Creates a proxy handler for the SPE service
- * This intercepts method calls and wraps them with debugging if enabled
- */
-const serviceProxyHandler = {
-  get: (target, prop) => {
-    // Get the original property
-    const originalProp = target[prop];
-    
-    // If it's not a function or debugging is disabled, return as is
-    if (typeof originalProp !== 'function' || !debuggingEnabled || !captureCallFn) {
-      return originalProp;
-    }
-    
-    // Return a wrapped version of the function
-    return withApiDebugging(originalProp, captureCallFn);
-  }
-};
-
-// Create a proxy around the original speService
-export const enhancedSpeService = new Proxy(speService, serviceProxyHandler);
+// Just export the original service without any proxy wrapping
+// The fetch interceptor will handle capturing the HTTP calls
+export const enhancedSpeService = speService;

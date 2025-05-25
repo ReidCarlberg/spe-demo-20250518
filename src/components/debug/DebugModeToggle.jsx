@@ -31,7 +31,7 @@ const DebugModeToggle = () => {
         <div className="debug-mode-active-indicator">
           <span className="debug-mode-dot"></span>
           <span className="debug-mode-tooltip">
-            Developer Mode is active. Press Alt+D to toggle panel.
+            Developer Mode is active. Press Alt+D to toggle flyout panel.
           </span>
         </div>
       )}

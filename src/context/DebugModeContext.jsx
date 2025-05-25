@@ -22,18 +22,6 @@ export const DebugModeProvider = ({ children }) => {
   // Panel visibility state
   const [isPanelVisible, setIsPanelVisible] = useState(false);
 
-  // Panel position
-  const [panelPosition, setPanelPosition] = useState(() => {
-    const savedPosition = localStorage.getItem("debug_panel_position");
-    return savedPosition ? JSON.parse(savedPosition) : { x: 10, y: 10 };
-  });
-
-  // Panel size
-  const [panelSize, setPanelSize] = useState(() => {
-    const savedSize = localStorage.getItem("debug_panel_size");
-    return savedSize ? JSON.parse(savedSize) : { width: 400, height: 500 };
-  });
-
   // Filter options
   const [filter, setFilter] = useState("all"); // "all", "success", "error"
 
@@ -63,11 +51,6 @@ export const DebugModeProvider = ({ children }) => {
   useEffect(() => {
     localStorage.setItem("debug_mode", isDebugModeActive);
 
-    // Show panel when debug mode is activated
-    if (isDebugModeActive && apiCalls.length === 0) {
-      setIsPanelVisible(true);
-    }
-
     // Setup or remove API interception based on debug mode state
     if (isDebugModeActive) {
       // Setup API interception
@@ -87,6 +70,7 @@ export const DebugModeProvider = ({ children }) => {
 
       // Clear history when disabled to free memory
       setApiCalls([]);
+      // Hide panel when debug mode is disabled
       setIsPanelVisible(false);
     }
 
@@ -97,17 +81,7 @@ export const DebugModeProvider = ({ children }) => {
       }
       disableApiDebugging();
     };
-  }, [isDebugModeActive, captureApiCall, apiCalls.length, setIsPanelVisible, setApiCalls]);
-
-  // Save panel position to localStorage when it changes
-  useEffect(() => {
-    localStorage.setItem("debug_panel_position", JSON.stringify(panelPosition));
-  }, [panelPosition]);
-
-  // Save panel size to localStorage when it changes
-  useEffect(() => {
-    localStorage.setItem("debug_panel_size", JSON.stringify(panelSize));
-  }, [panelSize]);
+  }, [isDebugModeActive, captureApiCall]);
 
   // Add keyboard shortcut for toggling debug panel
   useEffect(() => {
@@ -141,10 +115,6 @@ export const DebugModeProvider = ({ children }) => {
       setSelectedCall,
       isPanelVisible,
       setIsPanelVisible,
-      panelPosition,
-      setPanelPosition,
-      panelSize,
-      setPanelSize,
       filter,
       setFilter,
     }}>
