@@ -38,6 +38,12 @@ document.head.appendChild(style);
 (async () => {
   try {
     console.log("Starting MSAL initialization...");
+    console.log("Environment variables:", {
+      CLIENT_ID: import.meta.env.VITE_MSAL_CLIENT_ID,
+      TENANT_ID: import.meta.env.VITE_MSAL_TENANT_ID,
+      CONTAINER_TYPE_ID: import.meta.env.VITE_CONTAINER_TYPE_ID
+    });
+    
     // Wait for MSAL to initialize
     await initializeMsal();
     console.log("MSAL initialization complete, rendering app");
@@ -52,6 +58,11 @@ document.head.appendChild(style);
     );
   } catch (error) {
     console.error("Error initializing the application:", error);
+    console.error("Full error details:", {
+      message: error.message,
+      stack: error.stack,
+      name: error.name
+    });
     
     // Render a fallback UI if MSAL fails to initialize
     root.render(
@@ -59,6 +70,12 @@ document.head.appendChild(style);
         <h2>Authentication Error</h2>
         <p>There was a problem initializing the authentication system.</p>
         <p className="error-details">{error.message}</p>
+        <details style={{ marginTop: '10px', textAlign: 'left' }}>
+          <summary>Technical Details</summary>
+          <pre style={{ background: '#f5f5f5', padding: '10px', fontSize: '12px', overflow: 'auto' }}>
+            {error.stack}
+          </pre>
+        </details>
         <button 
           onClick={() => window.location.reload()} 
           style={{ padding: '8px 16px', background: '#0078d4', color: 'white', border: 'none', borderRadius: '4px', cursor: 'pointer', marginTop: '15px' }}

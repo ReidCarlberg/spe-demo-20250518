@@ -5,7 +5,7 @@ import RequestDetail from './RequestDetail';
 import '../../styles/debug-panel.css';
 
 /**
- * Collapsible flyout debug panel that displays API calls from the left side
+ * Collapsible flyout API Explorer panel that displays API calls from the left side
  */
 const ApiDebugPanel = () => {
   const { 
@@ -27,13 +27,13 @@ const ApiDebugPanel = () => {
       // Alt+D to toggle panel
       if (e.altKey && e.key === 'd') {
         e.preventDefault();
-        console.log('Alt+D pressed, toggling panel');
+        console.log('Alt+D pressed, toggling API explorer panel');
         setIsPanelVisible(!isPanelVisible);
       }
       // Escape to close panel
       if (e.key === 'Escape' && isPanelVisible) {
         e.preventDefault();
-        console.log('Escape pressed, closing panel');
+        console.log('Escape pressed, closing API explorer panel');
         setIsPanelVisible(false);
       }
     };
@@ -52,7 +52,7 @@ const ApiDebugPanel = () => {
   }, [setFilter]);
 
   const handleClose = useCallback(() => {
-    console.log('Debug panel close handler called');
+    console.log('API explorer panel close handler called');
     setIsPanelVisible(false);
   }, [setIsPanelVisible]);
 
@@ -88,8 +88,8 @@ const ApiDebugPanel = () => {
         <div className="api-debug-panel-flyout open">
           <div className="api-debug-panel-header">
             <div className="api-debug-panel-title">
-              <i className="fas fa-bug"></i>
-              <span>API Debug</span>
+              <i className="fas fa-search"></i>
+              <span>API Explorer</span>
             </div>
             <div className="api-debug-panel-controls">
               <select 
@@ -112,7 +112,7 @@ const ApiDebugPanel = () => {
               <button 
                 className="api-debug-close-button" 
                 onClick={handleClose}
-                aria-label="Close debug panel"
+                aria-label="Close API explorer panel"
               >
                 <i className="fas fa-times"></i>
               </button>
@@ -151,11 +151,11 @@ const ApiDebugPanel = () => {
         <button 
           className="api-debug-panel-toggle"
           onClick={() => setIsPanelVisible(true)}
-          aria-label="Open debug panel"
-          title="Open API Debug Panel (Alt+D)"
+          aria-label="Open API explorer panel"
+          title="Open API Explorer (Alt+D)"
         >
-          <i className="fas fa-bug"></i>
-          <span className="api-debug-panel-toggle-text">Debug</span>
+          <i className="fas fa-search"></i>
+          <span className="api-debug-panel-toggle-text">API Explorer</span>
         </button>
       )}
     </>

@@ -1,117 +1,115 @@
-import React, { useState, useEffect, useRef } from 'react';
-import '../styles/chat-flyout.css';
+import React, { useEffect, useCallback } from 'react';
+import { useChatFlyout } from '../hooks/useChatFlyout';
 import SPEChat from './SPEChat';
-
+import '../styles/chat-flyout.css';
 
 /**
  * Chat Flyout Component
- * Displays a flyout panel from the right side with the SPE Copilot Chat
- * 
- * @param {Object} props Component props
- * @param {boolean} props.isOpen Whether the flyout is open
- * @param {function} props.onClose Callback that toggles the chat open/closed state
- * @param {function} props.onError Callback when there's an error with the chat
- * @param {string} props.containerId The container ID for SPE
- * @param {string} props.containerName The name of the container for display
+ * Displays a collapsible flyout panel from the right side with the SPE Copilot Chat
+ * Works exactly like the DevMode flyout with conditional rendering
  */
-const ChatFlyout = ({ isOpen, onClose, onError, containerId, containerName }) => {
-  const [modalVisible, setModalVisible] = useState(false);
-  const [chatLoading, setChatLoading] = useState(true);
-  const [chatError, setChatError] = useState(false);
-  const closeButtonRef = useRef(null);
-  const chatAttempts = useRef(0);
+const ChatFlyout = () => {
+  const { 
+    isChatVisible, 
+    setIsChatVisible,
+    currentContainer
+  } = useChatFlyout();
   
-  // Setup error detection and handling - removed timeout as our component now handles this
+  // Debug logging
+  console.log('ChatFlyout render:', { 
+    isChatVisible, 
+    currentContainer: currentContainer ? { id: currentContainer.id, name: currentContainer.name } : null 
+  });
+  
+  
+  // Handle keyboard shortcuts (Escape to close)
   useEffect(() => {
-    // Clear any lingering state when the component mounts/unmounts
-    return () => {
-      // Cleanup function
+    const handleKeyDown = (e) => {
+      // Escape to close flyout
+      if (e.key === 'Escape' && isChatVisible) {
+        e.preventDefault();
+        console.log('Escape pressed, closing chat flyout');
+        setIsChatVisible(false);
+      }
     };
-  }, [isOpen, modalVisible, onError, onClose]);
-  
-  // Reset chat error state when modal is closed
-  useEffect(() => {
-    if (!isOpen) {
-      setTimeout(() => {
-        setChatError(false);
-      }, 500);
-    }
-  }, [isOpen]);
-  
-  // Handle animation effects when opening/closing
-  useEffect(() => {
-    if (isOpen) {
-      setModalVisible(true);
-      
-      // Focus on the close button when modal opens (for accessibility)
-      setTimeout(() => {
-        if (closeButtonRef.current) {
-          closeButtonRef.current.focus();
-        }
-      }, 100);
-      
-      // Add ESC key handler for closing
-      const handleEscKey = (e) => {
-        if (e.key === 'Escape') {
-          onClose();
-        }
-      };
-      
-      document.addEventListener('keydown', handleEscKey);
-      
-      // Prevent scrolling of the background
-      document.body.style.overflow = 'hidden';
-      
-      return () => {
-        document.removeEventListener('keydown', handleEscKey);
-        document.body.style.overflow = '';
-      };
-    } else {
-      // Wait for animation to complete before hiding
-      const timer = setTimeout(() => {
-        setModalVisible(false);
-      }, 300);
-      
-      document.body.style.overflow = '';
-      
-      return () => clearTimeout(timer);
-    }  }, [isOpen, onClose]);    // Show restore button even when the flyout is completely hidden
 
-  
+    if (currentContainer.id) {
+      window.addEventListener('keydown', handleKeyDown);
+    }
+
+    return () => {
+      window.removeEventListener('keydown', handleKeyDown);
+    };
+  }, [isChatVisible, currentContainer.id, setIsChatVisible]);
+
+  const handleClose = useCallback(() => {
+    console.log('Chat flyout close handler called');
+    setIsChatVisible(false);
+  }, [setIsChatVisible]);
+
+  // Handle overlay click to close
+  const handleOverlayClick = useCallback(() => {
+    setIsChatVisible(false);
+  }, [setIsChatVisible]);
+
+  // Don't render if no container is set
+  if (!currentContainer.id) {
+    return null;
+  }
+
   return (
     <>
-      <div 
-        className={`chat-flyout-overlay ${isOpen ? 'open' : 'closing'}`} 
-        onClick={onClose}
-        role="complementary"
-        aria-labelledby="chat-flyout-title"
-      >
-        <div className={`chat-flyout-container ${isOpen ? 'open' : 'closing'}`} onClick={(e) => e.stopPropagation()}>
-        <div className="chat-flyout-header">
-          <h3 id="chat-flyout-title">AI Chat for {containerName || 'Container'}</h3>
-          <button 
-            className="chat-flyout-close" 
-            onClick={onClose} 
-            aria-label="Close chat"
-            ref={closeButtonRef}
-          >
-            <i className="fas fa-times"></i>          </button>
-        </div>        <div className="chat-flyout-content">
-          {containerId && (
-            <>
-              <SPEChat 
-                containerId={containerId}
-                height="calc(100vh - 150px)"
-                width="100%"
-                className="chat-flyout-embedded-chat"
-              />
-              <div className="chat-flyout-footer">
-                <small>If the chat doesn't load, try refreshing the page or checking your connection.</small>
-              </div>
-            </>
-          )}        </div>
-      </div>
-    </div>
+      {/* Overlay - only when flyout is visible */}
+      {isChatVisible && (
+        <div 
+          className="chat-flyout-overlay"
+          onClick={handleOverlayClick}
+        />
+      )}
+      
+      {/* Flyout Panel - only when flyout is visible */}
+      {isChatVisible && (
+        <div className="chat-flyout-container open">
+          <div className="chat-flyout-header">
+            <div className="chat-flyout-title">
+              <i className="fas fa-robot"></i>
+              <span>AI Chat for {currentContainer.name || 'Container'}</span>
+            </div>
+            <button 
+              className="chat-flyout-close-button" 
+              onClick={handleClose}
+              aria-label="Close chat flyout"
+            >
+              <i className="fas fa-times"></i>
+            </button>
+          </div>
+          
+          <div className="chat-flyout-content">
+            <SPEChat 
+              containerId={currentContainer.id}
+              height="calc(100vh - 120px)"
+              width="100%"
+              className="chat-flyout-embedded-chat"
+            />
+            <div className="chat-flyout-footer">
+              <small>AI-powered chat for your SharePoint Embedded container</small>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Toggle Button - only when flyout is NOT visible */}
+      {!isChatVisible && (
+        <button 
+          className="chat-flyout-toggle"
+          onClick={() => setIsChatVisible(true)}
+          aria-label="Open chat flyout"
+          title="Open Chat (Alt+C)"
+        >
+          <i className="fas fa-robot"></i>
+          <span className="chat-flyout-toggle-text">Chat</span>
+        </button>
+      )}
     </>
   );
 };

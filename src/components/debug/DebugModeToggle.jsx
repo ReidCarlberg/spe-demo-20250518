@@ -13,16 +13,16 @@ const DebugModeToggle = () => {
     <div className="debug-mode-toggle">
       <label htmlFor="debug-toggle" className="debug-toggle-label">
         <span className="debug-toggle-icon">
-          <i className="fas fa-bug"></i>
+          <i className="fas fa-search"></i>
         </span>
-        <span className="debug-toggle-text">Developer Mode</span>
+        <span className="debug-toggle-text">API Explorer</span>
         <div className="debug-toggle-switch">
           <input
             id="debug-toggle"
             type="checkbox"
             checked={isDebugModeActive}
             onChange={toggleDebugMode}
-            aria-label="Toggle developer mode"
+            aria-label="Toggle API explorer mode"
           />
           <span className="debug-toggle-slider"></span>
         </div>
@@ -31,7 +31,7 @@ const DebugModeToggle = () => {
         <div className="debug-mode-active-indicator">
           <span className="debug-mode-dot"></span>
           <span className="debug-mode-tooltip">
-            Developer Mode is active. Press Alt+D to toggle flyout panel.
+            API Explorer is active. Press Alt+D to toggle flyout panel.
           </span>
         </div>
       )}

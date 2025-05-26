@@ -1,48 +1,38 @@
-/* Chat Flyout styles */
+/* Chat Flyout styles - similar to debug panel but from the right */
 .chat-flyout-overlay {
   position: fixed;
   top: 0;
   left: 0;
   right: 0;
   bottom: 0;
-  background-color: rgba(0, 0, 0, 0.5);
-  display: flex;
-  justify-content: flex-end;
-  align-items: stretch;
+  background-color: rgba(0, 0, 0, 0.3);
+  backdrop-filter: blur(4px);
   z-index: 1000;
-  opacity: 0;
-  visibility: hidden;
-  transition: opacity 0.3s ease, visibility 0.3s ease;
-}
-
-.chat-flyout-overlay.open {
-  opacity: 1;
-  visibility: visible;
-}
-
-.chat-flyout-overlay.closing {
-  opacity: 0;
-  visibility: hidden;
+  display: block;
 }
 
 .chat-flyout-container {
-  width: 600px; /* Increased by 50% from 400px */
+  position: fixed;
+  top: 0;
+  right: 0;
+  width: 600px;
   max-width: 90vw;
   height: 100vh;
   background-color: #fff;
   display: flex;
   flex-direction: column;
   box-shadow: -5px 0 15px rgba(0, 0, 0, 0.1);
-  transform: translateX(100%);
-  transition: transform 0.3s ease-in-out;
+  z-index: 1001;
+  animation: slideInFromRight 0.3s ease-out;
 }
 
-.chat-flyout-container.open {
-  transform: translateX(0);
-}
-
-.chat-flyout-container.closing {
-  transform: translateX(100%);
+@keyframes slideInFromRight {
+  from {
+    transform: translateX(100%);
+  }
+  to {
+    transform: translateX(0);
+  }
 }
 
 .chat-flyout-header {
@@ -52,29 +42,37 @@
   padding: 15px 20px;
   border-bottom: 1px solid #e5e5e5;
   background-color: #f8f9fa;
+  min-height: 60px;
 }
 
-.chat-flyout-header h3 {
-  margin: 0;
+.chat-flyout-title {
+  display: flex;
+  align-items: center;
+  gap: 8px;
   font-size: 18px;
   font-weight: 600;
   color: #333;
 }
 
-.chat-flyout-close {
+.chat-flyout-title i {
+  color: #0078d4;
+}
+
+.chat-flyout-close-button {
   background: none;
   border: none;
   font-size: 20px;
   color: #666;
   cursor: pointer;
-  padding: 5px;
+  padding: 8px;
   display: flex;
   align-items: center;
   justify-content: center;
-  border-radius: 50%;
+  border-radius: 4px;
+  transition: all 0.2s ease;
 }
 
-.chat-flyout-close:hover {
+.chat-flyout-close-button:hover {
   background-color: rgba(0, 0, 0, 0.05);
   color: #333;
 }
@@ -96,10 +94,60 @@
 }
 
 .chat-flyout-footer {
-  padding: 10px 0;
+  padding: 10px 20px;
   text-align: center;
   color: #666;
   font-size: 12px;
+  border-top: 1px solid #e5e5e5;
+  background-color: #f8f9fa;
+}
+
+/* Toggle Button - Blue tab on the right side */
+.chat-flyout-toggle {
+  position: fixed;
+  top: 50%;
+  right: 0;
+  transform: translateY(-50%);
+  background: linear-gradient(135deg, #0078d4, #106ebe);
+  color: white;
+  border: none;
+  padding: 12px 6px;
+  cursor: pointer;
+  z-index: 999;
+  border-top-left-radius: 8px;
+  border-bottom-left-radius: 8px;
+  box-shadow: -2px 0 8px rgba(0, 120, 212, 0.3);
+  transition: all 0.3s ease;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+  min-width: 40px;
+  writing-mode: vertical-lr;
+  text-orientation: mixed;
+}
+
+.chat-flyout-toggle:hover {
+  background: linear-gradient(135deg, #106ebe, #005a9e);
+  transform: translateY(-50%) translateX(-2px);
+  box-shadow: -4px 0 12px rgba(0, 120, 212, 0.4);
+}
+
+.chat-flyout-toggle:active {
+  transform: translateY(-50%) translateX(1px);
+}
+
+.chat-flyout-toggle i {
+  font-size: 18px;
+  margin-bottom: 4px;
+}
+
+.chat-flyout-toggle-text {
+  font-size: 12px;
+  font-weight: 600;
+  letter-spacing: 0.5px;
+  writing-mode: vertical-lr;
+  text-orientation: mixed;
 }
 
 /* Mobile responsive adjustments */
@@ -114,5 +162,18 @@
   
   .chat-flyout-content {
     padding: 15px;
+  }
+  
+  .chat-flyout-toggle {
+    min-width: 35px;
+    padding: 10px 5px;
+  }
+  
+  .chat-flyout-toggle i {
+    font-size: 16px;
+  }
+  
+  .chat-flyout-toggle-text {
+    font-size: 11px;
   }
 }

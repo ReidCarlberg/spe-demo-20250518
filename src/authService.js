@@ -15,6 +15,11 @@ export const msalInstance = new PublicClientApplication({
 // Initialize the MSAL instance with proper error handling
 export const initializeMsal = async () => {
   try {
+    console.log("initializeMsal called, checking current state...");
+    console.log("msalInstance:", msalInstance);
+    console.log("Current URL:", window.location.href);
+    console.log("MSAL config:", msalConfig);
+    
     // Check if already initialized to prevent double initialization
     if (msalInstance.getActiveAccount) {
       console.log("MSAL instance already initialized");
@@ -30,16 +35,22 @@ export const initializeMsal = async () => {
     console.log("Initializing MSAL instance...");
     // Initialize the MSAL application
     await msalInstance.initialize();
+    console.log("MSAL instance.initialize() completed");
     
     // Handle the redirect promise after initialization
-    await msalInstance.handleRedirectPromise().catch((error) => {
-      console.error("Redirect error: ", error);
-    });
+    console.log("Handling redirect promise...");
+    const redirectResponse = await msalInstance.handleRedirectPromise();
+    console.log("Redirect response:", redirectResponse);
     
     console.log("MSAL initialization completed successfully");
     return true;
   } catch (error) {
     console.error("MSAL initialization error:", error);
+    console.error("Error details:", {
+      message: error.message,
+      name: error.name,
+      stack: error.stack
+    });
     // Throw the error to be caught by the calling function
     throw new Error(`MSAL initialization failed: ${error.message}`);
   }

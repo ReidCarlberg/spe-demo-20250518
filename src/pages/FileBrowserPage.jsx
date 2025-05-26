@@ -1,9 +1,9 @@
 import { useState, useEffect, useRef } from 'react';
 import { useNavigate, useParams, Link } from 'react-router-dom';
 import { useAuth } from '../AuthContext';
+import { useChatFlyout } from '../hooks/useChatFlyout';
 import { speService } from '../services';
 import FilePreview from '../components/FilePreview';
-import PersistentChatPanel from '../components/PersistentChatPanel';
 import './FileBrowserPage.css';
 
 // Icons for different file types
@@ -50,10 +50,11 @@ const FileIcon = ({ type }) => {
 
 const FileBrowserPage = () => {
   const { isAuthenticated, loading } = useAuth();
+  const { setContainer } = useChatFlyout();
   const navigate = useNavigate();
   const { containerId, folderId } = useParams();
   const [files, setFiles] = useState([]);
-  const [container, setContainer] = useState(null);
+  const [container, setContainerState] = useState(null);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState(null);
   const [currentPath, setCurrentPath] = useState([]);
@@ -61,8 +62,7 @@ const FileBrowserPage = () => {
   const [isUploading, setIsUploading] = useState(false);
   const [uploadProgress, setUploadProgress] = useState(0);
   const fileInputRef = useRef(null);
-  const [previewFile, setPreviewFile] = useState(null);  const [chatError, setChatError] = useState(false);
-  const [isChatCollapsed, setIsChatCollapsed] = useState(window.innerWidth <= 768);
+  const [previewFile, setPreviewFile] = useState(null);
   
   // Search state
   const [searchTerm, setSearchTerm] = useState('');
@@ -70,48 +70,12 @@ const FileBrowserPage = () => {
   const [searchResults, setSearchResults] = useState(null);
   const searchInputRef = useRef(null);
 
-  // State for managing shortcut notification
-  const [showShortcutNotification, setShowShortcutNotification] = useState(false);
-
   useEffect(() => {
     // Redirect to login if not authenticated
     if (!isAuthenticated && !loading) {
       navigate('/login');
     }
   }, [isAuthenticated, navigate, loading]);
-  // Reset chat error on component mount or container change
-  useEffect(() => {
-    if (containerId) {
-      setChatError(false);
-    }
-  }, [containerId]);
-  
-  // Handle responsive chat panel
-  useEffect(() => {
-    const handleResize = () => {
-      setIsChatCollapsed(window.innerWidth <= 768);
-    };
-
-    window.addEventListener('resize', handleResize);
-    
-    // Add keyboard shortcut support for chat panel
-    const handleKeyDown = (e) => {
-      // Ctrl+Alt+C to toggle chat
-      if (e.ctrlKey && e.altKey && e.key === 'c') {
-        toggleChatCollapsed();
-        // Show notification that keyboard shortcut was used
-        setShowShortcutNotification(true);
-        setTimeout(() => setShowShortcutNotification(false), 3000);
-      }
-    };
-    
-    window.addEventListener('keydown', handleKeyDown);
-    
-    return () => {
-      window.removeEventListener('resize', handleResize);
-      window.removeEventListener('keydown', handleKeyDown);
-    };
-  }, []);
   
   // Fetch container details when component mounts
   useEffect(() => {
@@ -123,7 +87,10 @@ const FileBrowserPage = () => {
           const containerMatch = containers.find(c => c.id === containerId);
           
           if (containerMatch) {
-            setContainer(containerMatch);
+            setContainerState(containerMatch);
+            // Set container in chat context for ChatFlyout
+            console.log('Setting container for chat:', { id: containerMatch.id, name: containerMatch.displayName });
+            setContainer(containerMatch.id, containerMatch.displayName);
             
             // Initialize the path with container name
             if (currentPath.length === 0) {
@@ -140,7 +107,7 @@ const FileBrowserPage = () => {
       
       fetchContainerDetails();
     }
-  }, [containerId, isAuthenticated, currentPath.length]);
+  }, [containerId, isAuthenticated, currentPath.length, setContainer]);
 
   // Fetch files when component mounts or folder changes
   useEffect(() => {
@@ -433,15 +400,6 @@ const FileBrowserPage = () => {
       fileInputRef.current.click();
     }
   };
-    // Toggle chat panel collapsed state
-  const toggleChatCollapsed = () => {
-    setIsChatCollapsed(prev => !prev);
-  };
-  
-  // Handle chat errors
-  const handleChatError = () => {
-    setChatError(true);
-  };
   
   // Handle search
   const handleSearch = async (e) => {
@@ -484,26 +442,7 @@ const FileBrowserPage = () => {
       </div>
     );
   }  return (
-    <div className={`file-browser-wrapper ${containerId ? 'with-chat-panel' : ''} ${isChatCollapsed ? 'panel-collapsed' : ''}`}>
-      {/* Keyboard shortcut notification */}
-      {showShortcutNotification && (
-        <div className="shortcut-notification">
-          <i className="fas fa-keyboard"></i> Chat panel toggled with keyboard shortcut (Ctrl+Alt+C)
-        </div>
-      )}
-        {containerId && isChatCollapsed && (
-        <button 
-          className="chat-restore-button" 
-          onClick={toggleChatCollapsed}
-          aria-label="Restore Chat Panel"
-          title="Restore Chat Panel"
-          tabIndex={0}
-          role="button"
-        >
-          <i className="fas fa-chevron-left"></i>
-          <span className="chat-restore-tooltip">Open Chat</span>
-        </button>
-      )}
+    <div className="file-browser-wrapper">
       <div className="file-browser-container">
         <div className="file-browser-header">
           <div className="file-browser-title">
@@ -762,16 +701,6 @@ const FileBrowserPage = () => {
           />
         )}
       </div>
-        {/* Persistent Chat Panel */}
-      {containerId && (
-        <PersistentChatPanel
-          containerId={containerId}
-          containerName={container?.displayName || "My Container"}
-          collapsed={isChatCollapsed}
-          onToggleCollapse={toggleChatCollapsed}
-          onError={handleChatError}
-        />
-      )}
     </div>
   );
 };

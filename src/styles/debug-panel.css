@@ -1,5 +1,5 @@
 /**
- * Debug Panel Styles
+ * API Explorer Panel Styles
  */
 
 /* API Call Notification */
@@ -202,7 +202,7 @@ input:checked + .debug-toggle-slider:before {
   position: fixed;
   top: 0;
   left: 0;
-  width: 450px;
+  width: 80vw;
   height: 100vh;
   background-color: #f8f9fa;
   border-right: 1px solid #ddd;
