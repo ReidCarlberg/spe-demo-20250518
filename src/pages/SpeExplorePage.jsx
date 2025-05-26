@@ -1,10 +1,12 @@
 import { useState, useEffect } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { useAuth } from '../AuthContext';
+import { useTheme } from '../context/ThemeContext';
 import { speService } from '../services';
 
 const SpeExplorePage = () => {
   const { isAuthenticated, loading, accessToken } = useAuth();
+  const { getDocumentsContent } = useTheme();
   const navigate = useNavigate();
   
   const [containers, setContainers] = useState([]);
@@ -15,6 +17,9 @@ const SpeExplorePage = () => {
     displayName: '',
     description: ''
   });
+
+  // Get theme-based content
+  const documentsContent = getDocumentsContent();
 
   useEffect(() => {
     // Redirect to login if not authenticated
@@ -128,8 +133,8 @@ const SpeExplorePage = () => {
   return (
     <div className="spe-container">
       <div className="spe-header">
-        <h1>SharePoint Embedded Explorer</h1>
-        <p className="spe-subtitle">Manage your SPE containers and documents</p>
+        <h1>{documentsContent.pageTitle}</h1>
+        <p className="spe-subtitle">{documentsContent.pageSubtitle}</p>
       </div>
 
       {error && (
@@ -143,15 +148,9 @@ const SpeExplorePage = () => {
           className="spe-button create-button" 
           onClick={() => setShowCreateForm(!showCreateForm)}
         >
-          {showCreateForm ? 'Cancel' : 'Create New Container'}
+          {showCreateForm ? 'Cancel' : documentsContent.createButtonText}
         </button>
-        <button 
-          className="spe-button refresh-button" 
-          onClick={fetchContainers}
-          disabled={isLoading}
-        >
-          {isLoading ? 'Loading...' : 'Refresh Containers'}
-        </button>
+
       </div>
 
       {showCreateForm && (
@@ -192,7 +191,7 @@ const SpeExplorePage = () => {
       )}
 
       <div className="containers-section">
-        <h2>Your Containers</h2>
+        <h2>{documentsContent.containersHeadline}</h2>
         {isLoading ? (
           <p className="loading-text">Loading containers...</p>
         ) : containers.length === 0 ? (

@@ -1,12 +1,13 @@
 import { Link, useLocation } from 'react-router-dom';
 import { useAuth } from '../AuthContext';
+import { useTheme } from '../context/ThemeContext';
 import { useState } from 'react';
 import SearchModal from './SearchModal';
-import { DebugModeToggle } from './debug';
 import './Navbar.css';
 
 const Navbar = () => {
   const { isAuthenticated, logout } = useAuth();
+  const { appName } = useTheme();
   const location = useLocation();
   const [showMobileMenu, setShowMobileMenu] = useState(false);
 
@@ -21,7 +22,7 @@ const Navbar = () => {
 
   return (
     <nav className="navbar">
-      <Link to="/" className="navbar-brand">SPE Demo</Link>
+      <Link to="/" className="navbar-brand">{appName}</Link>
       
       <button className="mobile-menu-toggle" onClick={toggleMobileMenu}>
         <i className={`fas ${showMobileMenu ? 'fa-times' : 'fa-bars'}`}></i>
@@ -55,7 +56,6 @@ const Navbar = () => {
       </ul>        <div className="auth-buttons">
         {isAuthenticated ? (
           <>
-            <DebugModeToggle />
             <button 
               className="button button-secondary" 
               onClick={handleLogout}

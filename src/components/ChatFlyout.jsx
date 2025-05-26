@@ -15,12 +15,6 @@ const ChatFlyout = () => {
     currentContainer
   } = useChatFlyout();
   
-  // Debug logging
-  console.log('ChatFlyout render:', { 
-    isChatVisible, 
-    currentContainer: currentContainer ? { id: currentContainer.id, name: currentContainer.name } : null 
-  });
-  
   
   // Handle keyboard shortcuts (Escape to close)
   useEffect(() => {

@@ -1,8 +1,8 @@
-// filepath: c:\Users\carlb\vscodelive\my-vite-app\src\pages\PageOne.jsx
 import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { speService } from '../services';
 import { useAuth } from '../AuthContext';
+import { useTheme } from '../context/ThemeContext';
 import '../styles/search-modal.css';
 import '../styles/search-page.css';
 import '../styles/auth.css';
@@ -73,12 +73,16 @@ const PageOne = () => {
   const [searchMode] = useState('term');
   const [fields] = useState('');
   const { accessToken, login } = useAuth();
+  const { getDashboardContent } = useTheme();
   // Set default to only driveItem (Files)
   const [entities] = useState({
     drive: false,
     driveItem: true
   });
   const [isLoading, setIsLoading] = useState(false);
+  
+  // Get theme content for intro
+  const dashboardContent = getDashboardContent();
   const [results, setResults] = useState(null);
   const [searchError, setSearchError] = useState(null);
 
@@ -372,10 +376,9 @@ const PageOne = () => {
   return (
     <div className="page-container home-container">
       <div className="home-content">
-        <h1 className="home-headline">Introducing SharePoint Embedded</h1>
+        <h1 className="home-headline">{dashboardContent.introTitle}</h1>
         <p className="home-text">
-          SPE is an AI forward platform, the fastest way to build and scale modern apps that manage documents, 
-          delivering Copilot AI, Office collaboration, Purview compliance, and a whole lot more, all via easy-to-use APIs.
+          {dashboardContent.introText}
         </p>      </div>
       <div className="home-search-container">
         {accessToken ? (

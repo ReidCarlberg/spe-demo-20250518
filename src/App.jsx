@@ -2,6 +2,7 @@ import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-d
 import { AuthProvider } from './AuthContext'
 import { DebugModeProvider } from './context/DebugModeContext'
 import { ChatProvider } from './context/ChatContext'
+import { ThemeProvider } from './context/ThemeContext'
 import Navbar from './components/Navbar'
 import PageOne from './pages/PageOne'
 import PageTwo from './pages/PageTwo'
@@ -20,21 +21,23 @@ import ProtectedRoute from './components/ProtectedRoute'
 import AuthenticationStatus from './components/AuthenticationStatus'
 import { ApiDebugPanel, ApiCallNotification } from './components/debug'
 import ChatFlyout from './components/ChatFlyout'
+import Footer from './components/Footer'
 
 import './App.css'
 
 function App() {
   return (
     <AuthProvider>
-      <DebugModeProvider>
-        <ChatProvider>
-          <Router>
-            <AuthenticationStatus />
-            <Navbar />
-            <ApiDebugPanel />
-            <ApiCallNotification />
-            <ChatFlyout />
-            <div className="app-container">
+      <ThemeProvider>
+        <DebugModeProvider>
+          <ChatProvider>
+            <Router>
+              <AuthenticationStatus />
+              <Navbar />
+              <ApiDebugPanel />
+              <ApiCallNotification />
+              <ChatFlyout />
+              <div className="app-container">
             <Routes>
               <Route path="/" element={<PageOne />} />
               <Route path="/page-two" element={<PageTwo />} />
@@ -118,10 +121,12 @@ function App() {
 
               <Route path="*" element={<Navigate to="/" />} />
             </Routes>
-          </div>
-        </Router>
+            </div>
+            <Footer />
+          </Router>
         </ChatProvider>
       </DebugModeProvider>
+    </ThemeProvider>
     </AuthProvider>
   )
 }

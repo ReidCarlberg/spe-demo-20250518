@@ -1,11 +1,15 @@
 import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../AuthContext';
+import { useTheme } from '../context/ThemeContext';
 
 const DashboardPage = () => {
   const { isAuthenticated, user, logout, loading, accessToken } = useAuth();
+  const { getDashboardContent } = useTheme();
   const [lastLogin, setLastLogin] = useState(new Date().toLocaleString());
   const navigate = useNavigate();
+  
+  const dashboardContent = getDashboardContent();
 
   useEffect(() => {
     // Redirect to login if not authenticated
@@ -39,7 +43,7 @@ const DashboardPage = () => {
   return (
     <div className="dashboard-container">
       <div className="dashboard-header">
-        <h1>Welcome to Your Dashboard</h1>
+        <h1>{dashboardContent.welcomeMessage}</h1>
         <p className="user-greeting">Hello, {getUserDisplayName()}!</p>
       </div>
 
@@ -61,11 +65,12 @@ const DashboardPage = () => {
         <div className="dashboard-row">
           <div className="dashboard-card">
             <h2>Recent Activity</h2>
-            <p className="card-description">Your recent actions and activities will appear here.</p>
+            <p className="card-description">{dashboardContent.cardDescription}</p>
             <ul className="activity-list">
               <li>Logged in at {lastLogin}</li>
-              <li>Profile viewed</li>
-              <li>Dashboard accessed</li>
+              {dashboardContent.recentActivities.map((activity, index) => (
+                <li key={index}>{activity}</li>
+              ))}
             </ul>
           </div>
 
@@ -73,9 +78,9 @@ const DashboardPage = () => {
             <h2>Quick Actions</h2>
             <p className="card-description">Common tasks you can perform from your dashboard.</p>
             <div className="action-buttons">
-              <button className="action-button">View Profile</button>
-              <button className="action-button">Account Settings</button>
-              <button className="action-button">Notifications</button>
+              {dashboardContent.quickActions.map((action, index) => (
+                <button key={index} className="action-button">{action}</button>
+              ))}
               <button className="action-button logout-button" onClick={handleLogout}>Sign Out</button>
             </div>
           </div>

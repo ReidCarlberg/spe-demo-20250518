@@ -43,7 +43,6 @@ export const ChatProvider = ({ children }) => {
 
   // Set current container for chat
   const setContainer = useCallback((id, name) => {
-    console.log('ChatContext.setContainer called:', { id, name });
     setCurrentContainer({ id, name });
   }, []);
 

@@ -89,7 +89,6 @@ const FileBrowserPage = () => {
           if (containerMatch) {
             setContainerState(containerMatch);
             // Set container in chat context for ChatFlyout
-            console.log('Setting container for chat:', { id: containerMatch.id, name: containerMatch.displayName });
             setContainer(containerMatch.id, containerMatch.displayName);
             
             // Initialize the path with container name

@@ -1,0 +1,169 @@
+/**
+ * Footer Styles
+ */
+
+.app-footer {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  background-color: #f8f9fa;
+  border-top: 1px solid #dee2e6;
+  padding: 12px 0;
+  z-index: 1000;
+  box-shadow: 0 -2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.footer-content {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 0 20px;
+}
+
+.footer-links {
+  display: flex;
+  align-items: center;
+}
+
+.footer-link {
+  display: flex;
+  align-items: center;
+  color: #0066cc;
+  text-decoration: none;
+  font-size: 14px;
+  font-weight: 500;
+  transition: color 0.2s ease;
+}
+
+.footer-link:hover {
+  color: #004499;
+  text-decoration: underline;
+}
+
+.footer-link i {
+  margin-right: 8px;
+  font-size: 12px;
+}
+
+.footer-controls {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
+
+/* Theme Selector Styles */
+.theme-selector {
+  position: relative;
+  display: inline-block;
+}
+
+.theme-selector-button {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  background: #ffffff;
+  border: 1px solid #d1d5db;
+  border-radius: 6px;
+  padding: 8px 12px;
+  font-size: 14px;
+  color: #374151;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
+}
+
+.theme-selector-button:hover {
+  background: #f9fafb;
+  border-color: #9ca3af;
+}
+
+.theme-label {
+  font-weight: 500;
+}
+
+.theme-chevron {
+  font-size: 12px;
+  transition: transform 0.2s ease;
+}
+
+.theme-dropdown {
+  position: absolute;
+  bottom: 100%;
+  right: 0;
+  margin-bottom: 8px;
+  background: white;
+  border: 1px solid #d1d5db;
+  border-radius: 8px;
+  box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+  min-width: 200px;
+  z-index: 1001;
+  overflow: hidden;
+}
+
+.theme-option {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  width: 100%;
+  padding: 12px 16px;
+  border: none;
+  background: white;
+  text-align: left;
+  font-size: 14px;
+  color: #374151;
+  cursor: pointer;
+  transition: background-color 0.2s ease;
+}
+
+.theme-option:hover {
+  background: #f3f4f6;
+}
+
+.theme-option.active {
+  background: #dbeafe;
+  color: #1d4ed8;
+}
+
+.theme-name {
+  font-weight: 500;
+}
+
+.theme-check {
+  font-size: 12px;
+  color: #10b981;
+}
+
+/* Responsive design */
+@media (max-width: 768px) {
+  .footer-content {
+    flex-direction: column;
+    gap: 10px;
+    padding: 0 16px;
+  }
+  
+  .footer-link {
+    font-size: 13px;
+  }
+}
+
+@media (max-width: 480px) {
+  .app-footer {
+    padding: 10px 0;
+  }
+  
+  .footer-content {
+    padding: 0 12px;
+  }
+  
+  .footer-link {
+    font-size: 12px;
+  }
+}
+
+/* Ensure main content has enough bottom padding to not be covered by footer */
+.app-container {
+  padding-bottom: 80px; /* Adjust based on footer height */
+}
