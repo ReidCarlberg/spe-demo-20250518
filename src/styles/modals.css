@@ -1,0 +1,458 @@
+/* Modal and Overlay Components */
+@import './base.css';
+
+/* ========== MODAL OVERLAYS ========== */
+
+/* Base overlay for all modals - covers full screen */
+.modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 1000;
+  opacity: 0;
+  transition: opacity var(--transition-speed) ease;
+}
+
+/* Overlay background variants */
+.modal-overlay.standard {
+  background-color: rgba(0, 0, 0, 0.5);
+}
+
+.modal-overlay.light {
+  background-color: rgba(0, 0, 0, 0.3);
+}
+
+.modal-overlay.dark {
+  background-color: rgba(0, 0, 0, 0.7);
+}
+
+.modal-overlay.debug {
+  background-color: rgba(0, 0, 0, 0.2);
+}
+
+/* Blur effects */
+.modal-overlay.blur-light {
+  backdrop-filter: blur(2px);
+}
+
+.modal-overlay.blur-medium {
+  backdrop-filter: blur(4px);
+}
+
+.modal-overlay.blur-heavy {
+  backdrop-filter: blur(10px);
+}
+
+/* Overlay states */
+.modal-overlay.open {
+  opacity: 1;
+}
+
+.modal-overlay.closing {
+  opacity: 0;
+}
+
+/* ========== MODAL CONTAINERS ========== */
+
+/* Base modal container */
+.modal-container {
+  background-color: var(--theme-surface-background-color, white);
+  border-radius: var(--border-radius-lg);
+  display: flex;
+  flex-direction: column;
+  box-shadow: var(--shadow-lg);
+  overflow: hidden;
+  max-width: 95vw;
+  max-height: 95vh;
+  transition: transform var(--transition-speed) ease;
+}
+
+/* Container size variants */
+.modal-container.small {
+  width: 400px;
+  max-width: 90vw;
+  height: auto;
+  max-height: 600px;
+}
+
+.modal-container.medium {
+  width: 80%;
+  max-width: 800px;
+  height: 80vh;
+  max-height: 700px;
+}
+
+.modal-container.large {
+  width: 90%;
+  max-width: 1200px;
+  height: 85vh;
+  max-height: 900px;
+}
+
+.modal-container.chat {
+  width: 80%;
+  max-width: 900px;
+  height: 80vh;
+  max-height: 800px;
+}
+
+/* Container animation states */
+.modal-container.fade-in {
+  transform: translateY(20px);
+}
+
+.modal-container.fade-in.open {
+  transform: translateY(0);
+}
+
+.modal-container.fade-in.closing {
+  transform: translateY(20px);
+}
+
+/* ========== FLYOUT PANELS ========== */
+
+/* Base flyout panel */
+.flyout-panel {
+  position: fixed;
+  top: 0;
+  height: 100vh;
+  background-color: #fff;
+  display: flex;
+  flex-direction: column;
+  box-shadow: var(--shadow-lg);
+  z-index: 1001;
+  transition: transform var(--transition-speed) ease-out;
+}
+
+/* Flyout from left */
+.flyout-panel.from-left {
+  left: 0;
+  border-right: 1px solid var(--border-light);
+  box-shadow: 2px 0 10px rgba(0, 0, 0, 0.15);
+  transform: translateX(-100%);
+}
+
+.flyout-panel.from-left.open {
+  transform: translateX(0);
+}
+
+/* Flyout from right */
+.flyout-panel.from-right {
+  right: 0;
+  border-left: 1px solid var(--border-light);
+  box-shadow: -5px 0 15px rgba(0, 0, 0, 0.1);
+  transform: translateX(100%);
+}
+
+.flyout-panel.from-right.open {
+  transform: translateX(0);
+}
+
+/* Flyout size variants */
+.flyout-panel.narrow {
+  width: 400px;
+  max-width: 90vw;
+}
+
+.flyout-panel.medium {
+  width: 600px;
+  max-width: 90vw;
+}
+
+.flyout-panel.wide {
+  width: 80vw;
+  max-width: 1000px;
+}
+
+/* ========== MODAL HEADERS ========== */
+
+/* Base modal header */
+.modal-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: var(--spacing-md) var(--spacing-lg);
+  border-bottom: 1px solid var(--border-light);
+  min-height: 60px;
+}
+
+/* Header variants */
+.modal-header.primary {
+  background-color: var(--primary-color);
+  color: white;
+  border-top-left-radius: var(--border-radius-lg);
+  border-top-right-radius: var(--border-radius-lg);
+}
+
+.modal-header.secondary {
+  background-color: var(--secondary-color);
+  color: white;
+  border-top-left-radius: var(--border-radius-lg);
+  border-top-right-radius: var(--border-radius-lg);
+}
+
+.modal-header.light {
+  background-color: var(--background-light);
+  color: var(--text-dark);
+}
+
+.modal-header.neutral {
+  background-color: #f8f9fa;
+  color: var(--text-dark);
+}
+
+/* Header title */
+.modal-title {
+  margin: 0;
+  font-size: var(--font-size-lg);
+  font-weight: 600;
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-sm);
+}
+
+.modal-title i {
+  color: inherit;
+}
+
+.modal-title.with-icon {
+  gap: var(--spacing-sm);
+}
+
+/* ========== CLOSE BUTTONS ========== */
+
+/* Base close button */
+.modal-close {
+  background: none;
+  border: none;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+  transition: all 0.2s ease;
+  font-size: 18px;
+  width: 36px;
+  height: 36px;
+}
+
+/* Close button variants */
+.modal-close.light {
+  color: white;
+}
+
+.modal-close.light:hover {
+  background-color: rgba(255, 255, 255, 0.2);
+}
+
+.modal-close.dark {
+  color: var(--text-medium);
+}
+
+.modal-close.dark:hover {
+  background-color: var(--border-light);
+  color: var(--text-dark);
+}
+
+.modal-close.danger:hover {
+  background-color: rgba(255, 238, 238, 1);
+  color: var(--error-color);
+}
+
+/* Smaller close button variant */
+.modal-close.small {
+  width: 32px;
+  height: 32px;
+  font-size: 16px;
+}
+
+/* ========== MODAL CONTENT ========== */
+
+/* Base modal content area */
+.modal-content {
+  flex: 1;
+  overflow: hidden;
+  position: relative;
+  display: flex;
+  flex-direction: column;
+}
+
+.modal-content.padded {
+  padding: var(--spacing-lg);
+}
+
+.modal-content.scrollable {
+  overflow-y: auto;
+}
+
+/* ========== MODAL FOOTER ========== */
+
+/* Base modal footer */
+.modal-footer {
+  padding: var(--spacing-md) var(--spacing-lg);
+  border-top: 1px solid var(--border-light);
+  display: flex;
+  justify-content: flex-end;
+  gap: var(--spacing-md);
+  background-color: var(--background-light);
+}
+
+.modal-footer.center {
+  justify-content: center;
+}
+
+.modal-footer.space-between {
+  justify-content: space-between;
+}
+
+.modal-footer.light {
+  background-color: #f8f8f8;
+}
+
+/* ========== ANIMATIONS ========== */
+
+/* Fade in animation */
+@keyframes modalFadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* Slide in from right */
+@keyframes slideInFromRight {
+  from {
+    transform: translateX(100%);
+  }
+  to {
+    transform: translateX(0);
+  }
+}
+
+/* Slide in from left */
+@keyframes slideInFromLeft {
+  from {
+    transform: translateX(-100%);
+    opacity: 0;
+  }
+  to {
+    transform: translateX(0);
+    opacity: 1;
+  }
+}
+
+/* Overlay fade in */
+@keyframes overlayFadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+/* Scale in animation */
+@keyframes scaleIn {
+  from {
+    transform: scale(0.9);
+    opacity: 0;
+  }
+  to {
+    transform: scale(1);
+    opacity: 1;
+  }
+}
+
+/* ========== UTILITY CLASSES ========== */
+
+/* Z-index utilities */
+.z-modal {
+  z-index: 1000;
+}
+
+.z-modal-high {
+  z-index: 9999;
+}
+
+.z-flyout {
+  z-index: 1001;
+}
+
+.z-overlay {
+  z-index: 999;
+}
+
+.z-debug {
+  z-index: 9998;
+}
+
+/* Animation utilities */
+.animate-fade-in {
+  animation: modalFadeIn var(--transition-speed) ease-out;
+}
+
+.animate-slide-right {
+  animation: slideInFromRight var(--transition-speed) ease-out;
+}
+
+.animate-slide-left {
+  animation: slideInFromLeft var(--transition-speed) ease-out;
+}
+
+.animate-scale-in {
+  animation: scaleIn var(--transition-speed) ease-out;
+}
+
+/* ========== RESPONSIVE DESIGN ========== */
+
+@media screen and (max-width: 768px) {
+  .modal-container.medium,
+  .modal-container.large {
+    width: 95%;
+    height: 90vh;
+    max-height: none;
+  }
+  
+  .flyout-panel.medium,
+  .flyout-panel.wide {
+    width: 100%;
+    max-width: 100%;
+  }
+  
+  .modal-header {
+    padding: var(--spacing-sm) var(--spacing-md);
+  }
+  
+  .modal-footer {
+    padding: var(--spacing-sm) var(--spacing-md);
+    flex-direction: column;
+  }
+  
+  .modal-footer .button {
+    width: 100%;
+    justify-content: center;
+  }
+}
+
+@media screen and (max-width: 480px) {
+  .modal-container {
+    width: 100%;
+    height: 100vh;
+    border-radius: 0;
+    max-height: 100vh;
+  }
+  
+  .flyout-panel {
+    width: 100%;
+    border-radius: 0;
+  }
+}

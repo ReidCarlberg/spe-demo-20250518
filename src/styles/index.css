@@ -6,6 +6,9 @@
 /* Base and shared styles */
 @import './base.css';
 
+/* Modal and overlay components */
+@import './modals.css';
+
 /* Layout and navigation */
 @import './layout.css';
 

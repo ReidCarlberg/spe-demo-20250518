@@ -1,69 +1,34 @@
 /* File Preview Component Styles */
 @import './base.css';
+@import './modals.css';
 
+/* 
+ * File Preview Implementation
+ * Uses consolidated modal classes from modals.css
+ * HTML structure should use these classes:
+ * <div class="modal-overlay dark blur-medium z-modal file-preview-overlay">
+ *   <div class="modal-container large file-preview-container">
+ *     <div class="modal-header neutral file-preview-header">
+ *       <h3>File Preview</h3>
+ *       <button class="modal-close light file-close-button">×</button>
+ *     </div>
+ *     <div class="modal-content file-preview-content">...</div>
+ *     <div class="modal-footer file-preview-footer">...</div>
+ *   </div>
+ * </div>
+ */
+
+/* File preview specific customizations */
 .file-preview-overlay {
-  position: fixed;
-  top: 0;
-  left: 0;
-  right: 0;
-  bottom: 0;
   background-color: rgba(0, 0, 0, 0.7);
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  z-index: 1000;
 }
 
 .file-preview-container {
-  background-color: var(--theme-surface-background-color, white);
-  border-radius: var(--border-radius-lg);
-  width: 90%;
   height: 85vh;
   max-width: 1200px;
-  display: flex;
-  flex-direction: column;
-  box-shadow: 0 5px 20px rgba(0, 0, 0, 0.3);
 }
 
-.file-preview-header {
-  padding: var(--spacing-md) var(--spacing-lg);
-  border-bottom: 1px solid var(--border-light);
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-}
-
-.file-preview-header h3 {
-  margin: 0;
-  font-size: var(--font-size-lg);
-  color: var(--text-dark);
-}
-
-.file-close-button {
-  background: none;
-  border: none;
-  font-size: var(--font-size-lg);
-  color: var(--text-medium);
-  cursor: pointer;
-  width: 32px;
-  height: 32px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  border-radius: 50%;
-  transition: all 0.2s ease;
-}
-
-.file-close-button:hover {
-  background-color: var(--border-light);
-  color: var(--text-dark);
-}
-
-.file-preview-content {
-  flex: 1;
-  overflow: hidden;
-  position: relative;
-}
+/* File-specific content styles */
 
 .file-iframe {
   width: 100%;

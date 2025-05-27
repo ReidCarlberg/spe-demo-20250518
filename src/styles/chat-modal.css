@@ -1,94 +1,26 @@
 /* Chat Modal Styles */
 @import './base.css';
+@import './modals.css';
 
-.chat-modal-overlay {
-  position: fixed;
-  top: 0;
-  left: 0;  right: 0;
-  bottom: 0;
-  background-color: rgba(0, 0, 0, 0.5);
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  z-index: 9999;
-  backdrop-filter: blur(2px);
-  opacity: 0;
-  transition: opacity 0.3s ease;
-}
+/* 
+ * Chat Modal Implementation
+ * Uses consolidated modal classes from modals.css
+ * HTML structure should use these classes:
+ * <div class="modal-overlay standard blur-light z-modal-high chat-modal-overlay">
+ *   <div class="modal-container chat fade-in chat-modal-container">
+ *     <div class="modal-header primary chat-modal-header">
+ *       <h3 class="modal-title">Title</h3>
+ *       <button class="modal-close light chat-modal-close">×</button>
+ *     </div>
+ *     <div class="modal-content chat-modal-content">...</div>
+ *   </div>
+ * </div>
+ */
 
-.chat-modal-overlay.open {
-  opacity: 1;
-}
-
-.chat-modal-overlay.closing {
-  opacity: 0;
-}
-
-.chat-modal-container {
-  width: 80%;
-  max-width: 900px;
-  height: 80vh;
-  max-height: 800px;
-  background-color: var(--theme-surface-background-color, white);
-  border-radius: var(--border-radius-lg);
-  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2);
-  display: flex;
-  flex-direction: column;
-  overflow: hidden;
-  transform: translateY(20px);
-  transition: transform 0.3s ease;
-}
-
-.chat-modal-container.open {
-  transform: translateY(0);
-}
-
-.chat-modal-container.closing {
-  transform: translateY(20px);
-}
-
-.chat-modal-header {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  padding: var(--spacing-md);
-  background-color: var(--primary-color);
-  color: white;
-  border-top-left-radius: var(--border-radius-lg);
-  border-top-right-radius: var(--border-radius-lg);
-}
-
-.chat-modal-header h3 {
-  margin: 0;
-  font-size: var(--font-size-lg);
-}
-
-.chat-modal-close {
-  background: none;
-  border: none;
-  color: white;
-  cursor: pointer;
-  font-size: 18px;
-  width: 36px;
-  height: 36px;
-  border-radius: 50%;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  transition: background-color 0.2s ease;
-}
-
-.chat-modal-close:hover {
-  background-color: rgba(255, 255, 255, 0.2);
-}
-
+/* Chat-specific content styling */
 .chat-modal-content {
-  flex: 1;
-  overflow: hidden;
+  /* Inherits from .modal-content */
   padding: 0;
-  position: relative;
-  display: flex;
-  flex-direction: column;
 }
 
 /* Reset some SPE chat container styles when inside the modal */
@@ -122,14 +54,8 @@
   border-bottom-right-radius: var(--border-radius-lg);
 }
 
-/* Responsive design */
+/* Responsive design - mobile overrides */
 @media (max-width: 768px) {
-  .chat-modal-container {
-    width: 95%;
-    height: 90vh;
-    max-height: none;
-  }
-  
   .chat-modal-content .spe-chat-container > div {
     min-height: 300px !important;
   }

@@ -1,6 +1,22 @@
 /**
  * API Explorer Panel Styles
  */
+@import './modals.css';
+
+/* 
+ * Debug Panel Implementation
+ * Uses consolidated modal classes from modals.css
+ * HTML structure should use these classes:
+ * <div class="modal-overlay debug blur-light z-debug api-debug-panel-overlay">
+ *   <div class="flyout-panel from-left large api-debug-panel-flyout">
+ *     <div class="modal-header neutral api-debug-panel-header">
+ *       <h3 class="modal-title with-icon">API Debug Panel</h3>
+ *       <button class="modal-close dark api-debug-close-button">×</button>
+ *     </div>
+ *     <div class="modal-content scrollable api-debug-panel-content">...</div>
+ *   </div>
+ * </div>
+ */
 
 /* API Call Notification */
 .api-call-notification {
@@ -197,7 +213,7 @@ input:checked + .debug-toggle-slider:before {
   100% { opacity: 0.6; }
 }
 
-/* Debug Panel - Flyout Design */
+/* Debug panel specific customizations */
 .api-debug-panel-flyout {
   position: fixed;
   top: 0;
@@ -213,17 +229,6 @@ input:checked + .debug-toggle-slider:before {
   animation: slideInFromLeft 0.3s ease-out;
 }
 
-@keyframes slideInFromLeft {
-  0% {
-    transform: translateX(-100%);
-    opacity: 0;
-  }
-  100% {
-    transform: translateX(0);
-    opacity: 1;
-  }
-}
-
 .api-debug-panel-overlay {
   position: fixed;
   top: 0;
@@ -234,6 +239,17 @@ input:checked + .debug-toggle-slider:before {
   z-index: 9998;
   backdrop-filter: blur(2px);
   animation: fadeIn 0.3s ease-out;
+}
+
+@keyframes slideInFromLeft {
+  0% {
+    transform: translateX(-100%);
+    opacity: 0;
+  }
+  100% {
+    transform: translateX(0);
+    opacity: 1;
+  }
 }
 
 @keyframes fadeIn {

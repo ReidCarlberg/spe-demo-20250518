@@ -1,3 +1,22 @@
+/* Search Modal Styles */
+@import './modals.css';
+
+/* 
+ * Search Modal Implementation
+ * Uses consolidated modal classes from modals.css
+ * HTML structure should use these classes:
+ * <div class="modal-overlay standard blur-medium z-modal search-modal-overlay">
+ *   <div class="modal-container large search-modal">
+ *     <div class="modal-header primary search-modal-header">
+ *       <h2>Search</h2>
+ *       <button class="modal-close dark close-button">×</button>
+ *     </div>
+ *     <div class="modal-content scrollable search-modal-content">...</div>
+ *     <div class="modal-footer search-modal-footer">...</div>
+ *   </div>
+ * </div>
+ */
+
 .search-component {
   display: inline-block;
 }
@@ -6,62 +25,9 @@
   cursor: pointer;
 }
 
-.search-modal-overlay {
-  position: fixed;
-  top: 0;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  background-color: rgba(0, 0, 0, 0.5);
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  z-index: 1000;
-}
-
+/* Search-specific modal customizations */
 .search-modal {
-  background-color: white;
-  border-radius: 8px;
-  width: 90%;
   max-width: 800px;
-  max-height: 90vh;
-  display: flex;
-  flex-direction: column;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
-}
-
-.search-modal-header {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  padding: 16px 20px;
-  border-bottom: 1px solid #e0e0e0;
-}
-
-.search-modal-header h2 {
-  margin: 0;
-  font-size: 1.2rem;
-}
-
-.close-button {
-  background: none;
-  border: none;
-  font-size: 24px;
-  cursor: pointer;
-  color: #666;
-}
-
-.search-modal-content {
-  padding: 20px;
-  overflow-y: auto;
-  flex: 1;
-}
-
-.search-modal-footer {
-  padding: 12px 20px;
-  border-top: 1px solid #e0e0e0;
-  display: flex;
-  justify-content: flex-end;
 }
 
 .close-button-footer {

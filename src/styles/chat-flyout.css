@@ -1,28 +1,48 @@
-/* Chat Flyout styles - similar to debug panel but from the right */
+/* Chat Flyout Styles */
+@import './base.css';
+@import './modals.css';
+
+/* 
+ * Chat Flyout Implementation
+ * Uses conditional rendering - overlay and container are shown/hidden via React state
+ * HTML structure:
+ * {isChatVisible && (
+ *   <div className="chat-flyout-overlay">
+ *     <div className="chat-flyout-container">
+ *       <div className="chat-flyout-header">
+ *         <div className="chat-flyout-title">Title</div>
+ *         <button className="chat-flyout-close-button">×</button>
+ *       </div>
+ *       <div className="chat-flyout-content">...</div>
+ *     </div>
+ *   </div>
+ * )}
+ * 
+ * Animation handled via CSS keyframes when component mounts.
+ */
+
+/* Essential Chat Flyout Functionality - Core positioning and behavior */
 .chat-flyout-overlay {
   position: fixed;
   top: 0;
   left: 0;
-  right: 0;
-  bottom: 0;
+  width: 100%;
+  height: 100%;
+  z-index: 999;
   background-color: rgba(0, 0, 0, 0.3);
-  backdrop-filter: blur(4px);
-  z-index: 1000;
-  display: block;
 }
 
 .chat-flyout-container {
   position: fixed;
   top: 0;
   right: 0;
-  width: 600px;
-  max-width: 90vw;
+  width: 50vw;
   height: 100vh;
-  background-color: #fff;
+  background: white;
+  z-index: 1000;
   display: flex;
   flex-direction: column;
-  box-shadow: -5px 0 15px rgba(0, 0, 0, 0.1);
-  z-index: 1001;
+  box-shadow: -4px 0 20px rgba(0, 0, 0, 0.15);
   animation: slideInFromRight 0.3s ease-out;
 }
 
@@ -35,9 +55,8 @@
   }
 }
 
+/* Chat-specific header customizations */
 .chat-flyout-header {
-  display: flex;
-  justify-content: space-between;
   align-items: center;
   padding: 15px 20px;
   border-bottom: 1px solid #e5e5e5;
@@ -153,7 +172,8 @@
 /* Mobile responsive adjustments */
 @media (max-width: 600px) {
   .chat-flyout-container {
-    width: 85vw;
+    width: 90vw;
+    right: 0;
   }
   
   .chat-flyout-header {

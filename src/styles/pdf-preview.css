@@ -1,69 +1,34 @@
 /* PDF Preview Component Styles */
 @import './base.css';
+@import './modals.css';
 
+/* 
+ * PDF Preview Implementation
+ * Uses consolidated modal classes from modals.css
+ * HTML structure should use these classes:
+ * <div class="modal-overlay dark blur-medium z-modal pdf-preview-overlay">
+ *   <div class="modal-container large pdf-preview-container">
+ *     <div class="modal-header neutral pdf-preview-header">
+ *       <h3>PDF Preview</h3>
+ *       <button class="modal-close light pdf-close-button">×</button>
+ *     </div>
+ *     <div class="modal-content pdf-preview-content">...</div>
+ *     <div class="modal-footer pdf-preview-footer">...</div>
+ *   </div>
+ * </div>
+ */
+
+/* PDF preview specific customizations */
 .pdf-preview-overlay {
-  position: fixed;
-  top: 0;
-  left: 0;
-  right: 0;
-  bottom: 0;
   background-color: rgba(0, 0, 0, 0.7);
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  z-index: 1000;
 }
 
 .pdf-preview-container {
-  background-color: white;
-  border-radius: var(--border-radius-lg);
-  width: 90%;
   height: 85vh;
   max-width: 1200px;
-  display: flex;
-  flex-direction: column;
-  box-shadow: 0 5px 20px rgba(0, 0, 0, 0.3);
 }
 
-.pdf-preview-header {
-  padding: var(--spacing-md) var(--spacing-lg);
-  border-bottom: 1px solid var(--border-light);
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-}
-
-.pdf-preview-header h3 {
-  margin: 0;
-  font-size: var(--font-size-lg);
-  color: var(--text-dark);
-}
-
-.pdf-close-button {
-  background: none;
-  border: none;
-  font-size: var(--font-size-lg);
-  color: var(--text-medium);
-  cursor: pointer;
-  width: 32px;
-  height: 32px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  border-radius: 50%;
-  transition: all 0.2s ease;
-}
-
-.pdf-close-button:hover {
-  background-color: var(--border-light);
-  color: var(--text-dark);
-}
-
-.pdf-preview-content {
-  flex: 1;
-  overflow: hidden;
-  position: relative;
-}
+/* PDF-specific content styles */
 
 .pdf-iframe {
   width: 100%;
