@@ -143,7 +143,7 @@ input:focus, textarea:focus, select:focus {
 
 /* Common elements */
 .card {
-  background-color: white;
+  background-color: var(--theme-card-background-color, white);
   border-radius: var(--border-radius-lg);
   box-shadow: var(--shadow-md);
   padding: var(--spacing-lg);

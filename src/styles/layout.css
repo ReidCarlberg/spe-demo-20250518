@@ -31,7 +31,7 @@
 
 /* Navbar Styles */
 .navbar {
-  background-color: white;
+  background-color: var(--theme-surface-background-color, white);
   box-shadow: var(--shadow-sm);
   padding: 1rem 2rem;
   display: flex;
@@ -124,7 +124,7 @@
     left: 0;
     right: 0;
     flex-direction: column;
-    background-color: white;
+    background-color: var(--theme-surface-background-color, white);
     padding: var(--spacing-md);
     box-shadow: var(--shadow-md);
     gap: var(--spacing-md);

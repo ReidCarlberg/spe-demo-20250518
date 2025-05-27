@@ -29,7 +29,7 @@
   max-width: 900px;
   height: 80vh;
   max-height: 800px;
-  background-color: white;
+  background-color: var(--theme-surface-background-color, white);
   border-radius: var(--border-radius-lg);
   box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2);
   display: flex;

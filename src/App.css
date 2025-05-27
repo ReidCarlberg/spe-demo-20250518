@@ -1,5 +1,5 @@
 /* App specific styles that are not included in the consolidated files */
 
 .app-container {
-  background-color: #f8f9fa;
+  background-color: var(--theme-background-color, #f8f9fa);
 }

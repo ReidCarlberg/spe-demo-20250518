@@ -15,7 +15,7 @@
 }
 
 .file-preview-container {
-  background-color: white;
+  background-color: var(--theme-surface-background-color, white);
   border-radius: var(--border-radius-lg);
   width: 90%;
   height: 85vh;

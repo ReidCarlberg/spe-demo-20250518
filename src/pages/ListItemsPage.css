@@ -10,7 +10,8 @@
   align-items: center;
   padding: 10px 20px;
   border-bottom: 1px solid var(--color-border);
-  background-color: white;
+  background-color: var(--theme-surface-background-color, white);
+}
 }
 
 .list-items-header h2 {
@@ -31,7 +32,7 @@
   flex: 1;
   overflow: auto;
   padding: 0;
-  background-color: white;
+  background-color: var(--theme-surface-background-color, white);
 }
 
 .list-items-loading,

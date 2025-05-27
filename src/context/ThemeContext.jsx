@@ -8,6 +8,9 @@ const THEMES = {
     id: 'spe-demo',
     name: 'SPE Demo',
     appName: 'SPE Demo',
+    backgroundColor: '#f0f4f8', // Soft blue-gray pastel
+    cardBackgroundColor: 'rgba(240, 244, 248, 0.7)', // Semi-transparent version
+    surfaceBackgroundColor: 'rgba(255, 255, 255, 0.8)', // Mostly white with slight transparency
     introTitle: 'Introducing SharePoint Embedded',
     introText: 'SPE is an AI forward platform, the fastest way to build and scale modern apps that manage documents, delivering Copilot AI, Office collaboration, Purview compliance, and a whole lot more, all via easy-to-use APIs.',
     dashboardConfig: {
@@ -37,6 +40,9 @@ const THEMES = {
     id: 'contoso-audit',
     name: 'Contoso Audit',
     appName: 'Contoso Audit',
+    backgroundColor: '#f5f0f8', // Soft lavender pastel
+    cardBackgroundColor: 'rgba(245, 240, 248, 0.7)', // Semi-transparent version
+    surfaceBackgroundColor: 'rgba(255, 255, 255, 0.8)', // Mostly white with slight transparency
     introTitle: 'Corporate Financial Audit Platform',
     introText: 'Streamline your financial audit processes with AI-powered document analysis, automated compliance checks, and real-time collaboration. Our platform ensures regulatory compliance while providing comprehensive audit trails and risk assessment capabilities for enterprise-grade financial auditing.',
     dashboardConfig: {
@@ -67,6 +73,9 @@ const THEMES = {
     id: 'fabrikam-legal',
     name: 'Fabrikam Legal',
     appName: 'Fabrikam Legal',
+    backgroundColor: '#f0f8f2', // Soft mint green pastel
+    cardBackgroundColor: 'rgba(240, 248, 242, 0.7)', // Semi-transparent version
+    surfaceBackgroundColor: 'rgba(255, 255, 255, 0.8)', // Mostly white with slight transparency
     introTitle: 'Legal Document Management System',
     introText: 'Transform your legal practice with intelligent document management, case collaboration, and client portal access. Built with legal-grade security and compliance features, enabling seamless case management, contract review, and secure client communications all in one platform.',
     dashboardConfig: {
@@ -89,6 +98,9 @@ const THEMES = {
     id: 'northwind-insurance',
     name: 'Northwind Insurance',
     appName: 'Northwind Insurance',
+    backgroundColor: '#fff8f0', // Soft peach pastel
+    cardBackgroundColor: 'rgba(255, 248, 240, 0.7)', // Semi-transparent version
+    surfaceBackgroundColor: 'rgba(255, 255, 255, 0.8)', // Mostly white with slight transparency
     introTitle: 'Insurance Claim Management Platform',
     introText: 'Streamline your insurance claim processing with intelligent document analysis, automated risk assessment, and real-time claim tracking. Our comprehensive platform provides end-to-end claim management capabilities, enabling faster settlements, improved customer satisfaction, and enhanced fraud detection for modern insurance operations.',
     dashboardConfig: {
@@ -122,6 +134,17 @@ export const ThemeProvider = ({ children }) => {
   useEffect(() => {
     localStorage.setItem("app_theme", currentThemeId);
   }, [currentThemeId]);
+
+  // Apply theme background color as CSS variable
+  useEffect(() => {
+    const backgroundColor = currentTheme.backgroundColor || '#f8f9fa';
+    const cardBackgroundColor = currentTheme.cardBackgroundColor || 'rgba(255, 255, 255, 0.9)';
+    const surfaceBackgroundColor = currentTheme.surfaceBackgroundColor || 'rgba(255, 255, 255, 0.8)';
+    
+    document.documentElement.style.setProperty('--theme-background-color', backgroundColor);
+    document.documentElement.style.setProperty('--theme-card-background-color', cardBackgroundColor);
+    document.documentElement.style.setProperty('--theme-surface-background-color', surfaceBackgroundColor);
+  }, [currentTheme.backgroundColor, currentTheme.cardBackgroundColor, currentTheme.surfaceBackgroundColor]);
 
   // Change theme function
   const changeTheme = useCallback((themeId) => {
