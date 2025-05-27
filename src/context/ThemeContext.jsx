@@ -47,10 +47,12 @@ const THEMES = {
     introText: 'Streamline your financial audit processes with AI-powered document analysis, automated compliance checks, and real-time collaboration. Our platform ensures regulatory compliance while providing comprehensive audit trails and risk assessment capabilities for enterprise-grade financial auditing.',
     dashboardConfig: {
       quickActions: [
+        'New Audit Project',
         'Financial Reports',
-        'Audit Trail',
         'Compliance Check',
-        'Risk Assessment'
+        'Risk Assessment',
+        'Audit Trail Review',
+        'Client Documents'
       ],
       recentActivityType: 'audit'
     },
@@ -80,10 +82,12 @@ const THEMES = {
     introText: 'Transform your legal practice with intelligent document management, case collaboration, and client portal access. Built with legal-grade security and compliance features, enabling seamless case management, contract review, and secure client communications all in one platform.',
     dashboardConfig: {
       quickActions: [
-        'Case Files',
-        'Legal Documents',
-        'Client Portal',
-        'Court Calendar'
+        'New Case File',
+        'Client Intake',
+        'Document Review',
+        'Court Calendar',
+        'Billing & Time Entry',
+        'Conflict Check'
       ],
       recentActivityType: 'legal'
     },
@@ -106,9 +110,11 @@ const THEMES = {
     dashboardConfig: {
       quickActions: [
         'New Claims',
-        'Claim Reports',
         'Policy Lookup',
-        'Fraud Detection'
+        'Claim Reports',
+        'Fraud Detection',
+        'Adjuster Assignment',
+        'Settlement Processing'
       ],
       recentActivityType: 'insurance'
     },
@@ -135,7 +141,7 @@ export const ThemeProvider = ({ children }) => {
     localStorage.setItem("app_theme", currentThemeId);
   }, [currentThemeId]);
 
-  // Apply theme background color as CSS variable
+  // Apply theme background color as CSS variable and update document title
   useEffect(() => {
     const backgroundColor = currentTheme.backgroundColor || '#f8f9fa';
     const cardBackgroundColor = currentTheme.cardBackgroundColor || 'rgba(255, 255, 255, 0.9)';
@@ -144,7 +150,10 @@ export const ThemeProvider = ({ children }) => {
     document.documentElement.style.setProperty('--theme-background-color', backgroundColor);
     document.documentElement.style.setProperty('--theme-card-background-color', cardBackgroundColor);
     document.documentElement.style.setProperty('--theme-surface-background-color', surfaceBackgroundColor);
-  }, [currentTheme.backgroundColor, currentTheme.cardBackgroundColor, currentTheme.surfaceBackgroundColor]);
+    
+    // Update document title to match theme name
+    document.title = currentTheme.name;
+  }, [currentTheme.backgroundColor, currentTheme.cardBackgroundColor, currentTheme.surfaceBackgroundColor, currentTheme.name]);
 
   // Change theme function
   const changeTheme = useCallback((themeId) => {
@@ -164,7 +173,9 @@ export const ThemeProvider = ({ children }) => {
     
     const baseContent = {
       quickActions: theme.dashboardConfig.quickActions,
-      welcomeMessage: `Welcome to Your ${theme.appName} Dashboard`,
+      welcomeMessage: theme.dashboardConfig.recentActivityType === 'legal' 
+        ? `Welcome to Your ${theme.appName} Practice Dashboard`
+        : `Welcome to Your ${theme.appName} Dashboard`,
       introTitle: theme.introTitle,
       introText: theme.introText
     };
@@ -175,21 +186,40 @@ export const ThemeProvider = ({ children }) => {
         return {
           ...baseContent,
           recentActivities: [
-            'Financial audit initiated',
-            'Quarterly compliance review completed',
-            'Risk assessment updated'
+            'Q4 financial audit initiated for TechCorp Inc.',
+            'SOX compliance review completed - Manufacturing Div',
+            'Risk assessment updated: Inventory controls',
+            'Audit findings documented - Internal controls gap',
+            'Management letter drafted for client review',
+            'Fieldwork scheduled: Next week - Client site visit'
           ],
-          cardDescription: 'Recent audit activities and compliance updates will appear here.'
+          cardDescription: 'Recent audit activities, compliance reviews, and project updates will appear here.'
         };
       case 'legal':
         return {
           ...baseContent,
           recentActivities: [
-            'Case file #2024-001 updated',
-            'Client consultation scheduled',
-            'Legal document review completed'
+            'Motion filed in Smith v. Jones - Case #2024-CV-1247',
+            'Deposition scheduled: Johnson case - Dec 3, 2:00 PM',
+            'Contract review completed for ABC Corp merger',
+            'Court hearing reminder: Tomorrow 2:00 PM - Courtroom 3A',
+            'Client consultation notes updated - Williams estate',
+            'Discovery documents received in Patterson litigation'
           ],
-          cardDescription: 'Recent legal activities and case updates will appear here.'
+          cardDescription: 'Recent legal matter activities, deadlines, and case updates will appear here.'
+        };
+      case 'insurance':
+        return {
+          ...baseContent,
+          recentActivities: [
+            'Auto claim #IC-2024-8934 - Adjuster assigned',
+            'Property damage assessment completed - Storm claim',
+            'Fraud investigation initiated - Claim #IC-2024-8821',
+            'Settlement approved: $15,000 - Policy #POL-445891',
+            'Medical records received for injury claim',
+            'Subrogation case opened - Third party liability'
+          ],
+          cardDescription: 'Recent insurance claim activities, assessments, and processing updates will appear here.'
         };
       default:
         return {

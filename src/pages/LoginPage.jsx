@@ -1,9 +1,11 @@
 import { useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../AuthContext';
+import { useTheme } from '../context/ThemeContext';
 
 const LoginPage = () => {
   const { isAuthenticated, login, loading, error, inProgress } = useAuth();
+  const { currentTheme } = useTheme();
   const navigate = useNavigate();
   useEffect(() => {
     // Redirect to SPE Explore if already authenticated
@@ -21,7 +23,7 @@ const LoginPage = () => {
   return (
     <div className="login-container">
       <div className="login-card">
-        <h1>SharePoint Embedded</h1>
+        <h1>{currentTheme.name}</h1>
         <p className="login-subtitle">Sign in to get started.</p>
 
         

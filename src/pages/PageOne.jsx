@@ -73,7 +73,7 @@ const PageOne = () => {
   const [searchMode] = useState('term');
   const [fields] = useState('');
   const { accessToken, login } = useAuth();
-  const { getDashboardContent } = useTheme();
+  const { getDashboardContent, currentThemeId, currentTheme } = useTheme();
   // Set default to only driveItem (Files)
   const [entities] = useState({
     drive: false,
@@ -340,7 +340,7 @@ const PageOne = () => {
   const renderLoginContent = () => {
     return (
       <div className="login-card">
-        <h1>SharePoint Embedded</h1>
+        <h1>{currentTheme.name}</h1>
         <p className="login-subtitle">Sign in to get started.</p>
         
         <button 
@@ -373,27 +373,222 @@ const PageOne = () => {
     );
   };
 
+  const getProgressChartTitle = () => {
+    switch (currentThemeId) {
+      case 'fabrikam-legal':
+        return 'Case Progress Overview';
+      case 'contoso-audit':
+        return 'Audit Progress Tracking';
+      case 'northwind-insurance':
+        return 'Claims Processing Status';
+      default:
+        return 'Activity Overview';
+    }
+  };
+
+  const getProgressChartDescription = () => {
+    switch (currentThemeId) {
+      case 'fabrikam-legal':
+        return 'Current status of your active legal matters and upcoming deadlines.';
+      case 'contoso-audit':
+        return 'Progress on current audit engagements and compliance reviews.';
+      case 'northwind-insurance':
+        return 'Real-time status of insurance claims and processing metrics.';
+      default:
+        return 'Overview of your recent activity and progress.';
+    }
+  };
+
+  const renderProgressChart = () => {
+    switch (currentThemeId) {
+      case 'fabrikam-legal':
+        return renderLegalProgressChart();
+      case 'contoso-audit':
+        return renderAuditProgressChart();
+      case 'northwind-insurance':
+        return renderInsuranceProgressChart();
+      default:
+        return renderDefaultProgressChart();
+    }
+  };
+
+  const renderLegalProgressChart = () => {
+    const caseData = [
+      { label: 'Discovery', count: 8, color: '#28a745' },
+      { label: 'Pre-Trial', count: 4, color: '#ffc107' },
+      { label: 'Settlement', count: 3, color: '#17a2b8' },
+      { label: 'Trial Prep', count: 2, color: '#dc3545' }
+    ];
+
+    return (
+      <div className="progress-bars">
+        {caseData.map((item, index) => (
+          <div key={index} className="progress-item">
+            <div className="progress-label">
+              <span>{item.label}</span>
+              <span className="progress-count">{item.count}</span>
+            </div>
+            <div className="progress-bar-container">
+              <div 
+                className="progress-bar" 
+                style={{ 
+                  width: `${(item.count / 17) * 100}%`, 
+                  backgroundColor: item.color 
+                }}
+              ></div>
+            </div>
+          </div>
+        ))}
+      </div>
+    );
+  };
+
+  const renderAuditProgressChart = () => {
+    const auditData = [
+      { label: 'Planning', count: 2, color: '#6f42c1' },
+      { label: 'Fieldwork', count: 5, color: '#28a745' },
+      { label: 'Review', count: 3, color: '#ffc107' },
+      { label: 'Reporting', count: 1, color: '#dc3545' }
+    ];
+
+    return (
+      <div className="progress-bars">
+        {auditData.map((item, index) => (
+          <div key={index} className="progress-item">
+            <div className="progress-label">
+              <span>{item.label}</span>
+              <span className="progress-count">{item.count}</span>
+            </div>
+            <div className="progress-bar-container">
+              <div 
+                className="progress-bar" 
+                style={{ 
+                  width: `${(item.count / 11) * 100}%`, 
+                  backgroundColor: item.color 
+                }}
+              ></div>
+            </div>
+          </div>
+        ))}
+      </div>
+    );
+  };
+
+  const renderInsuranceProgressChart = () => {
+    const claimData = [
+      { label: 'New Claims', count: 12, color: '#007bff' },
+      { label: 'Under Review', count: 8, color: '#ffc107' },
+      { label: 'Approved', count: 15, color: '#28a745' },
+      { label: 'Pending Payment', count: 4, color: '#fd7e14' }
+    ];
+
+    return (
+      <div className="progress-bars">
+        {claimData.map((item, index) => (
+          <div key={index} className="progress-item">
+            <div className="progress-label">
+              <span>{item.label}</span>
+              <span className="progress-count">{item.count}</span>
+            </div>
+            <div className="progress-bar-container">
+              <div 
+                className="progress-bar" 
+                style={{ 
+                  width: `${(item.count / 39) * 100}%`, 
+                  backgroundColor: item.color 
+                }}
+              ></div>
+            </div>
+          </div>
+        ))}
+      </div>
+    );
+  };
+
+  const renderDefaultProgressChart = () => {
+    return (
+      <div className="progress-bars">
+        <div className="progress-item">
+          <div className="progress-label">
+            <span>Activity</span>
+            <span className="progress-count">75%</span>
+          </div>
+          <div className="progress-bar-container">
+            <div 
+              className="progress-bar" 
+              style={{ width: '75%', backgroundColor: '#007bff' }}
+            ></div>
+          </div>
+        </div>
+      </div>
+    );
+  };
+
   return (
     <div className="page-container home-container">
-      <div className="home-content">
-        <h1 className="home-headline">{dashboardContent.introTitle}</h1>
-        <p className="home-text">
-          {dashboardContent.introText}
-        </p>      </div>
-      <div className="home-search-container">
-        {accessToken ? (
-          <>
-            <h2 className="search-section-title">Search Your Content</h2>
+      {/* Only show intro content for SPE Demo theme */}
+      {currentThemeId === 'spe-demo' && (
+        <div className="home-content">
+          <h1 className="home-headline">{dashboardContent.introTitle}</h1>
+          <p className="home-text">
+            {dashboardContent.introText}
+          </p>
+        </div>
+      )}
+      
+      {/* Dashboard section - only show when logged in */}
+      {accessToken && (
+        <div className="dashboard-section">
+          <h2 className="dashboard-section-title">{dashboardContent.welcomeMessage}</h2>
+          
+          {/* Search section moved under welcome message */}
+          <div className="search-section">
+            <h3 className="search-section-title">Search Your Content</h3>
             <div className="search-page-content">
               {renderSearchContent()}
             </div>
-          </>
-        ) : (
+          </div>
+          
+          <div className="dashboard-cards">
+            <div className="dashboard-card">
+              <h3>Recent Activity</h3>
+              <p className="card-description">{dashboardContent.cardDescription}</p>
+              <ul className="activity-list">
+                {dashboardContent.recentActivities.map((activity, index) => (
+                  <li key={index}>{activity}</li>
+                ))}
+              </ul>
+            </div>
+
+            <div className="dashboard-card">
+              <h3>Quick Actions</h3>
+              <p className="card-description">Common tasks you can perform from your dashboard.</p>
+              <div className="action-buttons">
+                {dashboardContent.quickActions.map((action, index) => (
+                  <button key={index} className="action-button">{action}</button>
+                ))}
+              </div>
+            </div>
+
+            <div className="dashboard-card">
+              <h3>{getProgressChartTitle()}</h3>
+              <p className="card-description">{getProgressChartDescription()}</p>
+              <div className="progress-chart">
+                {renderProgressChart()}
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+      
+      {/* Show login form when not logged in */}
+      {!accessToken && (
+        <div className="home-search-container">
           <div className="search-page-content">
             {renderLoginContent()}
           </div>
-        )}
-      </div>
+        </div>
+      )}
     </div>
   );
 };
