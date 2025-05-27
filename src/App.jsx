@@ -5,7 +5,6 @@ import { ChatProvider } from './context/ChatContext'
 import { ThemeProvider } from './context/ThemeContext'
 import Navbar from './components/Navbar'
 import PageOne from './pages/PageOne'
-import PageTwo from './pages/PageTwo'
 import LoginPage from './pages/LoginPage'
 import DashboardPage from './pages/DashboardPage'
 import SpeExplorePage from './pages/SpeExplorePage'
@@ -15,8 +14,6 @@ import PreviewPage from './pages/PreviewPage'
 import ListItemsPage from './pages/ListItemsPage'
 import SearchPage from './pages/SearchPage'
 import Chat from './pages/Chat'
-import DebugAuthPage from './pages/DebugAuthPage'
-import EnvTestPage from './pages/EnvTestPage'
 import ProtectedRoute from './components/ProtectedRoute'
 import AuthenticationStatus from './components/AuthenticationStatus'
 import { ApiDebugPanel, ApiCallNotification } from './components/debug'
@@ -40,10 +37,7 @@ function App() {
               <div className="app-container">
             <Routes>
               <Route path="/" element={<PageOne />} />
-              <Route path="/page-two" element={<PageTwo />} />
               <Route path="/login" element={<LoginPage />} />
-              <Route path="/debug-auth" element={<DebugAuthPage />} />
-              <Route path="/env-test" element={<EnvTestPage />} />
               <Route 
                 path="/dashboard" 
                 element={<Navigate to="/spe-explore" replace />} 
