@@ -30,6 +30,12 @@ const ListItemsPage = () => {
   const [folderDetails, setFolderDetails] = useState(null);
   const [error, setError] = useState(null);
   const [breadcrumbs, setBreadcrumbs] = useState([]);
+  
+  // Preview modal state
+  const [previewFile, setPreviewFile] = useState(null);
+  const [previewLoading, setPreviewLoading] = useState(false);
+  const [previewError, setPreviewError] = useState(null);
+  const [previewUrl, setPreviewUrl] = useState(null);
 
   useEffect(() => {
     const loadItems = async () => {
@@ -135,6 +141,55 @@ const ListItemsPage = () => {
     }
   };
 
+  const handleFileClick = async (item) => {
+    if (item.folder) {
+      // Navigate to folder
+      navigate(`/list/${driveId}/${item.id}`);
+    } else {
+      // Show preview modal
+      setPreviewFile(item);
+      setPreviewLoading(true);
+      setPreviewError(null);
+      setPreviewUrl(null);
+      
+      try {
+        const url = await speService.getFilePreviewUrl(driveId, item.id);
+        setPreviewUrl(url);
+      } catch (err) {
+        console.error('Error loading preview:', err);
+        setPreviewError(err.message || 'Failed to load file preview');
+      } finally {
+        setPreviewLoading(false);
+      }
+    }
+  };
+
+  const closePreview = () => {
+    setPreviewFile(null);
+    setPreviewUrl(null);
+    setPreviewError(null);
+    setPreviewLoading(false);
+  };
+
+  // Handle escape key to close modal
+  useEffect(() => {
+    const handleEscape = (e) => {
+      if (e.key === 'Escape' && previewFile) {
+        closePreview();
+      }
+    };
+
+    if (previewFile) {
+      document.body.style.overflow = 'hidden';
+      document.addEventListener('keydown', handleEscape);
+    }
+
+    return () => {
+      document.body.style.overflow = 'unset';
+      document.removeEventListener('keydown', handleEscape);
+    };
+  }, [previewFile]);
+
   return (
     <div className="list-items-page">
       <div className="list-items-header">
@@ -200,9 +255,23 @@ const ListItemsPage = () => {
                         {getFileIcon(item)} {item.name}
                       </Link>
                     ) : (
-                      <Link to={`/preview/${driveId}/${item.id}`} className="item-link">
+                      <button 
+                        onClick={() => handleFileClick(item)} 
+                        className="item-link item-button"
+                        style={{ 
+                          background: 'none', 
+                          border: 'none', 
+                          padding: 0, 
+                          color: 'inherit',
+                          cursor: 'pointer',
+                          textAlign: 'left',
+                          display: 'flex',
+                          alignItems: 'center',
+                          gap: '8px'
+                        }}
+                      >
                         {getFileIcon(item)} {item.name}
-                      </Link>
+                      </button>
                     )}
                   </TableCell>
                   <TableCell>{formatDate(item.lastModifiedDateTime)}</TableCell>
@@ -213,6 +282,122 @@ const ListItemsPage = () => {
           </Table>
         )}
       </div>
+
+      {/* Preview Modal */}
+      {previewFile && (
+        <div 
+          style={{
+            position: 'fixed',
+            top: 0,
+            left: 0,
+            width: '100vw',
+            height: '100vh',
+            backgroundColor: 'rgba(0,0,0,0.7)',
+            zIndex: 99999,
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center'
+          }}
+          onClick={(e) => {
+            if (e.target === e.currentTarget) {
+              closePreview();
+            }
+          }}
+        >
+          <div 
+            style={{
+              backgroundColor: 'white',
+              borderRadius: '12px',
+              width: '90vw',
+              maxWidth: '1100px',
+              height: '75vh',
+              minHeight: '350px',
+              display: 'flex',
+              flexDirection: 'column',
+              boxShadow: '0 8px 32px rgba(0,0,0,0.3)'
+            }}
+          >
+            <div style={{ 
+              padding: '20px', 
+              borderBottom: '1px solid #ddd',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'space-between',
+              backgroundColor: 'white',
+              borderRadius: '12px 12px 0 0'
+            }}>
+              <h2 style={{ margin: 0, fontSize: '1.2rem' }}>
+                {previewFile.name}
+              </h2>
+              <Button 
+                appearance="subtle" 
+                onClick={closePreview}
+                style={{ minWidth: 'auto' }}
+              >
+                ✕
+              </Button>
+            </div>
+
+            <div style={{ flex: 1, position: 'relative', overflow: 'hidden' }}>
+              {previewLoading ? (
+                <div style={{ 
+                  display: 'flex', 
+                  flexDirection: 'column', 
+                  alignItems: 'center', 
+                  justifyContent: 'center', 
+                  height: '100%' 
+                }}>
+                  <Spinner />
+                  <p>Loading preview...</p>
+                </div>
+              ) : previewError ? (
+                <div style={{ 
+                  display: 'flex', 
+                  flexDirection: 'column', 
+                  alignItems: 'center', 
+                  justifyContent: 'center', 
+                  height: '100%', 
+                  textAlign: 'center', 
+                  padding: '20px' 
+                }}>
+                  <h3>Error Loading Preview</h3>
+                  <p>{previewError}</p>
+                  <Button onClick={closePreview} style={{ marginTop: '10px' }}>
+                    Close
+                  </Button>
+                </div>
+              ) : previewUrl ? (
+                <iframe 
+                  src={previewUrl} 
+                  style={{
+                    width: '100%',
+                    height: '100%',
+                    border: 'none'
+                  }}
+                  title={`Preview of ${previewFile.name}`}
+                  sandbox="allow-scripts allow-same-origin allow-forms" 
+                />
+              ) : (
+                <div style={{ 
+                  display: 'flex', 
+                  flexDirection: 'column', 
+                  alignItems: 'center', 
+                  justifyContent: 'center', 
+                  height: '100%', 
+                  textAlign: 'center', 
+                  padding: '20px' 
+                }}>
+                  <h3>Preview Not Available</h3>
+                  <p>This file type cannot be previewed.</p>
+                  <Button onClick={closePreview} style={{ marginTop: '10px' }}>
+                    Close
+                  </Button>
+                </div>
+              )}
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 };

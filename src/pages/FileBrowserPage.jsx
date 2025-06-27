@@ -63,6 +63,8 @@ const FileBrowserPage = () => {
   const [uploadProgress, setUploadProgress] = useState(0);
   const fileInputRef = useRef(null);
   const [previewFile, setPreviewFile] = useState(null);
+  const [previewLoading, setPreviewLoading] = useState(false);
+  const [previewError, setPreviewError] = useState(null);
   
   // Search state
   const [searchTerm, setSearchTerm] = useState('');
@@ -204,25 +206,31 @@ const FileBrowserPage = () => {
     try {
       // Only handle non-Office files like PDF, JPEG, etc.
       if (file.id && containerId) {
-        setIsLoading(true);
+        setPreviewFile(file);
+        setPreviewLoading(true);
+        setPreviewError(null);
+        
         // Get the preview URL from the SPE service
         const previewUrl = await speService.getFilePreviewUrl(containerId, file.id);
         
         setPreviewFile({
+          ...file,
           url: previewUrl,
           name: file.name
         });
-        setIsLoading(false);
+        setPreviewLoading(false);
       }
     } catch (error) {
       console.error('Error getting preview URL:', error);
-      setError(`Failed to get preview URL: ${error.message}`);
-      setIsLoading(false);
+      setPreviewError(error.message || 'Failed to load file preview');
+      setPreviewLoading(false);
     }
   };
   
   const closePreview = () => {
     setPreviewFile(null);
+    setPreviewLoading(false);
+    setPreviewError(null);
   };
   
   // Handle file deletion
@@ -432,6 +440,25 @@ const FileBrowserPage = () => {
       searchInputRef.current.focus();
     }
   };
+
+  // Handle escape key to close modal
+  useEffect(() => {
+    const handleEscape = (e) => {
+      if (e.key === 'Escape' && previewFile) {
+        closePreview();
+      }
+    };
+
+    if (previewFile) {
+      document.body.style.overflow = 'hidden';
+      document.addEventListener('keydown', handleEscape);
+    }
+
+    return () => {
+      document.body.style.overflow = 'unset';
+      document.removeEventListener('keydown', handleEscape);
+    };
+  }, [previewFile]);
   
   // If still loading or not authenticated, show loading
   if (loading || !isAuthenticated) {
@@ -691,13 +718,156 @@ const FileBrowserPage = () => {
           )}
         </div>
         
-        {/* Document Preview */}
+        {/* Document Preview Modal */}
         {previewFile && (
-          <FilePreview 
-            fileUrl={previewFile.url}
-            fileName={previewFile.name}
-            onClose={closePreview}
-          />
+          <div 
+            style={{
+              position: 'fixed',
+              top: 0,
+              left: 0,
+              width: '100vw',
+              height: '100vh',
+              backgroundColor: 'rgba(0,0,0,0.7)',
+              zIndex: 99999,
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center'
+            }}
+            onClick={(e) => {
+              if (e.target === e.currentTarget) {
+                closePreview();
+              }
+            }}
+          >
+            <div 
+              style={{
+                backgroundColor: 'white',
+                borderRadius: '12px',
+                width: '90vw',
+                maxWidth: '1100px',
+                height: '75vh',
+                minHeight: '350px',
+                display: 'flex',
+                flexDirection: 'column',
+                boxShadow: '0 8px 32px rgba(0,0,0,0.3)'
+              }}
+            >
+              <div style={{ 
+                padding: '20px', 
+                borderBottom: '1px solid #ddd',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'space-between',
+                backgroundColor: 'white',
+                borderRadius: '12px 12px 0 0'
+              }}>
+                <h2 style={{ margin: 0, fontSize: '1.2rem' }}>
+                  {previewFile.name}
+                </h2>
+                <button 
+                  onClick={closePreview}
+                  style={{
+                    background: 'none',
+                    border: 'none',
+                    fontSize: '20px',
+                    cursor: 'pointer',
+                    color: '#666',
+                    padding: '4px 8px'
+                  }}
+                >
+                  ✕
+                </button>
+              </div>
+
+              <div style={{ flex: 1, position: 'relative', overflow: 'hidden' }}>
+                {previewLoading ? (
+                  <div style={{ 
+                    display: 'flex', 
+                    flexDirection: 'column', 
+                    alignItems: 'center', 
+                    justifyContent: 'center', 
+                    height: '100%' 
+                  }}>
+                    <div className="spinner" style={{
+                      width: '40px',
+                      height: '40px',
+                      border: '4px solid #f3f3f3',
+                      borderTop: '4px solid #3498db',
+                      borderRadius: '50%',
+                      animation: 'spin 1s linear infinite',
+                      marginBottom: '10px'
+                    }}></div>
+                    <p>Loading preview...</p>
+                  </div>
+                ) : previewError ? (
+                  <div style={{ 
+                    display: 'flex', 
+                    flexDirection: 'column', 
+                    alignItems: 'center', 
+                    justifyContent: 'center', 
+                    height: '100%', 
+                    textAlign: 'center', 
+                    padding: '20px' 
+                  }}>
+                    <h3>Error Loading Preview</h3>
+                    <p>{previewError}</p>
+                    <button 
+                      onClick={closePreview} 
+                      style={{ 
+                        marginTop: '10px', 
+                        padding: '8px 16px',
+                        backgroundColor: '#0078d4',
+                        color: 'white',
+                        border: 'none',
+                        borderRadius: '4px',
+                        cursor: 'pointer'
+                      }}
+                    >
+                      Close
+                    </button>
+                  </div>
+                ) : previewFile.url ? (
+                  <iframe 
+                    src={previewFile.url} 
+                    style={{
+                      width: '100%',
+                      height: '100%',
+                      border: 'none'
+                    }}
+                    title={`Preview of ${previewFile.name}`}
+                    sandbox="allow-scripts allow-same-origin allow-forms" 
+                  />
+                ) : (
+                  <div style={{ 
+                    display: 'flex', 
+                    flexDirection: 'column', 
+                    alignItems: 'center', 
+                    justifyContent: 'center', 
+                    height: '100%', 
+                    textAlign: 'center', 
+                    padding: '20px' 
+                  }}>
+                    <h3>Preview Not Available</h3>
+                    <p>This file type cannot be previewed.</p>
+                    <button 
+                      onClick={closePreview} 
+                      style={{ 
+                        marginTop: '10px', 
+                        padding: '8px 16px',
+                        backgroundColor: '#0078d4',
+                        color: 'white',
+                        border: 'none',
+                        borderRadius: '4px',
+                        cursor: 'pointer'
+                      }}
+                    >
+                      Close
+                    </button>
+                  </div>
+                )}
+              </div>
+            </div>
+          </div>
         )}
       </div>
     </div>
