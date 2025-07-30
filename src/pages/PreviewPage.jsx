@@ -43,8 +43,35 @@ const PreviewPage = () => {
     }
   }, [driveId, itemId]);
 
+  // Handle escape key to close modal
+  useEffect(() => {
+    const handleEscape = (e) => {
+      if (e.key === 'Escape') {
+        navigate(-1);
+      }
+    };
+
+    // Prevent body scroll when modal is open and add class
+    document.body.style.overflow = 'hidden';
+    document.body.classList.add('preview-modal-open');
+    document.addEventListener('keydown', handleEscape);
+
+    return () => {
+      document.body.style.overflow = 'unset';
+      document.body.classList.remove('preview-modal-open');
+      document.removeEventListener('keydown', handleEscape);
+    };
+  }, [navigate]);
+
   const handleGoBack = () => {
     navigate(-1);
+  };
+
+  const handleOverlayClick = (e) => {
+    // Close modal when clicking on the overlay (background)
+    if (e.target === e.currentTarget) {
+      handleGoBack();
+    }
   };
 
   // Determine file type for better UI experience
@@ -62,44 +89,115 @@ const PreviewPage = () => {
   };
 
   return (
-    <div className="preview-page">
-      <div className="preview-header">
-        <Button 
-          icon={<ArrowLeft24Regular />} 
-          appearance="subtle" 
-          onClick={handleGoBack}
+    <>
+      <div 
+        style={{
+          position: 'fixed',
+          top: 0,
+          left: 0,
+          width: '100vw',
+          height: '100vh',
+          backgroundColor: 'rgba(0,0,0,0.7)',
+          zIndex: 99999,
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center'
+        }}
+        onClick={handleOverlayClick}
+      >
+        <div 
+          style={{
+            backgroundColor: 'white',
+            borderRadius: '12px',
+            width: '90vw',
+            maxWidth: '1100px',
+            height: '75vh',
+            minHeight: '350px',
+            display: 'flex',
+            flexDirection: 'column',
+            boxShadow: '0 8px 32px rgba(0,0,0,0.3)'
+          }}
         >
-          Back
-        </Button>
-        <h2>{fileDetails?.name || 'File Preview'}</h2>
-      </div>
+          <div style={{ 
+            padding: '20px', 
+            borderBottom: '1px solid #ddd',
+            display: 'flex',
+            alignItems: 'center',
+            backgroundColor: 'white',
+            borderRadius: '12px 12px 0 0'
+          }}>
+            <Button 
+              icon={<ArrowLeft24Regular />} 
+              appearance="subtle" 
+              onClick={handleGoBack}
+            >
+              Back
+            </Button>
+            <h2 style={{ margin: '0 0 0 15px', fontSize: '1.2rem' }}>
+              {fileDetails?.name || 'File Preview'}
+            </h2>
+          </div>
 
-      <div className="preview-container">
-        {loading ? (
-          <div className="preview-loading">
-            <Spinner />
-            <p>Loading preview...</p>
+          <div style={{ flex: 1, position: 'relative', overflow: 'hidden' }}>
+            {loading ? (
+              <div style={{ 
+                display: 'flex', 
+                flexDirection: 'column', 
+                alignItems: 'center', 
+                justifyContent: 'center', 
+                height: '100%' 
+              }}>
+                <Spinner />
+                <p>Loading preview...</p>
+              </div>
+            ) : error ? (
+              <div style={{ 
+                display: 'flex', 
+                flexDirection: 'column', 
+                alignItems: 'center', 
+                justifyContent: 'center', 
+                height: '100%', 
+                textAlign: 'center', 
+                padding: '20px' 
+              }}>
+                <h3>Error Loading Preview</h3>
+                <p>{error}</p>
+                <button onClick={handleGoBack} style={{ marginTop: '10px', padding: '8px 16px' }}>
+                  Go Back
+                </button>
+              </div>
+            ) : previewUrl ? (
+              <iframe 
+                src={previewUrl} 
+                style={{
+                  width: '100%',
+                  height: '100%',
+                  border: 'none'
+                }}
+                title="File Preview" 
+                sandbox="allow-scripts allow-same-origin allow-forms" 
+              />
+            ) : (
+              <div style={{ 
+                display: 'flex', 
+                flexDirection: 'column', 
+                alignItems: 'center', 
+                justifyContent: 'center', 
+                height: '100%', 
+                textAlign: 'center', 
+                padding: '20px' 
+              }}>
+                <h3>Preview Not Available</h3>
+                <p>This file type cannot be previewed.</p>
+                <button onClick={handleGoBack} style={{ marginTop: '10px', padding: '8px 16px' }}>
+                  Go Back
+                </button>
+              </div>
+            )}
           </div>
-        ) : error ? (
-          <div className="preview-error">
-            <h3>Error Loading Preview</h3>
-            <p>{error}</p>
-          </div>
-        ) : previewUrl ? (
-          <iframe 
-            src={previewUrl} 
-            className="preview-frame" 
-            title="File Preview" 
-            sandbox="allow-scripts allow-same-origin allow-forms" 
-          />
-        ) : (
-          <div className="preview-error">
-            <h3>Preview Not Available</h3>
-            <p>This file type cannot be previewed.</p>
-          </div>
-        )}
+        </div>
       </div>
-    </div>
+    </>
   );
 };
 

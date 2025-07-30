@@ -207,25 +207,31 @@ const FileBrowserPage = () => {
     try {
       // Only handle non-Office files like PDF, JPEG, etc.
       if (file.id && containerId) {
-        setIsLoading(true);
+        setPreviewFile(file);
+        setPreviewLoading(true);
+        setPreviewError(null);
+        
         // Get the preview URL from the SPE service
         const previewUrl = await speService.getFilePreviewUrl(containerId, file.id);
         
         setPreviewFile({
+          ...file,
           url: previewUrl,
           name: file.name
         });
-        setIsLoading(false);
+        setPreviewLoading(false);
       }
     } catch (error) {
       console.error('Error getting preview URL:', error);
-      setError(`Failed to get preview URL: ${error.message}`);
-      setIsLoading(false);
+      setPreviewError(error.message || 'Failed to load file preview');
+      setPreviewLoading(false);
     }
   };
   
   const closePreview = () => {
     setPreviewFile(null);
+    setPreviewLoading(false);
+    setPreviewError(null);
   };
   
   // Handle file deletion
@@ -728,7 +734,7 @@ const FileBrowserPage = () => {
           )}
         </div>
         
-        {/* Document Preview */}
+        {/* Document Preview Modal */}
         {previewFile && (
           <FilePreview 
             fileUrl={previewFile.url}
