@@ -65,7 +65,8 @@ const FilePreview = ({ fileUrl, fileName, onClose }) => {
         <div className="file-preview-footer">
           <button className="file-action-button" onClick={() => window.open(fileUrl, '_blank')}>
             <i className="fas fa-external-link-alt"></i> Open in New Tab
-          </button>          <a href={fileUrl} download className="file-action-button file-download-button">
+          </button>
+          <a href={fileUrl} download className="file-action-button file-download-button">
             <i className="fas fa-download"></i> Download
           </a>
           <button className="file-action-button file-close-button-text" onClick={onClose}>

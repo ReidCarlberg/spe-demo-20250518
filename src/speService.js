@@ -612,5 +612,40 @@ export const speService = {
       console.error('Error performing advanced search:', error);
       throw error;
     }
+  },
+
+  /**
+   * Get drive information for a container
+   * @param {string} containerId The ID of the container
+   * @returns {Promise<Object>} Drive information
+   */
+  async getDriveInfo(containerId) {
+    try {
+      const token = await getTokenSilent();
+      if (!token) {
+        throw new Error('No access token available');
+      }
+
+      const url = `https://graph.microsoft.com/v1.0/storage/fileStorage/containers/${containerId}/drive`;
+      
+      const response = await fetch(url, {
+        method: 'GET',
+        headers: {
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'application/json'
+        }
+      });
+
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.error?.message || 'Failed to fetch drive information');
+      }
+
+      const data = await response.json();
+      return data;
+    } catch (error) {
+      console.error('Error fetching drive information:', error);
+      throw error;
+    }
   }
 };

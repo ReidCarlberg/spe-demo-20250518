@@ -4,6 +4,7 @@ import { useAuth } from '../AuthContext';
 import { useChatFlyout } from '../hooks/useChatFlyout';
 import { speService } from '../services';
 import FilePreview from '../components/FilePreview';
+import DriveInfoModal from '../components/DriveInfoModal';
 import './FileBrowserPage.css';
 
 // Icons for different file types
@@ -63,6 +64,8 @@ const FileBrowserPage = () => {
   const [uploadProgress, setUploadProgress] = useState(0);
   const fileInputRef = useRef(null);
   const [previewFile, setPreviewFile] = useState(null);
+  const [driveInfo, setDriveInfo] = useState(null);
+  const [showDriveInfo, setShowDriveInfo] = useState(false);
   
   // Search state
   const [searchTerm, setSearchTerm] = useState('');
@@ -432,6 +435,33 @@ const FileBrowserPage = () => {
       searchInputRef.current.focus();
     }
   };
+
+  // Handle drive info modal
+  const handleDriveInfoClick = async () => {
+    if (!containerId) {
+      setError('Container ID not available');
+      return;
+    }
+
+    setIsLoading(true);
+    setError(null);
+
+    try {
+      const driveData = await speService.getDriveInfo(containerId);
+      setDriveInfo(driveData);
+      setShowDriveInfo(true);
+    } catch (error) {
+      console.error('Error fetching drive info:', error);
+      setError(`Failed to fetch drive information: ${error.message}`);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const closeDriveInfo = () => {
+    setShowDriveInfo(false);
+    setDriveInfo(null);
+  };
   
   // If still loading or not authenticated, show loading
   if (loading || !isAuthenticated) {
@@ -488,6 +518,13 @@ const FileBrowserPage = () => {
             disabled={isUploading}
           >
             {isUploading ? 'Uploading...' : 'Upload Files'}
+          </button>
+          <button
+            className="file-browser-button drive-info-button"
+            onClick={handleDriveInfoClick}
+            disabled={isLoading}
+          >
+            {isLoading ? 'Loading...' : 'Drive Info'}
           </button>
           <input 
             type="file" 
@@ -697,6 +734,14 @@ const FileBrowserPage = () => {
             fileUrl={previewFile.url}
             fileName={previewFile.name}
             onClose={closePreview}
+          />
+        )}
+
+        {/* Drive Info Modal */}
+        {showDriveInfo && (
+          <DriveInfoModal 
+            driveInfo={driveInfo}
+            onClose={closeDriveInfo}
           />
         )}
       </div>
