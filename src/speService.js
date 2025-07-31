@@ -42,6 +42,9 @@ export const speService = {
   /**
    * Create a new container
    * @param {Object} containerData Container creation data
+   * @param {string} containerData.displayName Display name for the container
+   * @param {string} [containerData.description] Description for the container
+   * @param {boolean} [containerData.isOcrEnabled] Whether OCR should be enabled for the container
    * @returns {Promise<Object>} Created container
    */
   async createContainer(containerData) {
@@ -57,7 +60,14 @@ export const speService = {
         containerTypeId: speConfig.containerTypeId
       };
 
-      const response = await fetch(graphConfig.graphContainersEndpoint, {
+      // Add OCR settings if specified
+      if (containerData.hasOwnProperty('isOcrEnabled')) {
+        requestBody.settings = {
+          isOcrEnabled: containerData.isOcrEnabled
+        };
+      }
+
+      const response = await fetch('https://graph.microsoft.com/v1.0/storage/fileStorage/containers', {
         method: 'POST',
         headers: {
           'Authorization': `Bearer ${token}`,

@@ -520,6 +520,27 @@ input:focus, textarea:focus, select:focus {
   color: var(--primary-color);
 }
 
+.checkbox-label {
+  display: flex !important;
+  align-items: center;
+  margin-bottom: 0.5rem !important;
+  cursor: pointer;
+}
+
+.checkbox-label input[type="checkbox"] {
+  width: auto !important;
+  margin-right: 0.75rem;
+  margin-bottom: 0;
+}
+
+.form-help-text {
+  display: block;
+  margin-top: 0.25rem;
+  font-size: 0.875rem;
+  color: var(--text-light);
+  font-style: italic;
+}
+
 .form-actions {
   margin-top: 1.5rem;
   display: flex;

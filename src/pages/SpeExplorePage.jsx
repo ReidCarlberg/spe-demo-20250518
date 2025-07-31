@@ -15,7 +15,8 @@ const SpeExplorePage = () => {
   const [showCreateForm, setShowCreateForm] = useState(false);
   const [newContainer, setNewContainer] = useState({
     displayName: '',
-    description: ''
+    description: '',
+    isOcrEnabled: false
   });
 
   // Get theme-based content
@@ -55,7 +56,7 @@ const SpeExplorePage = () => {
     try {
       const createdContainer = await speService.createContainer(newContainer);
       setContainers([...containers, createdContainer]);
-      setNewContainer({ displayName: '', description: '' });
+      setNewContainer({ displayName: '', description: '', isOcrEnabled: false });
       setShowCreateForm(false);
       setError(null);
     } catch (error) {
@@ -67,8 +68,9 @@ const SpeExplorePage = () => {
   };
 
   const handleInputChange = (e) => {
-    const { name, value } = e.target;
-    setNewContainer({ ...newContainer, [name]: value });
+    const { name, value, type, checked } = e.target;
+    const inputValue = type === 'checkbox' ? checked : value;
+    setNewContainer({ ...newContainer, [name]: inputValue });
   };
 
   const handleViewDocuments = (containerId) => {
@@ -176,6 +178,21 @@ const SpeExplorePage = () => {
                 value={newContainer.description}
                 onChange={handleInputChange}
               />
+            </div>
+            <div className="form-group">
+              <label htmlFor="isOcrEnabled" className="checkbox-label">
+                <input 
+                  type="checkbox" 
+                  id="isOcrEnabled" 
+                  name="isOcrEnabled" 
+                  checked={newContainer.isOcrEnabled}
+                  onChange={handleInputChange}
+                />
+                Enable OCR (Optical Character Recognition)
+              </label>
+              <small className="form-help-text">
+                OCR allows text extraction from images and scanned documents uploaded to this container.
+              </small>
             </div>
             <div className="form-actions">
               <button 
