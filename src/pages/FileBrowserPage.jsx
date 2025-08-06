@@ -64,6 +64,8 @@ const FileBrowserPage = () => {
   const [uploadProgress, setUploadProgress] = useState(0);
   const fileInputRef = useRef(null);
   const [previewFile, setPreviewFile] = useState(null);
+  const [previewLoading, setPreviewLoading] = useState(false);
+  const [previewError, setPreviewError] = useState(null);
   const [driveInfo, setDriveInfo] = useState(null);
   const [showDriveInfo, setShowDriveInfo] = useState(false);
   

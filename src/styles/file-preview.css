@@ -1,127 +1,335 @@
-/* File Preview Component Styles */
-@import './base.css';
-@import './modals.css';
+/* Modern File Preview Modal Styles */
 
-/* 
- * File Preview Implementation
- * Uses consolidated modal classes from modals.css
- * HTML structure should use these classes:
- * <div class="modal-overlay dark blur-medium z-modal file-preview-overlay">
- *   <div class="modal-container large file-preview-container">
- *     <div class="modal-header neutral file-preview-header">
- *       <h3>File Preview</h3>
- *       <button class="modal-close light file-close-button">×</button>
- *     </div>
- *     <div class="modal-content file-preview-content">...</div>
- *     <div class="modal-footer file-preview-footer">...</div>
- *   </div>
- * </div>
- */
-
-/* File preview specific customizations */
+/* Overlay with backdrop blur effect */
 .file-preview-overlay {
-  background-color: rgba(0, 0, 0, 0.7);
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.6);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+  animation: fadeIn 0.3s ease-out;
+  padding: 20px;
+  box-sizing: border-box;
 }
 
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+/* Modal container with modern styling */
 .file-preview-container {
-  height: 85vh;
+  background: #ffffff;
+  border-radius: 16px;
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3), 0 8px 24px rgba(0, 0, 0, 0.2);
+  width: 90vw;
   max-width: 1200px;
+  height: 85vh;
+  max-height: 800px;
+  min-height: 400px;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  animation: slideIn 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+  border: 1px solid rgba(255, 255, 255, 0.1);
 }
 
-/* File-specific content styles */
-
-.file-iframe {
-  width: 100%;
-  height: 100%;
-  border: none;
+@keyframes slideIn {
+  from {
+    opacity: 0;
+    transform: scale(0.9) translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1) translateY(0);
+  }
 }
 
-.file-loading, 
-.file-error {
+/* Header with gradient and modern typography */
+.file-preview-header {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  color: white;
+  padding: 20px 24px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  border-bottom: none;
+  position: relative;
+  overflow: hidden;
+}
+
+.file-preview-header::before {
+  content: '';
   position: absolute;
   top: 0;
   left: 0;
   right: 0;
   bottom: 0;
+  background: linear-gradient(135deg, rgba(255, 255, 255, 0.1) 0%, rgba(255, 255, 255, 0.05) 100%);
+  pointer-events: none;
+}
+
+.file-preview-header h3 {
+  margin: 0;
+  font-size: 1.25rem;
+  font-weight: 600;
+  color: white;
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
+  max-width: calc(100% - 60px);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  position: relative;
+  z-index: 1;
+}
+
+/* Modern close button */
+.file-close-button {
+  background: rgba(255, 255, 255, 0.2);
+  border: 1px solid rgba(255, 255, 255, 0.3);
+  color: white;
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  font-size: 16px;
+  position: relative;
+  z-index: 1;
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+}
+
+.file-close-button:hover {
+  background: rgba(255, 255, 255, 0.3);
+  border-color: rgba(255, 255, 255, 0.5);
+  transform: scale(1.05);
+}
+
+.file-close-button:active {
+  transform: scale(0.95);
+}
+
+/* Content area with loading states */
+.file-preview-content {
+  flex: 1;
+  position: relative;
+  background: #f8f9fa;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+}
+
+/* Beautiful loading spinner */
+.file-loading {
   display: flex;
   flex-direction: column;
-  justify-content: center;
   align-items: center;
-  background-color: white;
-  z-index: 5;
+  justify-content: center;
+  gap: 16px;
+  color: #6c757d;
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  z-index: 10;
 }
 
-.file-loading i,
-.file-error i {
-  font-size: 2rem;
-  margin-bottom: var(--spacing-md);
+.file-loading i {
+  font-size: 2.5rem;
+  color: #667eea;
+  animation: spin 1s linear infinite;
 }
 
-.file-loading {
-  color: var(--primary-color);
+@keyframes spin {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
 }
 
+.file-loading span {
+  font-size: 1rem;
+  font-weight: 500;
+  color: #495057;
+}
+
+/* Error state styling */
 .file-error {
-  color: var(--error-color);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 16px;
+  color: #dc3545;
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  z-index: 10;
+  text-align: center;
+  padding: 20px;
 }
 
+.file-error i {
+  font-size: 3rem;
+  color: #dc3545;
+  margin-bottom: 8px;
+}
+
+.file-error span {
+  font-size: 1.1rem;
+  font-weight: 500;
+  max-width: 400px;
+  line-height: 1.5;
+}
+
+/* Iframe styling */
+.file-iframe {
+  width: 100%;
+  height: 100%;
+  border: none;
+  background: white;
+}
+
+/* Footer with modern button styling */
 .file-preview-footer {
-  padding: var(--spacing-md) var(--spacing-lg);
-  border-top: 1px solid var(--border-light);
+  padding: 20px 24px;
+  background: white;
+  border-top: 1px solid #e9ecef;
   display: flex;
   justify-content: flex-end;
-  gap: var(--spacing-md);
+  gap: 12px;
+  align-items: center;
 }
 
+/* Modern action buttons */
 .file-action-button {
-  padding: var(--spacing-xs) var(--spacing-md);
-  border-radius: var(--border-radius-md);
-  font-size: var(--font-size-sm);
+  padding: 10px 20px;
+  border-radius: 8px;
+  font-size: 0.9rem;
+  font-weight: 500;
   cursor: pointer;
-  display: flex;
+  display: inline-flex;
   align-items: center;
-  gap: var(--spacing-xs);
+  gap: 8px;
   text-decoration: none;
   transition: all 0.2s ease;
-  background-color: transparent;
-  border: 1px solid var(--border-medium);
-  color: var(--text-medium);
+  border: none;
+  position: relative;
+  overflow: hidden;
 }
 
-.file-action-button:hover {
-  background-color: var(--background-light);
-  color: var(--text-dark);
+.file-action-button::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: -100%;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+  transition: left 0.5s ease;
 }
 
+.file-action-button:hover::before {
+  left: 100%;
+}
+
+/* Primary download button */
 .file-download-button {
-  background-color: var(--primary-color);
-  border-color: var(--primary-color);
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
   color: white;
+  border: 1px solid transparent;
 }
 
 .file-download-button:hover {
-  background-color: var(--primary-color-dark);
-  border-color: var(--primary-color-dark);
-  color: white;
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(102, 126, 234, 0.4);
 }
 
+/* Secondary buttons */
+.file-action-button:not(.file-download-button) {
+  background: #f8f9fa;
+  color: #495057;
+  border: 1px solid #dee2e6;
+}
+
+.file-action-button:not(.file-download-button):hover {
+  background: #e9ecef;
+  border-color: #adb5bd;
+  transform: translateY(-1px);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+/* Close button text variant */
 .file-close-button-text {
-  background-color: transparent;
-  border: 1px solid var(--border-medium);
+  background: transparent;
+  color: #6c757d;
+  border: 1px solid #dee2e6;
 }
 
-@media screen and (max-width: 768px) {
+.file-close-button-text:hover {
+  background: #f8f9fa;
+  color: #495057;
+}
+
+/* Responsive design */
+@media (max-width: 768px) {
+  .file-preview-overlay {
+    padding: 10px;
+  }
+  
   .file-preview-container {
-    width: 95%;
+    width: 100vw;
     height: 90vh;
+    border-radius: 12px;
+  }
+  
+  .file-preview-header {
+    padding: 16px 20px;
+  }
+  
+  .file-preview-header h3 {
+    font-size: 1.1rem;
   }
   
   .file-preview-footer {
+    padding: 16px 20px;
     flex-direction: column;
+    gap: 8px;
   }
   
   .file-action-button {
     width: 100%;
     justify-content: center;
+  }
+}
+
+@media (max-width: 480px) {
+  .file-preview-container {
+    border-radius: 0;
+    height: 100vh;
+    width: 100vw;
+  }
+  
+  .file-preview-overlay {
+    padding: 0;
   }
 }

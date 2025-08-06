@@ -6,15 +6,31 @@ const FilePreview = ({ fileUrl, fileName, onClose }) => {
   const [error, setError] = useState(null);
 
   useEffect(() => {
+    console.log('FilePreview received fileUrl:', fileUrl); // Debug log
+    console.log('FilePreview received fileName:', fileName); // Debug log
+    
     // Set up any initialization here
     const timer = setTimeout(() => {
       setLoading(false);
     }, 1000);
 
+    // Handle escape key to close modal
+    const handleEscape = (e) => {
+      if (e.key === 'Escape') {
+        onClose();
+      }
+    };
+
+    // Prevent body scroll when modal is open
+    document.body.style.overflow = 'hidden';
+    document.addEventListener('keydown', handleEscape);
+
     return () => {
       clearTimeout(timer);
+      document.body.style.overflow = 'unset';
+      document.removeEventListener('keydown', handleEscape);
     };
-  }, [fileUrl]);
+  }, [fileUrl, onClose]);
 
   // Determine file type for specific handling
   const getFileType = () => {
@@ -30,12 +46,20 @@ const FilePreview = ({ fileUrl, fileName, onClose }) => {
   const fileType = getFileType();
 
   return (
-    <div className="file-preview-overlay">
+    <div 
+      className="file-preview-overlay"
+      onClick={(e) => {
+        // Close modal when clicking on the overlay (background)
+        if (e.target === e.currentTarget) {
+          onClose();
+        }
+      }}
+    >
       <div className="file-preview-container">
         <div className="file-preview-header">
           <h3>{fileName || 'File Preview'}</h3>
           <button className="file-close-button" onClick={onClose}>
-            <i className="fas fa-times"></i>
+            ×
           </button>
         </div>
         <div className="file-preview-content">
@@ -55,19 +79,29 @@ const FilePreview = ({ fileUrl, fileName, onClose }) => {
             src={fileUrl} 
             className="file-iframe"
             title={fileName || 'File Preview'}
-            onLoad={() => setLoading(false)}
-            onError={() => {
+            onLoad={() => {
+              console.log('Iframe loaded successfully'); // Debug log
+              setLoading(false);
+            }}
+            onError={(e) => {
+              console.error('Iframe failed to load:', e); // Debug log
               setLoading(false);
               setError(`Failed to load the ${fileType}. Please try downloading the file instead.`);
             }}
+            style={{
+              display: loading ? 'none' : 'block'
+            }}
+            allow="same-origin"
           />
         </div>
         <div className="file-preview-footer">
           <button className="file-action-button" onClick={() => window.open(fileUrl, '_blank')}>
-            <i className="fas fa-external-link-alt"></i> Open in New Tab
+            <i className="fas fa-external-link-alt"></i>
+            Open in New Tab
           </button>
           <a href={fileUrl} download className="file-action-button file-download-button">
-            <i className="fas fa-download"></i> Download
+            <i className="fas fa-download"></i>
+            Download
           </a>
           <button className="file-action-button file-close-button-text" onClick={onClose}>
             Close

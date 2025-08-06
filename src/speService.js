@@ -338,9 +338,13 @@ export const speService = {
 
       const data = await response.json();
       
+      console.log('Preview API response:', data); // Debug log
+      
       // Return the preview URL with the nb=true parameter
       if (data && data.getUrl) {
-        return `${data.getUrl}&nb=true`;
+        const previewUrl = `${data.getUrl}&nb=true`;
+        console.log('Generated preview URL:', previewUrl); // Debug log
+        return previewUrl;
       } else {
         throw new Error('Preview URL not found in the response');
       }
