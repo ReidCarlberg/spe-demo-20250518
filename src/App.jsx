@@ -13,6 +13,7 @@ import ContainerPermissionsPage from './pages/ContainerPermissionsPage'
 import PreviewPage from './pages/PreviewPage'
 import ListItemsPage from './pages/ListItemsPage'
 import SearchPage from './pages/SearchPage'
+import AgentPage from './pages/AgentPage'
 import Chat from './pages/Chat'
 import ProtectedRoute from './components/ProtectedRoute'
 import AuthenticationStatus from './components/AuthenticationStatus'
@@ -109,6 +110,15 @@ function App() {
                 element={
                   <ProtectedRoute>
                     <SearchPage />
+                  </ProtectedRoute>
+                } 
+              />
+              
+              <Route 
+                path="/agent" 
+                element={
+                  <ProtectedRoute>
+                    <AgentPage />
                   </ProtectedRoute>
                 } 
               />

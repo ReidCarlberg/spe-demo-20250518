@@ -51,6 +51,15 @@ const Navbar = () => {
             <li>
               <SearchModal />
             </li>
+            <li>
+              <Link 
+                to="/agent" 
+                className={`nav-link ${location.pathname === '/agent' ? 'active' : ''}`}
+                onClick={() => setShowMobileMenu(false)}
+              >
+                Agent
+              </Link>
+            </li>
           </>
         ) : null}
       </ul>        <div className="auth-buttons">
