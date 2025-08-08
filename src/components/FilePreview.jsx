@@ -1,5 +1,8 @@
 import { useEffect, useState } from 'react';
+import { Button } from '@fluentui/react-components';
+import { Dismiss24Regular, Open24Regular, ArrowDownload24Regular } from '@fluentui/react-icons';
 import '../styles/file-preview.css';
+import '../styles/page-one-modern.css';
 
 const FilePreview = ({ fileUrl, fileName, onClose }) => {
   const [loading, setLoading] = useState(true);
@@ -9,19 +12,16 @@ const FilePreview = ({ fileUrl, fileName, onClose }) => {
     console.log('FilePreview received fileUrl:', fileUrl); // Debug log
     console.log('FilePreview received fileName:', fileName); // Debug log
     
-    // Set up any initialization here
     const timer = setTimeout(() => {
       setLoading(false);
     }, 1000);
 
-    // Handle escape key to close modal
     const handleEscape = (e) => {
       if (e.key === 'Escape') {
         onClose();
       }
     };
 
-    // Prevent body scroll when modal is open
     document.body.style.overflow = 'hidden';
     document.addEventListener('keydown', handleEscape);
 
@@ -32,12 +32,9 @@ const FilePreview = ({ fileUrl, fileName, onClose }) => {
     };
   }, [fileUrl, onClose]);
 
-  // Determine file type for specific handling
   const getFileType = () => {
     if (!fileName) return 'unknown';
-    
     const extension = fileName.split('.').pop().toLowerCase();
-    
     if (['pdf'].includes(extension)) return 'pdf';
     if (['jpg', 'jpeg', 'png', 'gif', 'bmp', 'svg', 'webp'].includes(extension)) return 'image';
     return 'document';
@@ -49,7 +46,6 @@ const FilePreview = ({ fileUrl, fileName, onClose }) => {
     <div 
       className="file-preview-overlay"
       onClick={(e) => {
-        // Close modal when clicking on the overlay (background)
         if (e.target === e.currentTarget) {
           onClose();
         }
@@ -58,9 +54,7 @@ const FilePreview = ({ fileUrl, fileName, onClose }) => {
       <div className="file-preview-container">
         <div className="file-preview-header">
           <h3>{fileName || 'File Preview'}</h3>
-          <button className="file-close-button" onClick={onClose}>
-            ×
-          </button>
+          <Button appearance="subtle" icon={<Dismiss24Regular />} onClick={onClose} aria-label="Close preview" />
         </div>
         <div className="file-preview-content">
           {loading && (
@@ -80,32 +74,28 @@ const FilePreview = ({ fileUrl, fileName, onClose }) => {
             className="file-iframe"
             title={fileName || 'File Preview'}
             onLoad={() => {
-              console.log('Iframe loaded successfully'); // Debug log
+              console.log('Iframe loaded successfully');
               setLoading(false);
             }}
             onError={(e) => {
-              console.error('Iframe failed to load:', e); // Debug log
+              console.error('Iframe failed to load:', e);
               setLoading(false);
               setError(`Failed to load the ${fileType}. Please try downloading the file instead.`);
             }}
-            style={{
-              display: loading ? 'none' : 'block'
-            }}
-            allow="same-origin"
+            style={{ display: loading ? 'none' : 'block' }}
+            sandbox="allow-scripts allow-same-origin allow-forms"
           />
         </div>
         <div className="file-preview-footer">
-          <button className="file-action-button" onClick={() => window.open(fileUrl, '_blank')}>
-            <i className="fas fa-external-link-alt"></i>
+          <Button appearance="secondary" icon={<Open24Regular />} onClick={() => window.open(fileUrl, '_blank')}>
             Open in New Tab
-          </button>
-          <a href={fileUrl} download className="file-action-button file-download-button">
-            <i className="fas fa-download"></i>
+          </Button>
+          <Button as="a" href={fileUrl} download appearance="secondary" icon={<ArrowDownload24Regular />}>
             Download
-          </a>
-          <button className="file-action-button file-close-button-text" onClick={onClose}>
+          </Button>
+          <Button appearance="primary" onClick={onClose}>
             Close
-          </button>
+          </Button>
         </div>
       </div>
     </div>

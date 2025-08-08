@@ -371,7 +371,7 @@ input:checked + .debug-toggle-slider:before {
 }
 
 .api-debug-left-pane {
-  width: 45%;
+  width: 35%;
   overflow-y: auto;
   border-right: 1px solid #ddd;
   max-height: 100%;
@@ -379,7 +379,7 @@ input:checked + .debug-toggle-slider:before {
 }
 
 .api-debug-right-pane {
-  width: 55%;
+  width: 65%;
   overflow-y: auto;
   max-height: 100%;
   background-color: #ffffff;
@@ -620,6 +620,11 @@ input:checked + .debug-toggle-slider:before {
   font-size: 12px;
   margin: 0;
   max-height: 200px;
+}
+
+/* Let Body sections take more vertical space */
+.api-debug-body .api-debug-code {
+  max-height: 60vh;
 }
 
 .api-debug-error {

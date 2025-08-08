@@ -2,7 +2,7 @@ import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-d
 import { AuthProvider } from './AuthContext'
 import { DebugModeProvider } from './context/DebugModeContext'
 import { ChatProvider } from './context/ChatContext'
-import { ThemeProvider } from './context/ThemeContext'
+import { ThemeProvider, useTheme } from './context/ThemeContext'
 import Navbar from './components/Navbar'
 import PageOne from './pages/PageOne'
 import LoginPage from './pages/LoginPage'
@@ -21,7 +21,43 @@ import { ApiDebugPanel, ApiCallNotification } from './components/debug'
 import ChatFlyout from './components/ChatFlyout'
 import Footer from './components/Footer'
 
+// Add Fluent UI Provider for global theming
+import { FluentProvider, webLightTheme, webDarkTheme } from '@fluentui/react-components'
+
 import './App.css'
+
+const ThemedAppShell = () => {
+  const { isDarkMode } = useTheme();
+  return (
+    <FluentProvider theme={isDarkMode ? webDarkTheme : webLightTheme}>
+      <Router>
+        <AuthenticationStatus />
+        <Navbar />
+        <ApiDebugPanel />
+        <ApiCallNotification />
+        <ChatFlyout />
+        <div className="app-container">
+          <Routes>
+            <Route path="/" element={<PageOne />} />
+            <Route path="/login" element={<LoginPage />} />
+            <Route path="/dashboard" element={<Navigate to="/spe-explore" replace />} />
+            <Route path="/spe-explore" element={<ProtectedRoute><SpeExplorePage /></ProtectedRoute>} />
+            <Route path="/file-browser/:containerId/:folderId?" element={<ProtectedRoute><FileBrowserPage /></ProtectedRoute>} />
+            <Route path="/container-permissions/:containerId" element={<ProtectedRoute><ContainerPermissionsPage /></ProtectedRoute>} />
+            <Route path="/chat" element={<ProtectedRoute><Chat /></ProtectedRoute>} />
+            <Route path="/container-permissions" element={<ProtectedRoute><ContainerPermissionsPage /></ProtectedRoute>} />
+            <Route path="/preview/:driveId/:itemId" element={<ProtectedRoute><PreviewPage /></ProtectedRoute>} />
+            <Route path="/list/:driveId/:folderId?" element={<ProtectedRoute><ListItemsPage /></ProtectedRoute>} />
+            <Route path="/search" element={<ProtectedRoute><SearchPage /></ProtectedRoute>} />
+            <Route path="/agent" element={<ProtectedRoute><AgentPage /></ProtectedRoute>} />
+            <Route path="*" element={<Navigate to="/" />} />
+          </Routes>
+        </div>
+        <Footer />
+      </Router>
+    </FluentProvider>
+  );
+}
 
 function App() {
   return (
@@ -29,109 +65,11 @@ function App() {
       <ThemeProvider>
         <DebugModeProvider>
           <ChatProvider>
-            <Router>
-              <AuthenticationStatus />
-              <Navbar />
-              <ApiDebugPanel />
-              <ApiCallNotification />
-              <ChatFlyout />
-              <div className="app-container">
-            <Routes>
-              <Route path="/" element={<PageOne />} />
-              <Route path="/login" element={<LoginPage />} />
-              <Route 
-                path="/dashboard" 
-                element={<Navigate to="/spe-explore" replace />} 
-              />
-              <Route 
-                path="/spe-explore" 
-                element={
-                  <ProtectedRoute>
-                    <SpeExplorePage />
-                  </ProtectedRoute>
-                } 
-              />
-              <Route 
-                path="/file-browser/:containerId/:folderId?" 
-                element={
-                  <ProtectedRoute>
-                    <FileBrowserPage />
-                  </ProtectedRoute>
-                } 
-              />
-              
-              <Route 
-                path="/container-permissions/:containerId" 
-                element={
-                  <ProtectedRoute>
-                    <ContainerPermissionsPage />
-                  </ProtectedRoute>
-                } 
-              />
-
-              <Route 
-                path="/chat" 
-                element={
-                  <ProtectedRoute>
-                    <Chat />
-                  </ProtectedRoute>
-                } 
-              />
-              
-              <Route 
-                path="/container-permissions" 
-                element={
-                  <ProtectedRoute>
-                    <ContainerPermissionsPage />
-                  </ProtectedRoute>
-                } 
-              />
-
-              <Route 
-                path="/preview/:driveId/:itemId" 
-                element={
-                  <ProtectedRoute>
-                    <PreviewPage />
-                  </ProtectedRoute>
-                } 
-              />
-
-              <Route 
-                path="/list/:driveId/:folderId?" 
-                element={
-                  <ProtectedRoute>
-                    <ListItemsPage />
-                  </ProtectedRoute>
-                } 
-              />
-              
-              <Route 
-                path="/search" 
-                element={
-                  <ProtectedRoute>
-                    <SearchPage />
-                  </ProtectedRoute>
-                } 
-              />
-              
-              <Route 
-                path="/agent" 
-                element={
-                  <ProtectedRoute>
-                    <AgentPage />
-                  </ProtectedRoute>
-                } 
-              />
-
-              <Route path="*" element={<Navigate to="/" />} />
-            </Routes>
-            </div>
-            <Footer />
-          </Router>
-        </ChatProvider>
-      </DebugModeProvider>
-    </ThemeProvider>
-    </AuthProvider>
+            <ThemedAppShell />
+       </ChatProvider>
+     </DebugModeProvider>
+   </ThemeProvider>
+     </AuthProvider>
   )
 }
 

@@ -1,0 +1,89 @@
+/* SPE Explore Page - Baller Upgrade */
+@import '../styles/spe.css';
+
+/* Page background enhancement */
+.spe-container {
+  /* ...existing code... */
+  background: radial-gradient(circle at 20% 20%, rgba(99,102,241,0.08), transparent 60%),
+              radial-gradient(circle at 80% 70%, rgba(16,185,129,0.08), transparent 55%);
+  backdrop-filter: blur(2px);
+}
+
+/* Header glow */
+.spe-header h1 {
+  position: relative;
+  background: linear-gradient(90deg,var(--secondary-color), var(--primary-color));
+  background-clip: text;
+  -webkit-background-clip: text;
+  color: transparent;
+}
+.spe-header h1::after { content:''; position:absolute; left:0; bottom:-6px; width:60px; height:3px; background: linear-gradient(90deg,var(--primary-color),transparent); border-radius:3px; }
+
+/* Action bar refinement */
+.spe-actions { justify-content: flex-start; flex-wrap: wrap; }
+.spe-actions .spe-button { position:relative; overflow:hidden; }
+.spe-actions .spe-button::before { content:''; position:absolute; inset:0; background:linear-gradient(120deg,rgba(255,255,255,0.15),rgba(255,255,255,0)); transform:translateX(-100%); transition:transform .6s ease; }
+.spe-actions .spe-button:hover::before { transform:translateX(0); }
+
+/* Containers grid upgrade */
+.containers-grid { gap: clamp(1rem,1.5vw,2rem); align-items:stretch; }
+
+.container-card {
+  /* ...existing code... */
+  background: linear-gradient(160deg, rgba(255,255,255,0.85), rgba(255,255,255,0.65));
+  backdrop-filter: blur(6px) saturate(160%);
+  border: 1px solid rgba(255,255,255,0.4);
+  animation: cardEnter .55s ease both;
+}
+.container-card:nth-child(2n) { animation-delay:.05s; }
+.container-card:nth-child(3n) { animation-delay:.1s; }
+.container-card:nth-child(4n) { animation-delay:.15s; }
+@keyframes cardEnter { from { opacity:0; transform:translateY(14px) scale(.97);} to { opacity:1; transform:translateY(0) scale(1);} }
+
+/* Corner ribbon enhancement */
+.container-card::before { border-width:0 46px 46px 0; border-color:transparent var(--secondary-color) transparent transparent; opacity:.9; }
+.container-card:hover::before { filter:brightness(1.15); }
+
+/* Date badge like chip */
+.container-date { position:absolute; top:8px; left:12px; font-size:11px; font-weight:600; padding:3px 8px; border-radius:30px; letter-spacing:.3px; background: var(--background-light); color: var(--text-medium); box-shadow:0 1px 2px rgba(0,0,0,.08); }
+.container-date.status-new { background:linear-gradient(90deg,#059669,#10b981); color:#fff; }
+.container-date.status-recent { background:linear-gradient(90deg,#6366f1,#8b5cf6); color:#fff; }
+.container-date.status-old { background:linear-gradient(90deg,#6b7280,#9ca3af); color:#fff; }
+
+.container-card h3 { font-weight:700; letter-spacing:.5px; }
+
+/* Sub-panels */
+.container-details { position:relative; overflow:hidden; }
+.container-details::after { content:''; position:absolute; inset:0; background:linear-gradient(140deg,rgba(255,255,255,0.4),rgba(255,255,255,0)); pointer-events:none; mix-blend-mode:overlay; }
+
+/* Buttons inside card */
+.container-actions .spe-button { border:1px solid rgba(255,255,255,0.4); background:linear-gradient(120deg,var(--primary-color),var(--secondary-color)); color:#fff; box-shadow:0 2px 4px rgba(0,0,0,.12); }
+.container-actions .spe-button.permissions-button { background:linear-gradient(120deg,#6366f1,#4f46e5); }
+.container-actions .spe-button.view-button { background:linear-gradient(120deg,#0ea5e9,#2563eb); }
+.container-actions .spe-button.delete-button { background:linear-gradient(120deg,#dc2626,#b91c1c); color:#fff; }
+.container-actions .spe-button:hover { transform:translateY(-3px); box-shadow:0 4px 12px rgba(0,0,0,.18); }
+.container-actions .spe-button:active { transform:translateY(-1px); }
+
+/* Hover sheen */
+.container-card::after { content:''; position:absolute; top:0; left:-75%; width:50%; height:100%; background:linear-gradient(120deg,rgba(255,255,255,0.35),rgba(255,255,255,0)); transform:skewX(-20deg); transition:transform .7s; }
+.container-card:hover::after { transform:translateX(250%) skewX(-20deg); }
+
+/* ID text refine */
+.container-details p:first-child { font-family: 'JetBrains Mono','Courier New',monospace; font-size:12px; }
+
+/* Create form polish */
+.create-container-form { position:relative; overflow:hidden; }
+.create-container-form::before { content:''; position:absolute; inset:0; background:linear-gradient(135deg, rgba(99,102,241,0.15), rgba(16,185,129,0.15)); opacity:.6; pointer-events:none; }
+.create-container-form h2 { font-weight:700; letter-spacing:.5px; }
+
+/* Dark theme adjustments */
+:root[data-theme='dark'] .container-card { background:linear-gradient(160deg, rgba(40,44,55,.9), rgba(40,44,55,.65)); border-color:rgba(255,255,255,0.1); }
+:root[data-theme='dark'] .spe-header h1::after { background:linear-gradient(90deg,var(--secondary-color),transparent); }
+
+/* Responsive fine-tuning */
+@media (max-width: 620px) {
+  .spe-actions { gap:.5rem; }
+  .container-card { padding: var(--spacing-md) var(--spacing-md) var(--spacing-lg); }
+  .container-actions { flex-direction:column; }
+  .container-actions .spe-button { width:100%; }
+}

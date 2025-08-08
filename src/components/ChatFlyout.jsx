@@ -2,6 +2,8 @@ import React, { useEffect, useCallback } from 'react';
 import { useChatFlyout } from '../hooks/useChatFlyout';
 import SPEChat from './SPEChat';
 import '../styles/chat-flyout.css';
+import { Button } from '@fluentui/react-components';
+import { Dismiss24Regular, Bot24Regular } from '@fluentui/react-icons';
 
 /**
  * Chat Flyout Component
@@ -69,13 +71,13 @@ const ChatFlyout = () => {
               <i className="fas fa-robot"></i>
               <span>AI Chat for {currentContainer.name || 'Container'}</span>
             </div>
-            <button 
-              className="chat-flyout-close-button" 
+            <Button 
+              appearance="subtle" 
+              icon={<Dismiss24Regular />} 
               onClick={handleClose}
               aria-label="Close chat flyout"
-            >
-              <i className="fas fa-times"></i>
-            </button>
+              className="chat-flyout-close-button"
+            />
           </div>
           
           <div className="chat-flyout-content">
@@ -94,15 +96,16 @@ const ChatFlyout = () => {
 
       {/* Toggle Button - only when flyout is NOT visible */}
       {!isChatVisible && (
-        <button 
-          className="chat-flyout-toggle"
+        <Button 
+          appearance="primary"
           onClick={() => setIsChatVisible(true)}
           aria-label="Open chat flyout"
           title="Open Chat (Alt+C)"
+          className="chat-flyout-toggle"
+          icon={<Bot24Regular />}
         >
-          <i className="fas fa-robot"></i>
           <span className="chat-flyout-toggle-text">Chat</span>
-        </button>
+        </Button>
       )}
     </>
   );

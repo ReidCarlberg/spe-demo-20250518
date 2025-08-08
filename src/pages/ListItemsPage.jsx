@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { useParams, useNavigate, Link } from 'react-router-dom';
+import { useParams, useNavigate } from 'react-router-dom';
 import { speService } from '../services';
 import { 
   Button, 
@@ -12,7 +12,8 @@ import {
   TableCell,
   Breadcrumb,
   BreadcrumbItem,
-  BreadcrumbDivider
+  BreadcrumbDivider,
+  BreadcrumbButton
 } from '@fluentui/react-components';
 import { 
   ArrowLeft24Regular, 
@@ -20,6 +21,8 @@ import {
   Folder24Regular,
   Image24Regular 
 } from '@fluentui/react-icons';
+import FilePreview from '../components/FilePreview';
+import '../styles/page-one-modern.css';
 import './ListItemsPage.css';
 
 const ListItemsPage = () => {
@@ -191,7 +194,7 @@ const ListItemsPage = () => {
   }, [previewFile]);
 
   return (
-    <div className="list-items-page">
+    <div className="list-items-page page-one-modern">
       <div className="list-items-header">
         <Button 
           icon={<ArrowLeft24Regular />} 
@@ -212,9 +215,9 @@ const ListItemsPage = () => {
                 {index === breadcrumbs.length - 1 ? (
                   <span>{crumb.name}</span>
                 ) : (
-                  <Link to={`/list/${driveId}/${crumb.isRoot ? 'root' : crumb.id}`}>
+                  <BreadcrumbButton onClick={() => navigate(`/list/${driveId}/${crumb.isRoot ? 'root' : crumb.id}`)}>
                     {crumb.name}
-                  </Link>
+                  </BreadcrumbButton>
                 )}
               </BreadcrumbItem>
             </React.Fragment>
@@ -251,27 +254,13 @@ const ListItemsPage = () => {
                 <TableRow key={item.id}>
                   <TableCell>
                     {item.folder ? (
-                      <Link to={`/list/${driveId}/${item.id}`} className="item-link">
+                      <BreadcrumbButton onClick={() => navigate(`/list/${driveId}/${item.id}`)} className="item-link">
                         {getFileIcon(item)} {item.name}
-                      </Link>
+                      </BreadcrumbButton>
                     ) : (
-                      <button 
-                        onClick={() => handleFileClick(item)} 
-                        className="item-link item-button"
-                        style={{ 
-                          background: 'none', 
-                          border: 'none', 
-                          padding: 0, 
-                          color: 'inherit',
-                          cursor: 'pointer',
-                          textAlign: 'left',
-                          display: 'flex',
-                          alignItems: 'center',
-                          gap: '8px'
-                        }}
-                      >
+                      <Button appearance="transparent" onClick={() => handleFileClick(item)} className="item-link item-button" style={{ textAlign: 'left', display: 'flex', alignItems: 'center', gap: '8px' }}>
                         {getFileIcon(item)} {item.name}
-                      </button>
+                      </Button>
                     )}
                   </TableCell>
                   <TableCell>{formatDate(item.lastModifiedDateTime)}</TableCell>
@@ -283,120 +272,13 @@ const ListItemsPage = () => {
         )}
       </div>
 
-      {/* Preview Modal */}
+      {/* Unified Preview Modal */}
       {previewFile && (
-        <div 
-          style={{
-            position: 'fixed',
-            top: 0,
-            left: 0,
-            width: '100vw',
-            height: '100vh',
-            backgroundColor: 'rgba(0,0,0,0.7)',
-            zIndex: 99999,
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center'
-          }}
-          onClick={(e) => {
-            if (e.target === e.currentTarget) {
-              closePreview();
-            }
-          }}
-        >
-          <div 
-            style={{
-              backgroundColor: 'white',
-              borderRadius: '12px',
-              width: '90vw',
-              maxWidth: '1100px',
-              height: '75vh',
-              minHeight: '350px',
-              display: 'flex',
-              flexDirection: 'column',
-              boxShadow: '0 8px 32px rgba(0,0,0,0.3)'
-            }}
-          >
-            <div style={{ 
-              padding: '20px', 
-              borderBottom: '1px solid #ddd',
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'space-between',
-              backgroundColor: 'white',
-              borderRadius: '12px 12px 0 0'
-            }}>
-              <h2 style={{ margin: 0, fontSize: '1.2rem' }}>
-                {previewFile.name}
-              </h2>
-              <Button 
-                appearance="subtle" 
-                onClick={closePreview}
-                style={{ minWidth: 'auto' }}
-              >
-                ✕
-              </Button>
-            </div>
-
-            <div style={{ flex: 1, position: 'relative', overflow: 'hidden' }}>
-              {previewLoading ? (
-                <div style={{ 
-                  display: 'flex', 
-                  flexDirection: 'column', 
-                  alignItems: 'center', 
-                  justifyContent: 'center', 
-                  height: '100%' 
-                }}>
-                  <Spinner />
-                  <p>Loading preview...</p>
-                </div>
-              ) : previewError ? (
-                <div style={{ 
-                  display: 'flex', 
-                  flexDirection: 'column', 
-                  alignItems: 'center', 
-                  justifyContent: 'center', 
-                  height: '100%', 
-                  textAlign: 'center', 
-                  padding: '20px' 
-                }}>
-                  <h3>Error Loading Preview</h3>
-                  <p>{previewError}</p>
-                  <Button onClick={closePreview} style={{ marginTop: '10px' }}>
-                    Close
-                  </Button>
-                </div>
-              ) : previewUrl ? (
-                <iframe 
-                  src={previewUrl} 
-                  style={{
-                    width: '100%',
-                    height: '100%',
-                    border: 'none'
-                  }}
-                  title={`Preview of ${previewFile.name}`}
-                  sandbox="allow-scripts allow-same-origin allow-forms" 
-                />
-              ) : (
-                <div style={{ 
-                  display: 'flex', 
-                  flexDirection: 'column', 
-                  alignItems: 'center', 
-                  justifyContent: 'center', 
-                  height: '100%', 
-                  textAlign: 'center', 
-                  padding: '20px' 
-                }}>
-                  <h3>Preview Not Available</h3>
-                  <p>This file type cannot be previewed.</p>
-                  <Button onClick={closePreview} style={{ marginTop: '10px' }}>
-                    Close
-                  </Button>
-                </div>
-              )}
-            </div>
-          </div>
-        </div>
+        <FilePreview 
+          fileUrl={previewUrl}
+          fileName={previewFile?.name}
+          onClose={closePreview}
+        />
       )}
     </div>
   );

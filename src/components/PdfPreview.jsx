@@ -1,4 +1,6 @@
 import { useEffect, useState } from 'react';
+import { Button } from '@fluentui/react-components';
+import { Dismiss24Regular, Open24Regular, ArrowDownload24Regular } from '@fluentui/react-icons';
 
 const PdfPreview = ({ fileUrl, fileName, onClose }) => {
   const [loading, setLoading] = useState(true);
@@ -20,9 +22,7 @@ const PdfPreview = ({ fileUrl, fileName, onClose }) => {
       <div className="pdf-preview-container">
         <div className="pdf-preview-header">
           <h3>{fileName || 'PDF Preview'}</h3>
-          <button className="pdf-close-button" onClick={onClose}>
-            <i className="fas fa-times"></i>
-          </button>
+          <Button appearance="subtle" icon={<Dismiss24Regular />} onClick={onClose} aria-label="Close" className="pdf-close-button" />
         </div>
         <div className="pdf-preview-content">
           {loading && (
@@ -49,15 +49,15 @@ const PdfPreview = ({ fileUrl, fileName, onClose }) => {
           />
         </div>
         <div className="pdf-preview-footer">
-          <button className="pdf-action-button" onClick={() => window.open(fileUrl, '_blank')}>
-            <i className="fas fa-external-link-alt"></i> Open in New Tab
-          </button>
-          <a href={fileUrl} download className="pdf-action-button pdf-download-button">
-            <i className="fas fa-download"></i> Download
-          </a>
-          <button className="pdf-action-button pdf-close-button-text" onClick={onClose}>
+          <Button appearance="secondary" icon={<Open24Regular />} onClick={() => window.open(fileUrl, '_blank')} className="pdf-action-button">
+            Open in New Tab
+          </Button>
+          <Button as="a" href={fileUrl} download appearance="secondary" icon={<ArrowDownload24Regular />} className="pdf-action-button pdf-download-button">
+            Download
+          </Button>
+          <Button appearance="primary" onClick={onClose} className="pdf-action-button pdf-close-button-text">
             Close
-          </button>
+          </Button>
         </div>
       </div>
     </div>

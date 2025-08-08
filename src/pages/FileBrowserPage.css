@@ -361,3 +361,82 @@
 .file-browser-button.drive-info-button:hover {
   background-color: #6a5acd;
 }
+
+/* Table spacing improvements */
+.files-section .fui-Table { width: 100%; }
+.files-section .fui-TableRow { border-bottom: 1px solid rgba(0,0,0,0.05); }
+.files-section .fui-TableCell.col-name { padding-right: 12px; }
+.files-section .fui-TableCell.col-modified { color: var(--text-medium); }
+.files-section .fui-TableCell.col-size { font-variant-numeric: tabular-nums; }
+.files-section .fui-TableCell.col-actions { white-space: nowrap; }
+.files-section .item-link { gap: 8px; }
+.files-section .fui-Button.item-button { padding-left: 0; }
+.files-section .fui-TableRow:hover { background: rgba(0,0,0,0.03); }
+
+/* Ensure filename text is left-aligned, not centered */
+.files-section .col-name { text-align: left; }
+.files-section .col-name .fui-Button { justify-content: flex-start; }
+.files-section .item-button { 
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  text-decoration: none;
+  color: inherit;
+  padding-left: 0;
+  justify-content: flex-start; /* override Fluent default center */
+  text-align: left;
+}
+.files-section .item-button .fui-Button__content { 
+  justify-content: flex-start; 
+  text-align: left; 
+}
+.files-section .item-button svg { width: 24px; height: 24px; flex: 0 0 auto; }
+
+/* Strong left alignment for filename */
+.files-section .fui-TableCell.col-name { text-align: left; }
+.files-section .fui-TableCell.col-name .fui-TableCell__content { justify-content: flex-start !important; width: 100%; }
+.files-section .col-name .item-button { width: 100%; justify-content: flex-start !important; text-align: left !important; }
+.files-section .col-name .item-button .fui-Button__content { width: 100%; justify-content: flex-start !important; text-align: left !important; }
+.files-section .col-name .item-text { flex: 1 1 auto; white-space: normal; text-align: left; }
+
+/* Tighten section spacing */
+.file-browser-container { padding-top: 12px; }
+.files-section { margin-top: 8px !important; }
+.po-toolbar { gap: 8px; }
+
+/* Breadcrumb polish (flattened, compact) */
+.file-browser-path { 
+  background: transparent;
+  border-radius: 0;
+  padding: 4px 0;
+}
+.file-browser-path .fui-Breadcrumb { gap: 4px; }
+.file-browser-path .fui-BreadcrumbItem { display: inline-flex; align-items: center; }
+.file-browser-path .fui-BreadcrumbDivider { opacity: 0.35; margin: 0 4px; }
+.file-browser-path .fui-BreadcrumbButton { padding-left: 0; padding-right: 0; min-height: 28px; }
+.file-browser-path .fui-BreadcrumbButton[aria-current="page"],
+.file-browser-path .fui-BreadcrumbButton:disabled { color: inherit; font-weight: 600; cursor: default; }
+
+/* Custom single-line breadcrumb */
+.fb-breadcrumb { 
+  display: flex; 
+  align-items: center; 
+  gap: 8px; 
+  white-space: nowrap; 
+  overflow: hidden; 
+  text-overflow: ellipsis; 
+  font-size: 14px; 
+  padding: 8px 0; 
+}
+.fb-breadcrumb .fb-link { 
+  appearance: none; 
+  background: none; 
+  border: 0; 
+  padding: 0; 
+  margin: 0; 
+  color: var(--color-text, inherit);
+  cursor: pointer; 
+}
+.fb-breadcrumb .fb-link:hover { text-decoration: underline; }
+.fb-breadcrumb .fb-sep { opacity: 0.5; }
+.fb-breadcrumb .fb-current { font-weight: 600; color: inherit; min-width: 0; overflow: hidden; text-overflow: ellipsis; }

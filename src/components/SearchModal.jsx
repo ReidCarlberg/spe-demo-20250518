@@ -1,6 +1,7 @@
 import React from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import '../styles/search-modal.css';
+import { Button } from '@fluentui/react-components';
 
 const SearchModal = () => {
   const navigate = useNavigate();
@@ -12,13 +13,9 @@ const SearchModal = () => {
   
   return (
     <div className="search-component">
-      <Link
-        className="nav-link"
-        onClick={handleSearchClick}
-        to="/search"
-      >
+      <Button appearance="transparent" onClick={handleSearchClick}>
         Search
-      </Link>
+      </Button>
     </div>
   );
 };

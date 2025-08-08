@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { useNavigate, useParams, Link } from 'react-router-dom';
 import { useAuth } from '../AuthContext';
 import { useChatFlyout } from '../hooks/useChatFlyout';
@@ -6,6 +6,35 @@ import { speService } from '../services';
 import FilePreview from '../components/FilePreview';
 import DriveInfoModal from '../components/DriveInfoModal';
 import './FileBrowserPage.css';
+import '../styles/page-one-modern.css';
+// Add Fluent UI components and icons
+import {
+  Button,
+  Spinner,
+  Input,
+  Table,
+  TableHeader,
+  TableRow,
+  TableHeaderCell,
+  TableBody,
+  TableCell,
+  Breadcrumb,
+  BreadcrumbItem,
+  BreadcrumbDivider,
+  BreadcrumbButton
+} from '@fluentui/react-components';
+import {
+  ArrowClockwise24Regular,
+  ArrowUpload24Regular,
+  Info24Regular,
+  ArrowDownload24Regular,
+  Eye24Regular,
+  FolderOpen24Regular,
+  Delete24Regular,
+  Search24Regular,
+  Dismiss24Regular,
+  Document24Regular
+} from '@fluentui/react-icons';
 
 // Icons for different file types
 const FileIcon = ({ type }) => {
@@ -194,9 +223,12 @@ const FileBrowserPage = () => {
     if (file.folder) {
       navigateToFolder(file);
     } else {
-      // Handle file preview or open
-      console.log('Open file', file);
-      // For now, just open the file in a new tab if it has a webUrl
+      // For previewable non-Office files (e.g., PDF, images), open in preview modal
+      if (isPreviewableFile(file) && !isOfficeFile(file)) {
+        openPreview(file);
+        return;
+      }
+      // Otherwise, open the source in a new tab if available
       if (file.webUrl) {
         window.open(file.webUrl, '_blank');
       }
@@ -205,9 +237,11 @@ const FileBrowserPage = () => {
   
   const handlePreviewClick = async (event, file) => {
     event.stopPropagation(); // Prevent parent click event
-    
+    await openPreview(file);
+  };
+  
+  const openPreview = async (file) => {
     try {
-      // Only handle non-Office files like PDF, JPEG, etc.
       if (file.id && containerId) {
         setPreviewFile(file);
         setPreviewLoading(true);
@@ -221,11 +255,11 @@ const FileBrowserPage = () => {
           url: previewUrl,
           name: file.name
         });
-        setPreviewLoading(false);
       }
     } catch (error) {
       console.error('Error getting preview URL:', error);
       setPreviewError(error.message || 'Failed to load file preview');
+    } finally {
       setPreviewLoading(false);
     }
   };
@@ -478,7 +512,9 @@ const FileBrowserPage = () => {
         <p>Loading file browser...</p>
       </div>
     );
-  }  return (
+  }
+
+  return (
     <div className="file-browser-wrapper">
       <div className="file-browser-container">
         <div className="file-browser-header">
@@ -496,261 +532,161 @@ const FileBrowserPage = () => {
           </div>
         )}
 
+        {/* Breadcrumb Path */}
         <div className="file-browser-path">
-          {currentPath.map((pathItem, index) => (
-            <span key={index}>
-              <span 
-                className="path-item" 
-                onClick={() => handlePathClick(pathItem, index)}
-              >
-                {pathItem.name}
-              </span>
-              {index < currentPath.length - 1 && <span className="path-separator"> &gt; </span>}
-            </span>
-          ))}
+          <nav className="fb-breadcrumb" aria-label="Breadcrumb">
+            {currentPath.map((pathItem, index) => {
+              const isLast = index === currentPath.length - 1;
+              return (
+                <React.Fragment key={index}>
+                  {index > 0 && <span className="fb-sep">›</span>}
+                  {isLast ? (
+                    <span className="fb-current" aria-current="page">{pathItem.name}</span>
+                  ) : (
+                    <button
+                      type="button"
+                      className="fb-link"
+                      onClick={() => handlePathClick(pathItem, index)}
+                    >
+                      {pathItem.name}
+                    </button>
+                  )}
+                </React.Fragment>
+              );
+            })}
+          </nav>
         </div>
 
+        {/* Toolbar: search + actions */}
+        <div className="po-search-area" style={{ marginTop: 12 }}>
+          <div className="po-toolbar">
+            <Input
+              size="large"
+              placeholder="Search files in this folder…"
+              value={searchTerm}
+              onChange={(_, data) => setSearchTerm(data.value)}
+              onKeyDown={(e) => {
+                if (e.key === 'Enter') {
+                  e.preventDefault();
+                  handleSearch(e);
+                }
+              }}
+            />
+            <div style={{ display: 'flex', gap: 8 }}>
+              <Button appearance="primary" size="large" icon={<Search24Regular />} onClick={handleSearch}>
+                Search
+              </Button>
+              {searchResults && (
+                <Button appearance="secondary" size="large" icon={<Dismiss24Regular />} onClick={clearSearch}>
+                  Clear
+                </Button>
+              )}
+            </div>
+          </div>
 
-        
-        <div className="file-browser-actions">
-          <button 
-            className="file-browser-button refresh-button" 
-            onClick={() => fetchFiles(currentFolderId)}
-            disabled={isLoading}
-          >
-            {isLoading ? 'Loading...' : 'Refresh Files'}
-          </button>
-          <button
-            className="file-browser-button upload-button"
-            onClick={triggerFileInput}
-            disabled={isUploading}
-          >
-            {isUploading ? 'Uploading...' : 'Upload Files'}
-          </button>
-          <button
-            className="file-browser-button drive-info-button"
-            onClick={handleDriveInfoClick}
-            disabled={isLoading}
-          >
-            {isLoading ? 'Loading...' : 'Drive Info'}
-          </button>
-          <input 
-            type="file" 
-            ref={fileInputRef}
-            style={{ display: 'none' }} 
-            onChange={handleFileUpload}
-            multiple
-          />
-          <Link to="/spe-explore" className="file-browser-button back-button">
-            Back to Containers
-          </Link>
+          <div style={{ display: 'flex', gap: 8, marginTop: 12, flexWrap: 'wrap' }}>
+            <Button icon={<ArrowClockwise24Regular />} onClick={() => fetchFiles(currentFolderId)} disabled={isLoading}>
+              {isLoading ? 'Loading…' : 'Refresh'}
+            </Button>
+            <Button icon={<ArrowUpload24Regular />} onClick={triggerFileInput} disabled={isUploading}>
+              {isUploading ? 'Uploading…' : 'Upload Files'}
+            </Button>
+            <Button icon={<Info24Regular />} onClick={handleDriveInfoClick} disabled={isLoading}>
+              Drive Info
+            </Button>
+            <Button onClick={() => navigate('/spe-explore')}>
+              Back to Containers
+            </Button>
+            <input
+              type="file"
+              ref={fileInputRef}
+              style={{ display: 'none' }}
+              onChange={handleFileUpload}
+              multiple
+            />
+          </div>
         </div>
 
         {isUploading && (
           <div className="upload-progress-container">
-            <div 
-              className="upload-progress-bar" 
-              style={{ width: `${uploadProgress}%` }}
-            ></div>
-            <div className="upload-progress-text">
-              Uploading: {Math.round(uploadProgress)}%
-            </div>
+            <div className="upload-progress-bar" style={{ width: `${uploadProgress}%` }} />
+            <div className="upload-progress-text">Uploading: {Math.round(uploadProgress)}%</div>
           </div>
         )}
-          <div className="files-section">
+
+        {/* Files Table */}
+        <div className="files-section" style={{ marginTop: 12 }}>
           {isSearching ? (
             <p className="loading-text">Searching files...</p>
           ) : isLoading ? (
             <p className="loading-text">Loading files...</p>
-          ) : searchResults ? (
-            // Display search results
-            searchResults.length === 0 ? (
-              <div className="empty-state">
-                <p>No files found matching "{searchTerm}"</p>
-                <button className="file-browser-button" onClick={clearSearch}>
-                  Clear Search
-                </button>
-              </div>
-            ) : (
-              <div className="files-list search-results">
-                <div className="search-results-header">
-                  <h3>Search Results for "{searchTerm}"</h3>
-                  <button className="file-browser-button" onClick={clearSearch}>
-                    Clear Search
-                  </button>
-                </div>
-                {searchResults.map(file => {
-                  const fileType = file.folder ? 'folder' : getFileTypeFromMime(file.file?.mimeType, file.name);
-                  
-                  return (
-                    <div 
-                      className="file-item search-result-item" 
-                      key={file.id}
-                      onClick={() => handleFileClick(file)}
-                    >
-                      <div className="file-icon-container">
-                        <FileIcon type={fileType} />
-                      </div>
-                      <div className="file-details">
-                        <div className="file-name">{file.name}</div>
-                        <div className="file-meta">
-                          {!file.folder && <span className="file-size">{file.size ? `${Math.round(file.size / 1024)} KB` : 'Unknown size'}</span>}
-                          {file.lastModifiedDateTime && (
-                            <span className="file-date">
-                              Modified: {new Date(file.lastModifiedDateTime).toLocaleString()}
-                            </span>
-                          )}
-                          {file.parentReference && file.parentReference.path && (
-                            <span className="file-path">
-                              Path: {file.parentReference.path.replace('/drive/root:', '')}
-                            </span>
-                          )}
-                        </div>
-                      </div>
-                      
-                      <div className="file-actions">
-                        {file.folder ? (
-                          <>
-                            <button className="file-action-button" onClick={(e) => { e.stopPropagation(); navigateToFolder(file); }}>
-                              <i className="fas fa-folder-open"></i>
-                            </button>
-                            <button className="file-action-button delete-button" onClick={(e) => handleDeleteFile(e, file)}>
-                              <i className="fas fa-trash"></i>
-                            </button>
-                          </>
-                        ) : (
-                          <>
-                            {isPreviewableFile(file) && !isOfficeFile(file) && (
-                              <button 
-                                className="file-action-button preview-button" 
-                                onClick={(e) => handlePreviewClick(e, file)}
-                                title={`Preview ${file.name}`}
-                              >
-                                <i className="fas fa-eye"></i>
-                                <span className="file-action-text">Preview</span>
-                              </button>
-                            )}
-                            <button 
-                              className="file-action-button" 
-                              onClick={(e) => handleDownloadClick(e, file)}
-                              title="Download file"
-                            >
-                              <i className="fas fa-download"></i>
-                            </button>
-                            <button 
-                              className="file-action-button delete-button" 
-                              onClick={(e) => handleDeleteFile(e, file)}
-                              title="Delete file"
-                            >
-                              <i className="fas fa-trash"></i>
-                            </button>
-                          </>
-                        )}
-                      </div>
-                    </div>
-                  );
-                })}
-              </div>
-            )
-          ) : files.length === 0 ? (
-            <div 
-              className="empty-state drop-zone" 
-              onDragOver={handleDragOver} 
-              onDrop={handleDrop}
-            >
-              <p>This folder is empty.</p>
+          ) : (searchResults ? (Array.isArray(searchResults) && searchResults.length === 0) : (files.length === 0)) ? (
+            <div className="empty-state drop-zone" onDragOver={handleDragOver} onDrop={handleDrop}>
+              <p>No files found.</p>
               <p className="drop-instructions">Drop files here to upload or use the Upload button above.</p>
             </div>
           ) : (
-            <div 
-              className="files-list"
-              onDragOver={handleDragOver} 
-              onDrop={handleDrop}
-            >
-              {files.map(file => {
-                const fileType = file.folder ? 'folder' : getFileTypeFromMime(file.file?.mimeType, file.name);
-                
-                return (
-                  <div 
-                    className="file-item" 
-                    key={file.id}
-                    onClick={() => handleFileClick(file)}
-                  >
-                    <div className="file-icon-container">
-                      <FileIcon type={fileType} />
-                    </div>
-                    <div className="file-details">
-                      <div className="file-name">{file.name}</div>
-                      <div className="file-meta">
-                        {!file.folder && <span className="file-size">{file.size ? `${Math.round(file.size / 1024)} KB` : 'Unknown size'}</span>}
-                        {file.lastModifiedDateTime && (
-                          <span className="file-date">
-                            Modified: {new Date(file.lastModifiedDateTime).toLocaleString()}
-                          </span>
+            <Table>
+              <TableHeader>
+                <TableRow>
+                  <TableHeaderCell className="col-name" style={{ width: '56%' }}>Name</TableHeaderCell>
+                  <TableHeaderCell className="col-modified" style={{ width: '22%' }}>Modified</TableHeaderCell>
+                  <TableHeaderCell className="col-size" style={{ width: '12%', textAlign: 'right' }}>Size</TableHeaderCell>
+                  <TableHeaderCell className="col-actions" style={{ width: '10%', textAlign: 'right' }}>Actions</TableHeaderCell>
+                </TableRow>
+              </TableHeader>
+              <TableBody>
+                {(searchResults || files).map((file) => {
+                  const fileType = file.folder ? 'folder' : getFileTypeFromMime(file.file?.mimeType, file.name);
+                  const sizeLabel = !file.folder && file.size ? `${Math.round(file.size / 1024)} KB` : (file.folder ? `${file.folder.childCount ?? ''} ${file.folder.childCount === 1 ? 'item' : 'items'}` : '');
+                  const modified = file.lastModifiedDateTime ? new Date(file.lastModifiedDateTime).toLocaleString() : '';
+                  return (
+                    <TableRow key={file.id}>
+                      <TableCell className="col-name">
+                        <Button
+                          appearance="transparent"
+                          onClick={() => (file.folder ? navigateToFolder(file) : handleFileClick(file))}
+                          className="item-link item-button"
+                          aria-label={file.folder ? `Open folder ${file.name}` : `Open ${file.name}`}
+                          style={{ width: '100%', justifyContent: 'flex-start', textAlign: 'left' }}
+                        >
+                          {file.folder ? <FolderOpen24Regular /> : <Document24Regular />} <span className="item-text">{file.name}</span>
+                        </Button>
+                      </TableCell>
+                      <TableCell className="col-modified">{modified}</TableCell>
+                      <TableCell className="col-size" style={{ textAlign: 'right' }}>{sizeLabel}</TableCell>
+                      <TableCell className="col-actions" style={{ textAlign: 'right' }}>
+                        {file.folder ? (
+                          <div style={{ display: 'inline-flex', gap: 8 }}>
+                            <Button appearance="subtle" icon={<FolderOpen24Regular />} onClick={(e) => { e.stopPropagation(); navigateToFolder(file); }} />
+                            <Button appearance="subtle" icon={<Delete24Regular />} onClick={(e) => handleDeleteFile(e, file)} />
+                          </div>
+                        ) : (
+                          <div style={{ display: 'inline-flex', gap: 8 }}>
+                            {isPreviewableFile(file) && !isOfficeFile(file) && (
+                              <Button appearance="subtle" icon={<Eye24Regular />} onClick={(e) => handlePreviewClick(e, file)} />
+                            )}
+                            <Button appearance="subtle" icon={<ArrowDownload24Regular />} onClick={(e) => handleDownloadClick(e, file)} />
+                            <Button appearance="subtle" icon={<Delete24Regular />} onClick={(e) => handleDeleteFile(e, file)} />
+                          </div>
                         )}
-                      </div>
-                    </div>
-                      <div className="file-actions">
-                      {file.folder ? (
-                        <>
-                          <button className="file-action-button" onClick={(e) => { e.stopPropagation(); navigateToFolder(file); }}>
-                            <i className="fas fa-folder-open"></i>
-                          </button>
-                          <button className="file-action-button delete-button" onClick={(e) => handleDeleteFile(e, file)}>
-                            <i className="fas fa-trash"></i>
-                          </button>
-                        </>
-                      ) : (
-                        <>
-                          {isPreviewableFile(file) && !isOfficeFile(file) && (
-                            <button 
-                              className="file-action-button preview-button" 
-                              onClick={(e) => handlePreviewClick(e, file)}
-                              title={`Preview ${file.name}`}
-                            >
-                              <i className="fas fa-eye"></i>
-                              <span className="file-action-text">Preview</span>
-                            </button>
-                          )}
-                          <button 
-                            className="file-action-button" 
-                            onClick={(e) => handleDownloadClick(e, file)}
-                            title="Download file"
-                          >
-                            <i className="fas fa-download"></i>
-                          </button>
-                          <button 
-                            className="file-action-button delete-button" 
-                            onClick={(e) => handleDeleteFile(e, file)}
-                            title="Delete file"
-                          >
-                            <i className="fas fa-trash"></i>
-                          </button>
-                        </>
-                      )}
-                    </div>
-                  </div>
-                );
-              })}
-            </div>
+                      </TableCell>
+                    </TableRow>
+                  );
+                })}
+              </TableBody>
+            </Table>
           )}
         </div>
         
         {/* Document Preview Modal */}
         {previewFile && (
-          <FilePreview 
-            fileUrl={previewFile.url}
-            fileName={previewFile.name}
-            onClose={closePreview}
-          />
+          <FilePreview fileUrl={previewFile.url} fileName={previewFile.name} onClose={closePreview} />
         )}
 
         {/* Drive Info Modal */}
         {showDriveInfo && (
-          <DriveInfoModal 
-            driveInfo={driveInfo}
-            onClose={closeDriveInfo}
-          />
+          <DriveInfoModal driveInfo={driveInfo} onClose={closeDriveInfo} />
         )}
       </div>
     </div>

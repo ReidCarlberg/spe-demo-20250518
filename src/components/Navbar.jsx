@@ -1,14 +1,16 @@
-import { Link, useLocation } from 'react-router-dom';
+import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { useAuth } from '../AuthContext';
 import { useTheme } from '../context/ThemeContext';
 import { useState } from 'react';
 import SearchModal from './SearchModal';
+import { Button } from '@fluentui/react-components';
 import './Navbar.css';
 
 const Navbar = () => {
   const { isAuthenticated, logout } = useAuth();
   const { appName } = useTheme();
   const location = useLocation();
+  const navigate = useNavigate();
   const [showMobileMenu, setShowMobileMenu] = useState(false);
 
   const handleLogout = async () => {
@@ -20,66 +22,55 @@ const Navbar = () => {
     setShowMobileMenu(!showMobileMenu);
   };
 
+  const go = (path) => {
+    navigate(path);
+    setShowMobileMenu(false);
+  };
+
   return (
-    <nav className="navbar">
-      <Link to="/" className="navbar-brand">{appName}</Link>
-      
-      <button className="mobile-menu-toggle" onClick={toggleMobileMenu}>
+    <nav className="app-navbar">
+      <div className="nav-left">
+        <Button appearance="transparent" onClick={() => go('/') } className="brand" aria-label="Home">
+          {appName}
+        </Button>
+      </div>
+
+      <Button appearance="transparent" className="mobile-menu-toggle" onClick={toggleMobileMenu} aria-label="Toggle navigation">
         <i className={`fas ${showMobileMenu ? 'fa-times' : 'fa-bars'}`}></i>
-      </button>
-      
-      <ul className={`navbar-nav ${showMobileMenu ? 'show' : ''}`}>
+      </Button>
+
+      <ul className={`nav-items ${showMobileMenu ? 'show' : ''}`}>
         <li>
-          <Link 
-            to="/" 
-            className={`nav-link ${location.pathname === '/' ? 'active' : ''}`}
-            onClick={() => setShowMobileMenu(false)}
-          >
+          <Button appearance="transparent" className={location.pathname === '/' ? 'active' : ''} onClick={() => go('/') }>
             Home
-          </Link>
-        </li>        {isAuthenticated ? (
+          </Button>
+        </li>
+        {isAuthenticated ? (
           <>
             <li>
-              <Link 
-                to="/spe-explore" 
-                className={`nav-link ${location.pathname === '/spe-explore' ? 'active' : ''}`}
-                onClick={() => setShowMobileMenu(false)}
-              >
+              <Button appearance="transparent" className={location.pathname === '/spe-explore' ? 'active' : ''} onClick={() => go('/spe-explore')}>
                 Documents
-              </Link>
+              </Button>
             </li>
             <li>
               <SearchModal />
             </li>
             <li>
-              <Link 
-                to="/agent" 
-                className={`nav-link ${location.pathname === '/agent' ? 'active' : ''}`}
-                onClick={() => setShowMobileMenu(false)}
-              >
+              <Button appearance="transparent" className={location.pathname === '/agent' ? 'active' : ''} onClick={() => go('/agent')}>
                 Agent
-              </Link>
+              </Button>
             </li>
           </>
         ) : null}
-      </ul>        <div className="auth-buttons">
+      </ul>
+
+      <div className="nav-actions">
         {isAuthenticated ? (
-          <>
-            <button 
-              className="button button-secondary" 
-              onClick={handleLogout}
-            >
-              Logout
-            </button>
-          </>
+          <Button appearance="primary" onClick={handleLogout}>Logout</Button>
         ) : (
-          <Link 
-            to="/login" 
-            className="button button-primary"
-            onClick={() => setShowMobileMenu(false)}
-          >
+          <Button appearance="primary" onClick={() => go('/login')}>
             Login
-          </Link>
+          </Button>
         )}
       </div>
     </nav>

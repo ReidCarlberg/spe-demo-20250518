@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { speService } from '../speService';
 import { getTokenSilent } from '../authService';
 import './AgentPage.css';
+import { Button } from '@fluentui/react-components';
 
 const AgentPage = () => {
   const [containers, setContainers] = useState([]);
@@ -122,13 +123,13 @@ const AgentPage = () => {
           ) : (
             <p>No results found.</p>
           )}
-          <button 
+          <Button 
             type="button" 
-            className="btn btn-secondary" 
+            appearance="secondary" 
             onClick={backToForm}
           >
             Back to Query Form
-          </button>
+          </Button>
         </div>
       </div>
     );
@@ -194,13 +195,13 @@ const AgentPage = () => {
             />
           </div>
 
-          <button 
+          <Button 
             type="submit" 
-            className="btn btn-primary" 
+            appearance="primary" 
             disabled={loading}
           >
             {loading ? 'Executing Query...' : 'Execute Query'}
-          </button>
+          </Button>
         </form>
       </div>
     </div>

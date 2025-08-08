@@ -132,6 +132,10 @@ export const ThemeProvider = ({ children }) => {
   const [currentThemeId, setCurrentThemeId] = useState(() => {
     return localStorage.getItem("app_theme") || "spe-demo";
   });
+  // Add dark mode flag
+  const [isDarkMode, setIsDarkMode] = useState(() => {
+    return localStorage.getItem("app_dark") === 'true';
+  });
 
   // Get current theme object
   const currentTheme = THEMES[currentThemeId] || THEMES['spe-demo'];
@@ -140,6 +144,11 @@ export const ThemeProvider = ({ children }) => {
   useEffect(() => {
     localStorage.setItem("app_theme", currentThemeId);
   }, [currentThemeId]);
+
+  // Persist dark mode
+  useEffect(() => {
+    localStorage.setItem("app_dark", String(isDarkMode));
+  }, [isDarkMode]);
 
   // Apply theme background color as CSS variable and update document title
   useEffect(() => {
@@ -160,6 +169,10 @@ export const ThemeProvider = ({ children }) => {
     if (THEMES[themeId]) {
       setCurrentThemeId(themeId);
     }
+  }, []);
+
+  const toggleDarkMode = useCallback(() => {
+    setIsDarkMode(prev => !prev);
   }, []);
 
   // Get all available themes
@@ -252,7 +265,9 @@ export const ThemeProvider = ({ children }) => {
     getAvailableThemes,
     getDashboardContent,
     getDocumentsContent,
-    appName: currentTheme.appName
+    appName: currentTheme.appName,
+    isDarkMode,
+    toggleDarkMode
   };
 
   return (

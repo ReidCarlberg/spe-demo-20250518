@@ -162,9 +162,9 @@ const PreviewPage = () => {
               }}>
                 <h3>Error Loading Preview</h3>
                 <p>{error}</p>
-                <button onClick={handleGoBack} style={{ marginTop: '10px', padding: '8px 16px' }}>
+                <Button onClick={handleGoBack} appearance="primary" style={{ marginTop: '10px' }}>
                   Go Back
-                </button>
+                </Button>
               </div>
             ) : previewUrl ? (
               <iframe 
@@ -189,9 +189,9 @@ const PreviewPage = () => {
               }}>
                 <h3>Preview Not Available</h3>
                 <p>This file type cannot be previewed.</p>
-                <button onClick={handleGoBack} style={{ marginTop: '10px', padding: '8px 16px' }}>
+                <Button onClick={handleGoBack} appearance="primary" style={{ marginTop: '10px' }}>
                   Go Back
-                </button>
+                </Button>
               </div>
             )}
           </div>

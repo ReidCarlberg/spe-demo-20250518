@@ -3,6 +3,8 @@ import { DebugModeContext } from '../../context/DebugModeContext';
 import RequestList from './RequestList';
 import RequestDetail from './RequestDetail';
 import '../../styles/debug-panel.css';
+import { Button } from '@fluentui/react-components';
+import { Search24Regular, Dismiss24Regular, Delete24Regular } from '@fluentui/react-icons';
 
 /**
  * Collapsible flyout API Explorer panel that displays API calls from the left side
@@ -102,20 +104,20 @@ const ApiDebugPanel = () => {
                 <option value="success">Success Only</option>
                 <option value="error">Errors Only</option>
               </select>
-              <button 
-                className="api-debug-clear-button" 
+              <Button 
+                appearance="subtle" 
+                icon={<Delete24Regular />} 
                 onClick={handleClear}
                 aria-label="Clear API calls"
-              >
-                <i className="fas fa-trash-alt"></i>
-              </button>
-              <button 
-                className="api-debug-close-button" 
+                className="api-debug-clear-button"
+              />
+              <Button 
+                appearance="subtle" 
+                icon={<Dismiss24Regular />} 
                 onClick={handleClose}
                 aria-label="Close API explorer panel"
-              >
-                <i className="fas fa-times"></i>
-              </button>
+                className="api-debug-close-button"
+              />
             </div>
           </div>
           
@@ -148,15 +150,16 @@ const ApiDebugPanel = () => {
 
       {/* Toggle Button - only when panel is NOT visible */}
       {!isPanelVisible && (
-        <button 
-          className="api-debug-panel-toggle"
+        <Button 
+          appearance="primary"
           onClick={() => setIsPanelVisible(true)}
           aria-label="Open API explorer panel"
           title="Open API Explorer (Alt+D)"
+          className="api-debug-panel-toggle"
+          icon={<Search24Regular />}
         >
-          <i className="fas fa-search"></i>
           <span className="api-debug-panel-toggle-text">API Explorer</span>
-        </button>
+        </Button>
       )}
     </>
   );

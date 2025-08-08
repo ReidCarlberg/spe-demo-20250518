@@ -20,27 +20,29 @@ export const initializeMsal = async () => {
     console.log("Current URL:", window.location.href);
     console.log("MSAL config:", msalConfig);
     
-    // Check if already initialized to prevent double initialization
-    if (msalInstance.getActiveAccount) {
+    // Ensure initialize() is called exactly once before any other API
+    if (!msalInstance._isInitialized) {
+      console.log("Initializing MSAL instance...");
+      await msalInstance.initialize();
+      console.log("MSAL instance.initialize() completed");
+    } else {
       console.log("MSAL instance already initialized");
-      
-      // Still handle any pending redirects
-      await msalInstance.handleRedirectPromise().catch((error) => {
-        console.error("Redirect error: ", error);
-      });
-      
-      return true;
     }
-    
-    console.log("Initializing MSAL instance...");
-    // Initialize the MSAL application
-    await msalInstance.initialize();
-    console.log("MSAL instance.initialize() completed");
     
     // Handle the redirect promise after initialization
     console.log("Handling redirect promise...");
     const redirectResponse = await msalInstance.handleRedirectPromise();
     console.log("Redirect response:", redirectResponse);
+
+    // Set active account when possible
+    if (redirectResponse?.account) {
+      msalInstance.setActiveAccount(redirectResponse.account);
+    } else {
+      const accounts = msalInstance.getAllAccounts();
+      if (accounts.length > 0) {
+        msalInstance.setActiveAccount(accounts[0]);
+      }
+    }
     
     console.log("MSAL initialization completed successfully");
     return true;
@@ -82,30 +84,34 @@ export const signOut = async () => {
 
 // Get the active account, but only if MSAL is initialized
 export const getAccount = () => {
-  // Defensive: check for internal _isInitialized property if available
-  if (msalInstance && msalInstance._isInitialized === false) {
+  // Guard: ensure MSAL initialized
+  if (!msalInstance || msalInstance._isInitialized === false) {
     return null;
   }
-  // If getAllAccounts is not available, MSAL is not ready
-  if (!msalInstance.getAllAccounts) {
+  // Prefer active account if set
+  if (typeof msalInstance.getActiveAccount === 'function') {
+    const active = msalInstance.getActiveAccount();
+    if (active) return active;
+  }
+  // Fallback to first account
+  if (typeof msalInstance.getAllAccounts !== 'function') {
     return null;
   }
   const accounts = msalInstance.getAllAccounts();
   if (accounts.length === 0) {
     return null;
   }
-  // If there are multiple accounts, choose the first one
   return accounts[0];
 };
 
 
 // Acquire a token silently for Graph API, but only if MSAL is initialized
 export const getTokenSilent = async () => {
-  // Defensive: check for internal _isInitialized property if available
-  if (msalInstance && msalInstance._isInitialized === false) {
+  // Defensive: check for initialized
+  if (!msalInstance || msalInstance._isInitialized === false) {
     return null;
   }
-  if (!msalInstance.getAllAccounts) {
+  if (typeof msalInstance.getAllAccounts !== 'function') {
     return null;
   }
   const account = getAccount();

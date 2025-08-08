@@ -1,21 +1,90 @@
 import React, { useState } from 'react';
-import { Link } from 'react-router-dom';
+// import { Link } from 'react-router-dom';
+import { Link as RouterLink } from 'react-router-dom';
 import { speService } from '../services';
 import { useAuth } from '../AuthContext';
 import '../styles/search-modal.css';
 import '../styles/search-page.css';
+// New modern styles
+import '../styles/page-one-modern.css';
+
+// Fluent UI
+import {
+  Button,
+  Input,
+  Card,
+  CardHeader,
+  CardPreview,
+  CardFooter,
+  Divider,
+  Text,
+  Tag,
+  Spinner,
+  Link as FluentLink
+} from '@fluentui/react-components';
+import {
+  Search24Regular,
+  Open24Regular,
+  ArrowDownload24Regular,
+  Edit24Regular,
+  CalendarClock24Regular,
+  Document24Regular
+} from '@fluentui/react-icons';
 
 // Function to format search result summaries with custom tags
 const formatSummary = (summary) => {
   if (!summary) return '';
   
   // Handle <c0> highlight tags (for search terms)
-  let formattedSummary = summary.replace(/<c0>(.*?)<\/c0>/g, '<span class="highlight-term">$1</span>');
+  let formattedSummary = summary.replace(/<c0>(.*?)<\/c0>/g, '<span class="highlight-term">$1<\/span>');
   
   // Handle <ddd/> truncation marks
-  formattedSummary = formattedSummary.replace(/<ddd\/>/g, '<span class="truncation-mark">...</span>');
+  formattedSummary = formattedSummary.replace(/<ddd\/>/g, '<span class="truncation-mark">...<\/span>');
   
   return formattedSummary;
+};
+
+// Build SharePoint edit URL from search hit
+const buildEditUrlFromHit = (hit) => {
+  try {
+    const resource = hit.resource;
+    
+    // Skip if required properties are missing
+    if (!resource?.parentReference?.siteId || !resource?.webUrl || !resource?.name || !resource?.parentReference?.sharepointIds?.listItemUniqueId) {
+      return null;
+    }
+    
+    // Get hostname from siteId
+    const siteIdParts = resource.parentReference.siteId.split(',');
+    const hostname = siteIdParts[0];
+    
+    // Get site path from webUrl
+    const webUrl = resource.webUrl;
+    const sitePath = '/' + webUrl.split('/').slice(3, 5).join('/');
+    
+    // Get sourcedoc from listItemUniqueId and format it
+    const rawId = resource.parentReference.sharepointIds.listItemUniqueId;
+    const upperId = rawId.toUpperCase();
+    const sourcedoc = encodeURIComponent(`{${upperId}}`);
+    
+    // Get file name
+    const fileName = resource.name;
+    
+    // Assemble final URL
+    const finalUrl = `https://${hostname}${sitePath}/_layouts/15/Doc.aspx?sourcedoc=${sourcedoc}&file=${encodeURIComponent(fileName)}&action=edit&mobileredirect=true`;
+    
+    // Sanity check: ensure URL is valid
+    try {
+      new URL(finalUrl);
+      return finalUrl;
+    } catch (e) {
+      console.error('Invalid URL generated:', finalUrl, e);
+      return null;
+    }
+  } catch (error) {
+    console.error('Error generating SharePoint edit URL:', error);
+    return null;
+  }
 };
 
 const SearchPage = () => {
@@ -46,7 +115,7 @@ const SearchPage = () => {
   };
 
   const handleSearch = async (e) => {
-    e.preventDefault();
+    if (e) e.preventDefault();
     
     if (!searchQuery.trim()) return;
     
@@ -77,18 +146,15 @@ const SearchPage = () => {
   const renderResults = () => {
     if (isLoading) {
       return (
-        <div className="search-loading">
-          <div className="spinner"></div>
-          <div>Searching...</div>
+        <div className="po-loading">
+          <Spinner label="Searching…" />
         </div>
       );
     }
 
     if (error) {
       return (
-        <div className="search-error">
-          {error}
-        </div>
+        <div className="po-error">{error}</div>
       );
     }
 
@@ -96,126 +162,74 @@ const SearchPage = () => {
 
     if (!results.value?.[0]?.hitsContainers?.length) {
       return (
-        <div className="no-results">
-          No results found for "{searchQuery}"
+        <div className="po-empty">
+          <div className="po-empty-illustration" />
+          <h3>No results</h3>
+          <p>Try different keywords or check your spelling.</p>
         </div>
       );
     }
-    
-    // Extract hits from result
-    const hits = results.value[0].hitsContainers
-      .flatMap(container => container.hits || []);
-        // New implementation that builds edit URL from site ID and other properties
-    const buildEditUrlFromHit = (hit) => {
-      try {
-        const resource = hit.resource;
-        
-        // Skip if required properties are missing
-        if (!resource.parentReference?.siteId || 
-            !resource.webUrl || 
-            !resource.name || 
-            !resource.parentReference?.sharepointIds?.listItemUniqueId) {
-          return null;
-        }
-        
-        // Get hostname from siteId
-        const siteIdParts = resource.parentReference.siteId.split(',');
-        const hostname = siteIdParts[0];
-        
-        // Get site path from webUrl
-        const webUrl = resource.webUrl;
-        const sitePath = '/' + webUrl.split('/').slice(3, 5).join('/');
-        
-        // Get sourcedoc from listItemUniqueId and format it
-        const rawId = resource.parentReference.sharepointIds.listItemUniqueId;
-        const upperId = rawId.toUpperCase();
-        const sourcedoc = encodeURIComponent(`{${upperId}}`);
-        
-        // Get file name
-        const fileName = resource.name;
-        
-        // Assemble final URL
-        const finalUrl = `https://${hostname}${sitePath}/_layouts/15/Doc.aspx?sourcedoc=${sourcedoc}&file=${encodeURIComponent(fileName)}&action=edit&mobileredirect=true`;
-        
-        // Sanity check: ensure URL is valid
-        try {
-          new URL(finalUrl);
-          return finalUrl;
-        } catch (e) {
-          console.error('Invalid URL generated:', finalUrl, e);
-          return null;
-        }
-      } catch (error) {
-        console.error('Error generating SharePoint edit URL:', error);
-        return null;
-      }
-    };
+
+    const hits = results.value[0].hitsContainers.flatMap(container => container.hits || []);
 
     return (
-      <div className="search-results">
-        <h3>Search Results ({hits.length})</h3>
+      <div className="po-results-grid">
         {hits.map((hit, index) => {
           const resource = hit.resource;
-          // More precise check for drive vs. driveItem
-          const odataType = resource['@odata.type'] || '';
-          const isDrive = odataType.endsWith('drive') && !odataType.endsWith('driveItem');
-          const driveId = resource.parentReference?.driveId || resource.id;
-          const itemId = resource.id;
-          
-          // Default link for internal app navigation
-          const appLinkTo = isDrive 
-            ? `/list/${driveId}` 
-            : `/preview/${driveId}/${itemId}`;
-            // Get SharePoint edit URL if possible
-          const sharePointEditUrl = buildEditUrlFromHit(hit);
-          
-          // Check if this is an Office document (based on extension)
-          const filename = resource.name || '';
-          const extension = filename.split('.').pop().toLowerCase();
-          const isOfficeDoc = ['doc', 'docx', 'xls', 'xlsx', 'ppt', 'pptx', 'pdf'].includes(extension);
-          
+          const title = resource?.name || resource?.displayName || 'Untitled';
+          const summaryHtml = hit.summary ? formatSummary(hit.summary) : '';
+          const date = resource?.lastModifiedDateTime ? new Date(resource.lastModifiedDateTime).toLocaleString() : '';
+          const isFolder = resource?.folder || (resource?.contentClass === 'folder');
+          const mime = resource?.file?.mimeType || (isFolder ? 'folder' : 'file');
+          const extension = resource?.name ? resource.name.split('.').pop().toLowerCase() : '';
+          const containerId = resource?.parentReference?.driveId || '';
+          const itemId = resource?.id || '';
+          const editUrl = buildEditUrlFromHit(hit);
+          const isOfficeDoc = ['doc', 'docx', 'xls', 'xlsx', 'ppt', 'pptx'].includes(extension);
+          const internalPreviewLink = containerId && itemId ? `/preview/${containerId}/${itemId}` : '';
+
           return (
-            <div key={index} className="result-item">
-              {isDrive ? (
-                // Drive link - open in same tab
-                <Link to={appLinkTo} className="result-title">
-                  {resource.name || 'Unnamed resource'}
-                </Link>
-              ) : sharePointEditUrl ? (
-                // If we have a valid SharePoint edit URL, use it to open in a new tab
-                <a 
-                  href={sharePointEditUrl}
-                  className="result-title"
-                  target="_blank"
-                  rel="noopener noreferrer"
-                >
-                  {resource.name || 'Unnamed resource'}
-                </a>
-              ) : (
-                // Otherwise use internal app navigation
-                <Link to={appLinkTo} className="result-title">
-                  {resource.name || 'Unnamed resource'}
-                </Link>
-              )}              {hit.summary ? (
-                <div className="result-summary" dangerouslySetInnerHTML={{ 
-                  __html: formatSummary(hit.summary)
-                }} />
-              ) : resource.summary ? (
-                <div className="result-summary" dangerouslySetInnerHTML={{ 
-                  __html: formatSummary(resource.summary)
-                }} />
-              ) : null}
-              
-              {/* Hide debugging info unless needed */}
-              <div className="result-debug" style={{ display: 'none' }}>
-                {resource.webUrl && (
-                  <div className="result-url small">
-                    <strong>Original URL:</strong> {resource.webUrl}
+            <Card key={index} className="po-result-card" appearance="filled">
+              <CardHeader
+                header={<Text weight="semibold">{title}</Text>}
+                description={
+                  <div className="po-meta-row">
+                    <span className="po-meta"><CalendarClock24Regular /> {date || '—'}</span>
+                    <span className="po-meta"><Document24Regular /> {mime}</span>
+                    {extension && <Tag size="small" appearance="filled" className="po-chip">.{extension}</Tag>}
                   </div>
-                )}
-                
-              </div>
-            </div>
+                }
+              />
+
+              {summaryHtml && (
+                <CardPreview>
+                  <div className="po-summary" dangerouslySetInnerHTML={{ __html: summaryHtml }} />
+                </CardPreview>
+              )}
+
+              <Divider />
+
+              <CardFooter>
+                <div className="po-actions">
+                  {isOfficeDoc && editUrl ? (
+                    <FluentLink className="po-link-button" href={editUrl} target="_blank" rel="noopener noreferrer">
+                      <Edit24Regular /> Edit in SharePoint
+                    </FluentLink>
+                  ) : (
+                    internalPreviewLink && (
+                      <FluentLink className="po-link-button" as={RouterLink} to={internalPreviewLink}>
+                        <Open24Regular /> Open Preview
+                      </FluentLink>
+                    )
+                  )}
+                  {resource?.webUrl && (
+                    <FluentLink className="po-link-button secondary" href={resource.webUrl} target="_blank" rel="noopener noreferrer">
+                      <ArrowDownload24Regular /> Open Source
+                    </FluentLink>
+                  )}
+                </div>
+              </CardFooter>
+            </Card>
           );
         })}
       </div>
@@ -223,93 +237,58 @@ const SearchPage = () => {
   };
 
   return (
-    <div className="page-container search-page">
-      <h1>Search SharePoint Embedded</h1>
-      
-      <div className="search-page-content">
-        <form onSubmit={handleSearch} className="search-form">
-          <div className="search-bar">
-            <input 
-              className="search-input"
-              placeholder="Enter search query..." 
-              value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
-            />
-            <button className="search-submit-button" type="submit">Search</button>
-          </div>
-          
-          <div className="form-row">
-            <label>Search Entity Types</label>
-            <div className="entity-checkboxes">
-              <label>
-                <input 
-                  type="checkbox" 
-                  checked={entities.drive}
-                  onChange={() => handleEntityChange('drive')}
-                />
-                Drive
-              </label>
-              <label>
-                <input 
-                  type="checkbox" 
-                  checked={entities.driveItem}
-                  onChange={() => handleEntityChange('driveItem')}
-                />
-                Drive Item (files/folders)
-              </label>
-            </div>
-          </div>
-          
-          <div className="form-row">
-            <label>Search Mode</label>
-            <div className="radio-group">
-              <label>
-                <input 
-                  type="radio" 
-                  value="term"
-                  checked={searchMode === 'term'}
-                  onChange={() => setSearchMode('term')}
-                />
-                Term (auto-append container filter)
-              </label>
-              <label>
-                <input 
-                  type="radio" 
-                  value="exact"
-                  checked={searchMode === 'exact'}
-                  onChange={() => setSearchMode('exact')}
-                />
-                Exact (use query as provided)
-              </label>
-            </div>
-          </div>
-          
-          <div className="form-row">
-            <label htmlFor="fieldsInput">Optional Fields (comma-separated)</label>
-            <input 
-              id="fieldsInput"
-              className="fields-input"
-              placeholder="E.g., name,size,lastModifiedDateTime" 
-              value={fields}
-              onChange={(e) => setFields(e.target.value)}
-            />
-            <div className="help-text">
-              Specify fields to include in results (leave empty for defaults)
-            </div>
-          </div>
-        </form>
-        
-        <div className="search-guide">
-          <div className="guide-title">Search Tips</div>
-          <ul className="guide-list">
-            <li>Use metadata queries with suffixes like <code>filename:OWSTEXT:"example"</code></li>
-            <li>Wildcard searches: <code>exam*</code> or <code>*ample</code></li>
-            <li>Prefix searches: <code>prefix:"doc"</code></li>
-            <li>Term search automatically filters to your container type</li>
-            <li>Exact search uses your query exactly as written</li>
-          </ul>
+    <div className="page-container page-one-modern">
+      <div className="po-section">
+        <div className="po-section-head">
+          <h1 className="po-section-title">Search SharePoint Embedded</h1>
+          <p className="po-section-desc">Find content across your containers with rich previews and quick actions.</p>
         </div>
-        
+
+        <div className="po-search-area">
+          <form onSubmit={handleSearch}>
+            <div className="po-toolbar">
+              <Input
+                size="large"
+                placeholder="Enter search query…"
+                value={searchQuery}
+                onChange={(_, data) => setSearchQuery(data.value)}
+                onKeyDown={(e) => { if (e.key === 'Enter') { e.preventDefault(); handleSearch(e); } }}
+              />
+              <Button appearance="primary" size="large" icon={<Search24Regular />} type="submit">Search</Button>
+            </div>
+
+            <div style={{ marginTop: 12, display: 'grid', gap: 8 }}>
+              <div className="radio-group" style={{ display: 'flex', gap: 16, flexWrap: 'wrap' }}>
+                <label>
+                  <input type="radio" value="term" checked={searchMode === 'term'} onChange={() => setSearchMode('term')} />
+                  <span style={{ marginLeft: 6 }}>Term (auto-append container filter)</span>
+                </label>
+                <label>
+                  <input type="radio" value="exact" checked={searchMode === 'exact'} onChange={() => setSearchMode('exact')} />
+                  <span style={{ marginLeft: 6 }}>Exact (use query as provided)</span>
+                </label>
+              </div>
+
+              <div className="entity-checkboxes" style={{ display: 'flex', gap: 16, flexWrap: 'wrap' }}>
+                <label>
+                  <input type="checkbox" checked={entities.drive} onChange={() => handleEntityChange('drive')} />
+                  <span style={{ marginLeft: 6 }}>Drive</span>
+                </label>
+                <label>
+                  <input type="checkbox" checked={entities.driveItem} onChange={() => handleEntityChange('driveItem')} />
+                  <span style={{ marginLeft: 6 }}>Drive Item (files/folders)</span>
+                </label>
+              </div>
+
+              <div className="form-row">
+                <label htmlFor="fieldsInput">Optional Fields (comma-separated)</label>
+                <Input id="fieldsInput" placeholder="E.g., name,size,lastModifiedDateTime" value={fields} onChange={(_, data) => setFields(data.value)} />
+                <Text size={200} style={{ color: '#5f6a7a' }}>Specify fields to include in results (leave empty for defaults)</Text>
+              </div>
+            </div>
+          </form>
+        </div>
+
         {renderResults()}
       </div>
     </div>

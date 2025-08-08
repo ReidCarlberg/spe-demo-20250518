@@ -1,5 +1,7 @@
 import React, { useState } from 'react';
 import '../../styles/debug-panel.css';
+import { Button } from '@fluentui/react-components';
+import { Copy24Regular } from '@fluentui/react-icons';
 
 /**
  * Renders detailed information about a selected API request
@@ -79,24 +81,27 @@ const RequestDetail = ({ call }) => {
       </div>
       
       <div className="api-debug-tabs">
-        <button 
+        <Button 
+          appearance={activeTab === 'request' ? 'primary' : 'secondary'}
           className={`api-debug-tab ${activeTab === 'request' ? 'active' : ''}`}
           onClick={() => setActiveTab('request')}
         >
           Request
-        </button>
-        <button 
+        </Button>
+        <Button 
+          appearance={activeTab === 'response' ? 'primary' : 'secondary'}
           className={`api-debug-tab ${activeTab === 'response' ? 'active' : ''}`}
           onClick={() => setActiveTab('response')}
         >
           Response
-        </button>
-        <button 
+        </Button>
+        <Button 
+          appearance={activeTab === 'timing' ? 'primary' : 'secondary'}
           className={`api-debug-tab ${activeTab === 'timing' ? 'active' : ''}`}
           onClick={() => setActiveTab('timing')}
         >
           Timing
-        </button>
+        </Button>
       </div>
       
       <div className="api-debug-tab-content">
@@ -104,13 +109,14 @@ const RequestDetail = ({ call }) => {
           <div className="api-debug-request-content">
             <div className="api-debug-section">
               <div className="api-debug-section-header">
-                <h4>Headers</h4>                <button 
+                <h4>Headers</h4>
+                <Button 
+                  appearance="subtle"
                   className="api-debug-copy-button"
                   onClick={(e) => copyToClipboard(formatJson(call.requestHeaders), e)}
                   aria-label="Copy headers to clipboard"
-                >
-                  <i className="fas fa-copy"></i>
-                </button>
+                  icon={<Copy24Regular />}
+                />
               </div>
               <pre className="api-debug-code">
                 {formatJson(call.requestHeaders)}
@@ -118,9 +124,11 @@ const RequestDetail = ({ call }) => {
             </div>
             
             {call.requestBody && (
-              <div className="api-debug-section">
+              <div className="api-debug-section api-debug-body">
                 <div className="api-debug-section-header">
-                  <h4>Body</h4>                  <button 
+                  <h4>Body</h4>
+                  <Button 
+                    appearance="subtle"
                     className="api-debug-copy-button"
                     onClick={(e) => copyToClipboard(
                       typeof call.requestBody === 'string' 
@@ -129,9 +137,8 @@ const RequestDetail = ({ call }) => {
                       e
                     )}
                     aria-label="Copy body to clipboard"
-                  >
-                    <i className="fas fa-copy"></i>
-                  </button>
+                    icon={<Copy24Regular />}
+                  />
                 </div>
                 <pre className="api-debug-code">
                   {typeof call.requestBody === 'string' 
@@ -159,13 +166,14 @@ const RequestDetail = ({ call }) => {
             {call.responseHeaders && (
               <div className="api-debug-section">
                 <div className="api-debug-section-header">
-                  <h4>Headers</h4>                  <button 
+                  <h4>Headers</h4>
+                  <Button 
+                    appearance="subtle"
                     className="api-debug-copy-button"
                     onClick={(e) => copyToClipboard(formatJson(call.responseHeaders), e)}
                     aria-label="Copy headers to clipboard"
-                  >
-                    <i className="fas fa-copy"></i>
-                  </button>
+                    icon={<Copy24Regular />}
+                  />
                 </div>
                 <pre className="api-debug-code">
                   {formatJson(call.responseHeaders)}
@@ -174,9 +182,11 @@ const RequestDetail = ({ call }) => {
             )}
             
             {call.responseBody && (
-              <div className="api-debug-section">
+              <div className="api-debug-section api-debug-body">
                 <div className="api-debug-section-header">
-                  <h4>Body</h4>                  <button 
+                  <h4>Body</h4>
+                  <Button 
+                    appearance="subtle"
                     className="api-debug-copy-button"
                     onClick={(e) => copyToClipboard(
                       typeof call.responseBody === 'string' 
@@ -185,9 +195,8 @@ const RequestDetail = ({ call }) => {
                       e
                     )}
                     aria-label="Copy body to clipboard"
-                  >
-                    <i className="fas fa-copy"></i>
-                  </button>
+                    icon={<Copy24Regular />}
+                  />
                 </div>
                 <pre className="api-debug-code">
                   {typeof call.responseBody === 'string' 

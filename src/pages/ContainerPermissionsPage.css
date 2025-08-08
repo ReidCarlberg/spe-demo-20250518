@@ -119,12 +119,18 @@
 }
 
 .form-group input,
-.form-group select {
+.form-group select,
+.add-permission-form select,
+.add-permission-form .fui-Select {
   width: 100%;
   padding: var(--spacing-sm);
   border: 1px solid var(--border-color);
   border-radius: var(--border-radius-sm);
   font-size: var(--font-size-md);
+  min-height: 46px; /* match input visual height */
+  line-height: 1.3;
+  padding: 10px 14px;
+  font-size: 16px;
 }
 
 .form-group input:focus,
@@ -132,6 +138,13 @@
   outline: none;
   border-color: var(--primary-color);
   box-shadow: 0 0 0 2px rgba(0, 120, 212, 0.2);
+}
+
+/* Fluent Select root when rendered */
+.add-permission-form .fui-Select:focus-within,
+.add-permission-form select:focus {
+  border-color: #0f6cbd;
+  box-shadow: 0 0 0 2px rgba(15,108,189,0.25);
 }
 
 .form-actions {
@@ -170,42 +183,49 @@
   margin-bottom: var(--spacing-xl);
   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
   border-radius: var(--border-radius-md);
+  background: #fff;
+  border: 1px solid var(--border-light);
 }
 
-.permissions-table {
-  width: 100%;
-  border-collapse: collapse;
-  background-color: white;
+.permissions-table-container table { width:100%; border-collapse: separate; border-spacing: 0; }
+.permissions-table-container thead tr { background: #f3f4f8; }
+.permissions-table-container th { font-size: 13px; letter-spacing: .3px; text-transform: uppercase; }
+
+/* NEW: enforce fixed layout & column sizing to prevent overlap */
+.permissions-table-container table { table-layout: fixed; }
+.col-display { width:18%; }
+.col-email { width:28%; }
+.col-type { width:10%; }
+.col-roles { width:16%; }
+.col-id { width:28%; }
+
+/* Email truncation with ellipsis instead of overlapping next column */
+.perm-email { display:block; max-width:100%; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+
+/* Allow wrap on very small screens */
+@media (max-width: 640px) {
+  .perm-email { white-space: normal; word-break: break-all; }
 }
 
-.permissions-table th,
-.permissions-table td {
-  padding: var(--spacing-md);
-  text-align: left;
-  border-bottom: 1px solid var(--border-light);
-}
+.perm-row:nth-child(odd) { background: #fafbfe; }
+.perm-row:hover { background: #eef5ff; }
 
-.permissions-table th {
-  background-color: var(--background-light);
-  font-weight: 600;
-  color: var(--text-color);
-}
+.perm-row td, .permissions-table-container th { padding: 10px 14px !important; }
 
-.permissions-table tr:hover {
-  background-color: var(--background-hover);
-}
+.perm-id-cell { display: flex; align-items: center; gap: 6px; }
+.perm-id-cell code { background: #f1f3f7; padding: 3px 6px; border-radius: 4px; font-size: 12px; }
+.copy-id-btn { font-size: 11px; padding: 2px 6px; }
+.copy-id-btn:hover { background: #e0e8f5; }
 
-.permission-id {
-  display: inline-block;
-  max-width: 180px;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-  font-family: monospace;
-  font-size: 12px;
-  background-color: var(--code-background);
-  padding: 2px 4px;
-  border-radius: 3px;
+/* Combobox height fix to align with input field */
+.role-combobox,
+.role-combobox.fui-Combobox { width:100%; min-height:46px; }
+.role-combobox input { min-height:44px; }
+.role-combobox .fui-Combobox__button { min-height:44px; }
+
+@media (forced-colors: active) {
+  .role-combobox { border: 1px solid CanvasText; box-shadow: none; }
+  .role-combobox:focus-within { outline: 1px solid Highlight; box-shadow: none; }
 }
 
 /* Responsive adjustments */

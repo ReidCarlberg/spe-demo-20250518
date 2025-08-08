@@ -5,6 +5,7 @@ import { msalInstance, initializeMsal } from './authService'
 import './styles/index.css'
 import App from './App.jsx'
 import '@fortawesome/fontawesome-free/css/all.css'
+import { Button } from '@fluentui/react-components';
 
 // Add a link to the consolidated CSS in the public folder as a backup
 const linkElement = document.createElement('link');
@@ -76,12 +77,13 @@ document.head.appendChild(style);
             {error.stack}
           </pre>
         </details>
-        <button 
+        <Button 
           onClick={() => window.location.reload()} 
-          style={{ padding: '8px 16px', background: '#0078d4', color: 'white', border: 'none', borderRadius: '4px', cursor: 'pointer', marginTop: '15px' }}
+          appearance="primary"
+          style={{ marginTop: '15px' }}
         >
           Refresh Page
-        </button>
+        </Button>
       </div>
     );
   }

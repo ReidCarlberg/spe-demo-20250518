@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../AuthContext';
 import { useTheme } from '../context/ThemeContext';
+import { Button } from '@fluentui/react-components';
 
 const DashboardPage = () => {
   const { isAuthenticated, user, logout, loading, accessToken } = useAuth();
@@ -79,9 +80,9 @@ const DashboardPage = () => {
             <p className="card-description">Common tasks you can perform from your dashboard.</p>
             <div className="action-buttons">
               {dashboardContent.quickActions.map((action, index) => (
-                <button key={index} className="action-button">{action}</button>
+                <Button key={index} appearance="secondary" className="action-button">{action}</Button>
               ))}
-              <button className="action-button logout-button" onClick={handleLogout}>Sign Out</button>
+              <Button appearance="primary" className="action-button logout-button" onClick={handleLogout}>Sign Out</Button>
             </div>
           </div>
         </div>
