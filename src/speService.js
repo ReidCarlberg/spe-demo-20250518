@@ -555,6 +555,36 @@ export const speService = {
   },
 
   /**
+   * Create a new blank Office file (docx, xlsx, pptx) in the specified folder
+   * @param {string} driveId Container (drive) ID
+   * @param {string} folderId Target folder id (defaults to root)
+   * @param {string} fileName Must end with .docx | .xlsx | .pptx
+   * @returns {Promise<Object>} Created driveItem
+   */
+  async createBlankFile(driveId, folderId = 'root', fileName) {
+    if (!fileName) throw new Error('File name required');
+    const valid = /\.(docx|xlsx|pptx)$/i.test(fileName);
+    if (!valid) throw new Error('File name must end with .docx, .xlsx, or .pptx');
+
+    const token = await getTokenSilent();
+    if (!token) throw new Error('No access token available');
+
+    const url = `https://graph.microsoft.com/v1.0/drives/${driveId}/items/${folderId}:/${encodeURIComponent(fileName)}:/content`;
+
+    const response = await fetch(url, {
+      method: 'PUT',
+      headers: { 'Authorization': `Bearer ${token}`, 'Content-Type': 'application/octet-stream' },
+      body: new Blob(['']) // empty body creates blank file
+    });
+
+    if (!response.ok) {
+      const errorData = await response.json().catch(() => ({}));
+      throw new Error(errorData.error?.message || 'Failed to create file');
+    }
+    return await response.json();
+  },
+
+  /**
    * Advanced Search across SharePoint Embedded using Microsoft Graph Search API
    * @param {Object} searchOptions Search configuration options
    * @param {string[]} searchOptions.entityTypes Entity types to search (drive, driveItem, or both)

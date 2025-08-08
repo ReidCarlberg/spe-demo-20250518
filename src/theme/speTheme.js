@@ -2,18 +2,18 @@
 // Light and Dark variants with a modern feel.
 import { createLightTheme, createDarkTheme, webLightTheme, webDarkTheme } from '@fluentui/react-components';
 
-// Brand ramp (purple-centric)
+// Brand ramp (corporate blue-centric)
 const brand = {
-  10: '#2A0A3F',
-  20: '#3A1156',
-  30: '#4A166C',
-  40: '#5A1C83',
-  50: '#6A239B',
-  60: '#7A2BB3',
-  70: '#8A37CA',
-  80: '#9A45E0',
-  90: '#AA55F5',
-  100: '#B669FF'
+  10: '#001D33', // darkest
+  20: '#002B4A',
+  30: '#003B63',
+  40: '#004D7D',
+  50: '#005F96',
+  60: '#0F6CBD', // core brand (matches MS blue accent)
+  70: '#1C7FD2',
+  80: '#2E91E4',
+  90: '#4AA3EE',
+  100: '#63B4F6' // lightest
 };
 
 const baseLight = createLightTheme(webLightTheme);
@@ -64,5 +64,5 @@ export const speDarkTheme = {
 
 export const getGradientBackground = (mode) =>
   mode === 'dark'
-    ? 'linear-gradient(160deg,#121317,#1C1E23 60%)'
-    : 'linear-gradient(160deg,#F7F8FA,#FFFFFF 60%)';
+    ? 'linear-gradient(160deg,#0A1620,#102A3A 60%)'
+    : 'linear-gradient(160deg,#F4F9FC,#FFFFFF 60%)';

@@ -17,7 +17,7 @@ import './SpeExplorePage.css';
 
 const useStyles = makeStyles({
   page: { padding: '48px clamp(1rem,3vw,3rem)', minHeight: '100vh' },
-  headerWrap: { marginBottom: '1.75rem' },
+  headerWrap: { marginBottom: '1.75rem', display: 'flex', flexDirection: 'column', alignItems: 'flex-start', gap: '4px' },
   title: { display: 'flex', alignItems: 'center', gap: '12px' },
   toolbar: { display: 'flex', gap: '8px', flexWrap: 'wrap', marginBottom: '1.25rem' },
   grid: { marginTop: '1rem', display: 'grid', gap: '1.25rem', gridTemplateColumns: 'repeat(auto-fill, minmax(300px, 1fr))' },
@@ -141,8 +141,8 @@ const SpeExplorePage = () => {
   return (
     <div className={mergeClasses('spe-container', styles.page)}>
       <div className={styles.headerWrap}>
-        <Title1>{documentsContent.pageTitle}</Title1>
-        <Subtitle1>{documentsContent.pageSubtitle}</Subtitle1>
+        <Title1 as="h1">{documentsContent.pageTitle}</Title1>
+        <Subtitle1 as="p">{documentsContent.pageSubtitle}</Subtitle1>
       </div>
 
       {error && <div role="alert"><Text style={{ color: tokens.colorPaletteRedForeground2 }}>{error}</Text></div>}

@@ -21,7 +21,8 @@ import {
   Breadcrumb,
   BreadcrumbItem,
   BreadcrumbDivider,
-  BreadcrumbButton
+  BreadcrumbButton,
+  tokens
 } from '@fluentui/react-components';
 import {
   ArrowClockwise24Regular,
@@ -35,6 +36,8 @@ import {
   Dismiss24Regular,
   Document24Regular
 } from '@fluentui/react-icons';
+// Add dialog components
+import { Dialog, DialogTrigger, DialogSurface, DialogBody, DialogTitle, DialogContent, DialogActions } from '@fluentui/react-components';
 
 // Icons for different file types
 const FileIcon = ({ type }) => {
@@ -103,6 +106,12 @@ const FileBrowserPage = () => {
   const [isSearching, setIsSearching] = useState(false);
   const [searchResults, setSearchResults] = useState(null);
   const searchInputRef = useRef(null);
+
+  // Create blank file state
+  const [creating, setCreating] = useState(false);
+  const [newFileName, setNewFileName] = useState('');
+  const [showCreateDialog, setShowCreateDialog] = useState(false);
+  const [createFileError, setCreateFileError] = useState(null);
 
   useEffect(() => {
     // Redirect to login if not authenticated
@@ -444,6 +453,19 @@ const FileBrowserPage = () => {
       fileInputRef.current.click();
     }
   };
+
+  const handleCreateBlankFile = async () => {
+    if (!newFileName.trim()) { setCreateFileError('File name required'); return; }
+    setCreateFileError(null);
+    try {
+      await speService.createBlankFile(containerId, currentFolderId, newFileName.trim());
+      setShowCreateDialog(false);
+      setNewFileName('');
+      await fetchFiles(currentFolderId);
+    } catch (err) {
+      setCreateFileError(err.message);
+    } finally { setCreating(false); }
+  };
   
   // Handle search
   const handleSearch = async (e) => {
@@ -597,6 +619,29 @@ const FileBrowserPage = () => {
             <Button onClick={() => navigate('/spe-explore')}>
               Back to Containers
             </Button>
+            <Dialog open={showCreateDialog} onOpenChange={(_, data) => { setShowCreateDialog(!!data.open); if (!data.open) { setNewFileName(''); setCreateFileError(null); } }}>
+              <DialogTrigger disableButtonEnhancement>
+                <Button icon={<Document24Regular />} onClick={() => setShowCreateDialog(true)}>New Office File</Button>
+              </DialogTrigger>
+              <DialogSurface>
+                <DialogBody>
+                  <DialogTitle>Create blank file</DialogTitle>
+                  <DialogContent>
+                    <p style={{ marginBottom: 8 }}>Enter a file name ending with .docx, .xlsx, or .pptx</p>
+                    {createFileError && (
+                      <div style={{ marginBottom: 8, color: tokens.colorPaletteRedForeground2, fontSize: 12 }} role="alert">
+                        {createFileError}
+                      </div>
+                    )}
+                    <Input value={newFileName} onChange={(_, d) => { setNewFileName(d.value); if (createFileError) setCreateFileError(null); }} placeholder="QuarterlyReport.docx" autoFocus onKeyDown={e => { if (e.key === 'Enter') { e.preventDefault(); handleCreateBlankFile(); } }} />
+                  </DialogContent>
+                  <DialogActions>
+                    <Button appearance="secondary" onClick={() => { setShowCreateDialog(false); setNewFileName(''); setCreateFileError(null); }}>Cancel</Button>
+                    <Button appearance="primary" disabled={creating} onClick={handleCreateBlankFile}>{creating ? 'Creating...' : 'Create'}</Button>
+                  </DialogActions>
+                </DialogBody>
+              </DialogSurface>
+            </Dialog>
             <input
               type="file"
               ref={fileInputRef}
