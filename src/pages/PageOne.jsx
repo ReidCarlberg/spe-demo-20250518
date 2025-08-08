@@ -1,6 +1,5 @@
 import React, { useState } from 'react';
-// Remove unused Link import
-// import { Link } from 'react-router-dom';
+import { Link } from 'react-router-dom';
 import { speService } from '../services';
 import { useAuth } from '../AuthContext';
 import { useTheme } from '../context/ThemeContext';
@@ -8,32 +7,6 @@ import '../styles/search-modal.css';
 import '../styles/search-page.css';
 import '../styles/auth.css';
 import './PageOne.css';
-// New modern styles
-import '../styles/page-one-modern.css';
-
-// Fluent UI
-import {
-  Button,
-  Input,
-  Card,
-  CardHeader,
-  CardPreview,
-  CardFooter,
-  Divider,
-  Text,
-  Tag,
-  Spinner,
-  Link as FluentLink
-} from '@fluentui/react-components';
-import { Link as RouterLink } from 'react-router-dom';
-import {
-  Search24Regular,
-  Open24Regular,
-  ArrowDownload24Regular,
-  Edit24Regular,
-  CalendarClock24Regular,
-  Document24Regular
-} from '@fluentui/react-icons';
 
 // Function to format search result summaries with custom tags
 const formatSummary = (summary) => {
@@ -94,78 +67,6 @@ const buildEditUrlFromHit = (hit) => {
   }
 };
 
-// A modern result card for search hits
-const ResultCard = ({ hit }) => {
-  const resource = hit.resource;
-  if (!resource) return null;
-
-  const title = resource.name || resource.displayName || 'Untitled';
-  const summary = hit.summary ? formatSummary(hit.summary) : '';
-  const date = resource.lastModifiedDateTime ? new Date(resource.lastModifiedDateTime).toLocaleString() : '';
-  const isFolder = resource.folder || (resource.contentClass === 'folder');
-  const mime = resource.file?.mimeType || (isFolder ? 'folder' : 'file');
-  const extension = resource.name ? resource.name.split('.').pop().toLowerCase() : '';
-  const containerId = resource.parentReference?.driveId || '';
-  const itemId = resource.id || '';
-  const editUrl = buildEditUrlFromHit(hit);
-
-  const isOfficeDoc = ['doc', 'docx', 'xls', 'xlsx', 'ppt', 'pptx'].includes(extension);
-  const internalPreviewLink = containerId && itemId ? `/preview/${containerId}/${itemId}` : '';
-
-  return (
-    <Card className="po-result-card" appearance="filled">
-      <CardHeader
-        header={<Text weight="semibold">{title}</Text>}
-        description={
-          <div className="po-meta-row">
-            <span className="po-meta"><CalendarClock24Regular /> {date || '—'}</span>
-            <span className="po-meta"><Document24Regular /> {mime}</span>
-            {extension && <Tag size="small" appearance="filled" className="po-chip">.{extension}</Tag>}
-          </div>
-        }
-      />
-
-      {summary && (
-        <CardPreview>
-          <div
-            className="po-summary"
-            dangerouslySetInnerHTML={{ __html: summary }}
-          />
-        </CardPreview>
-      )}
-
-      <Divider />
-
-      <CardFooter>
-        <div className="po-actions">
-          {isOfficeDoc && editUrl ? (
-            // use Fluent Link styled anchor for consistency
-            <FluentLink href={editUrl} target="_blank" rel="noopener noreferrer" className="po-link-button">
-              <Edit24Regular /> Edit in SharePoint
-            </FluentLink>
-          ) : (
-            internalPreviewLink && (
-              <FluentLink className="po-link-button" as={RouterLink} to={internalPreviewLink}>
-                <Open24Regular /> Open Preview
-              </FluentLink>
-            )
-          )}
-          {resource.webUrl && (
-            <FluentLink
-              className="po-link-button secondary"
-              href={resource.webUrl}
-              target="_blank"
-              rel="noopener noreferrer"
-            >
-              <ArrowDownload24Regular /> Open Source
-            </FluentLink>
-          )}
-        </div>
-      </CardFooter>
-    </Card>
-  );
-};
-
 const PageOne = () => {
   const [searchQuery, setSearchQuery] = useState('');
   // Set default to 'term' mode
@@ -224,15 +125,18 @@ const PageOne = () => {
   const renderResults = () => {
     if (isLoading) {
       return (
-        <div className="po-loading">
-          <Spinner label="Searching…" />
+        <div className="search-loading">
+          <div className="spinner"></div>
+          <div>Searching...</div>
         </div>
       );
     }
 
     if (searchError) {
       return (
-        <div className="po-error">{searchError}</div>
+        <div className="search-error">
+          {searchError}
+        </div>
       );
     }
 
@@ -240,24 +144,154 @@ const PageOne = () => {
 
     if (!results.value?.[0]?.hitsContainers?.length) {
       return (
-        <div className="po-empty">
-          <div className="po-empty-illustration" />
-          <h3>No results</h3>
-          <p>Try different keywords or check your spelling.</p>
+        <div className="no-results">
+          No results found for "{searchQuery}"
         </div>
       );
     }
 
     return (
-      <div className="po-results-grid">
+      <div className="search-results-container">
         {Array.isArray(results.value?.[0]?.hitsContainers) &&
           results.value[0].hitsContainers.map((container, containerIndex) => (
-            <React.Fragment key={containerIndex}>
-              {Array.isArray(container.hits) && container.hits.map((hit, hitIndex) => (
-                <ResultCard key={`${containerIndex}-${hitIndex}`} hit={hit} />
-              ))}
-            </React.Fragment>
-          ))}
+            <div key={containerIndex} className="hits-container">
+              {Array.isArray(container.hits) && container.hits.map((hit, hitIndex) => {
+                // Get the resource so we can access all properties
+                const resource = hit.resource;
+                if (!resource) return null;
+                
+                // Format the display of the search result based on entity type
+                const title = resource.name || resource.displayName || 'Untitled';
+                const summary = hit.summary ? formatSummary(hit.summary) : '';
+                const date = resource.lastModifiedDateTime ? new Date(resource.lastModifiedDateTime).toLocaleDateString() : '';
+                const previewUrl = resource.webUrl || '';
+                
+                // For driveItems (files)
+                const isFolder = resource.folder || (resource.contentClass === 'folder');
+                const itemType = isFolder ? 'Folder' : (resource.file?.mimeType || '');
+                const fileExtension = resource.name ? resource.name.split('.').pop().toLowerCase() : '';
+                
+                // Get containerId and itemId for navigation
+                const containerId = resource.parentReference?.driveId || '';
+                const itemId = resource.id || '';
+                
+                // Build edit URL using the new function
+                const editUrl = buildEditUrlFromHit(hit);
+                
+                return (
+                  <div key={hitIndex} className="search-result-item">                  <div className="search-result-header">
+                      
+                      {/* Title with link */}
+                      <h3 className="search-result-title">
+                      {/* First try to get SharePoint edit URL (only for editable Office docs, not PDF) */}
+                      {(() => {
+                        const sharePointEditUrl = buildEditUrlFromHit(hit);
+                        // Determine extension & doc types
+                        const extension = resource.name ? resource.name.split('.').pop().toLowerCase() : '';
+                        const isEditableOfficeDoc = ['doc', 'docx', 'xls', 'xlsx', 'ppt', 'pptx'].includes(extension); // removed pdf
+                        const isPdf = extension === 'pdf';
+
+                        // If it's an editable Office document and we have an edit URL, use it
+                        if (sharePointEditUrl && isEditableOfficeDoc) {
+                          return (
+                            <a 
+                              href={sharePointEditUrl}
+                              target="_blank"
+                              rel="noopener noreferrer"
+                            >
+                              {title}
+                            </a>
+                          );
+                        }
+                        // If it's a PDF, route to internal preview page (works like List Items page preview)
+                        if (isPdf && containerId && itemId) {
+                          return (
+                            <Link to={`/preview/${containerId}/${itemId}`}>
+                              {title}
+                            </Link>
+                          );
+                        }
+                        // Fallback to internal preview for other files when possible
+                        if (containerId && itemId) {
+                          return (
+                            <Link to={`/preview/${containerId}/${itemId}`}>
+                              {title}
+                            </Link>
+                          );
+                        }
+                        return <span>{title}</span>;
+                      })()}
+                    </h3>
+                  </div>
+                    {summary && (
+                    <div 
+                      className="search-result-summary" 
+                      dangerouslySetInnerHTML={{ __html: summary }}
+                    />
+                  )}
+                  
+                  {/* File metadata */}
+                  <div className="search-result-meta">
+                    {date && (
+                      <span className="search-result-date">
+                        <i className="fas fa-calendar-alt"></i> {date}
+                      </span>
+                    )}
+                    {itemType && (
+                      <span className="search-result-type" style={{ marginLeft: '10px' }}>
+                        <i className="fas fa-file-alt"></i> {itemType}
+                      </span>
+                    )}
+                  </div>
+                  
+                  {/* Debug info - hidden by default */}
+                  <div className="result-debug" style={{ display: 'none', fontSize: '12px', color: '#777', marginTop: '8px' }}>
+                    {resource.webUrl && (
+                      <div>
+                        <strong>Original URL:</strong> {resource.webUrl}
+                      </div>
+                    )}
+                    {resource.parentReference?.siteId && (
+                      <div>
+                        <strong>Site ID:</strong> {resource.parentReference.siteId}
+                      </div>
+                    )}
+                  </div>{/* Edit link for editable Office documents only (exclude PDFs) */}
+                  {resource.file && (() => {
+                    const ext = resource.name ? resource.name.split('.').pop().toLowerCase() : '';
+                    const isEditableOfficeDoc = ['doc', 'docx', 'xls', 'xlsx', 'ppt', 'pptx'].includes(ext);
+                    if (!isEditableOfficeDoc) return null; // no edit button for pdf or other non-editable types
+                    const editUrlForBtn = buildEditUrlFromHit(hit);
+                    if (!editUrlForBtn) return null;
+                    return (
+                      <div className="search-result-edit">
+                        <a 
+                          href={editUrlForBtn} 
+                          target="_blank" 
+                          rel="noopener noreferrer"
+                          className="edit-link"
+                          style={{ 
+                            display: 'inline-block', 
+                            marginTop: '8px', 
+                            padding: '8px 12px', 
+                            backgroundColor: '#0078d4', 
+                            color: 'white', 
+                            borderRadius: '4px', 
+                            textDecoration: 'none',
+                            fontSize: '14px',
+                            fontWeight: '500'
+                          }}
+                        >
+                          <i className="fas fa-edit"></i>&nbsp;Edit Document
+                        </a>
+                      </div>
+                    );
+                  })()}
+                </div>
+              );
+            })}
+          </div>
+        ))}
       </div>
     );
   };
@@ -265,25 +299,55 @@ const PageOne = () => {
   // Content to show when user is logged in (search functionality)
   const renderSearchContent = () => {
     return (
-      <>
-        <div className="po-toolbar">
-          <Input
-            size="large"
-            placeholder="Search files and content…"
+      <>        <div>
+          <input
+            type="text"
+            className="search-input"
+            placeholder="Search for files and content..."
             value={searchQuery}
-            onChange={(_, data) => setSearchQuery(data.value)}
+            onChange={(e) => setSearchQuery(e.target.value)}
             onKeyDown={(e) => {
               if (e.key === 'Enter') {
                 e.preventDefault();
                 handleSearch(e);
               }
             }}
+            aria-label="Search query"
+            style={{ 
+              width: '100%', 
+              padding: '12px 16px', 
+              marginBottom: '10px', 
+              boxSizing: 'border-box',
+              fontSize: '16px',
+              border: '2px solid #333',
+              borderRadius: '4px',
+              boxShadow: '0 2px 4px rgba(0,0,0,0.1)',
+              backgroundColor: '#ffffff',
+              color: '#000000'
+            }}
           />
-          <Button appearance="primary" size="large" icon={<Search24Regular />} onClick={handleSearch}>
-            Search
-          </Button>
+          <div style={{ display: 'flex', justifyContent: 'flex-end' }}>
+            <button 
+              onClick={handleSearch}
+              type="button" 
+              style={{ 
+                backgroundColor: '#0078d4',
+                color: 'white',
+                border: 'none',
+                borderRadius: '4px',
+                padding: '8px 16px',
+                cursor: 'pointer',
+                fontSize: '16px',
+                fontWeight: '500',
+                display: 'flex',
+                alignItems: 'center'
+              }}
+            >
+              <i className="fas fa-search"></i>&nbsp;Search
+            </button>
+          </div>
         </div>
-
+        
         {renderResults()}
       </>
     );
@@ -292,21 +356,37 @@ const PageOne = () => {
   // Content to show when user is not logged in (login form)
   const renderLoginContent = () => {
     return (
-      <Card className="po-login-card" appearance="filled">
-        <CardHeader
-          header={<Text weight="semibold" size={600}>{currentTheme.name}</Text>}
-          description={<Text>Sign in to get started.</Text>}
-        />
-        <Divider />
-        <div className="po-login-body">
-          <Button appearance="primary" size="large" onClick={handleLoginClick}>
-            Sign in with Microsoft
-          </Button>
-          <Text size={300} className="po-login-footnote">
-            This application uses Microsoft Authentication Library (MSAL) for secure sign-in. Your credentials are never stored by this application.
-          </Text>
+      <div className="login-card">
+        <h1>{currentTheme.name}</h1>
+        <p className="login-subtitle">Sign in to get started.</p>
+        
+        <button 
+          className="login-button" 
+          onClick={handleLoginClick}
+          style={{
+            marginTop: '20px',
+            padding: '12px',
+            backgroundColor: '#0078d4',
+            color: 'white',
+            border: 'none',
+            borderRadius: '4px',
+            fontWeight: '500',
+            fontSize: '16px',
+            cursor: 'pointer',
+            width: '100%',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center'
+          }}
+        >
+          Sign in with Microsoft
+        </button>
+        
+        <div className="login-footer" style={{ marginTop: '20px', fontSize: '14px', color: '#666' }}>
+          <p>This application uses Microsoft Authentication Library (MSAL) for secure sign-in.</p>
+          <p>Your credentials are never stored by this application.</p>
         </div>
-      </Card>
+      </div>
     );
   };
 
@@ -462,29 +542,30 @@ const PageOne = () => {
   };
 
   return (
-    <div className="page-container page-one-modern">
+    <div className="page-container home-container">
       {/* Only show intro content for SPE Demo theme */}
       {currentThemeId === 'spe-demo' && (
-        <div className="po-hero">
-          <div className="po-hero-content">
-            <h1 className="po-hero-title">{dashboardContent.introTitle}</h1>
-            <p className="po-hero-sub">{dashboardContent.introText}</p>
-          </div>
+        <div className="home-content">
+          <h1 className="home-headline">{dashboardContent.introTitle}</h1>
+          <p className="home-text">
+            {dashboardContent.introText}
+          </p>
         </div>
       )}
-
+      
       {/* Dashboard section - only show when logged in */}
       {accessToken && (
-        <div className="po-section">
-          <div className="po-section-head">
-            <h2 className="po-section-title">{dashboardContent.welcomeMessage}</h2>
-            <p className="po-section-desc">Search across your content with rich previews and quick actions.</p>
+        <div className="dashboard-section">
+          <h2 className="dashboard-section-title">{dashboardContent.welcomeMessage}</h2>
+          
+          {/* Search section moved under welcome message */}
+          <div className="search-section">
+            <h3 className="search-section-title">Search Your Content</h3>
+            <div className="search-page-content">
+              {renderSearchContent()}
+            </div>
           </div>
-
-          <div className="po-search-area">
-            {renderSearchContent()}
-          </div>
-
+          
           <div className="dashboard-cards">
             <div className="dashboard-card">
               <h3>Recent Activity</h3>
@@ -501,9 +582,7 @@ const PageOne = () => {
               <p className="card-description">Common tasks you can perform from your dashboard.</p>
               <div className="action-buttons">
                 {dashboardContent.quickActions.map((action, index) => (
-                  <Button key={index} appearance="secondary" size="medium" className="action-button">
-                    {action}
-                  </Button>
+                  <button key={index} className="action-button">{action}</button>
                 ))}
               </div>
             </div>
@@ -521,8 +600,8 @@ const PageOne = () => {
       
       {/* Show login form when not logged in */}
       {!accessToken && (
-        <div className="po-section">
-          <div className="po-search-area">
+        <div className="home-search-container">
+          <div className="search-page-content">
             {renderLoginContent()}
           </div>
         </div>
