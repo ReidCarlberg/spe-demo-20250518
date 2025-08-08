@@ -3,10 +3,12 @@ import { Link } from 'react-router-dom';
 import { speService } from '../services';
 import { useAuth } from '../AuthContext';
 import { useTheme } from '../context/ThemeContext';
+import { Card, Button as FButton, Input, Text, Toaster, useToastController, Toast, ToastTitle, ToastBody } from '@fluentui/react-components';
 import '../styles/search-modal.css';
 import '../styles/search-page.css';
 import '../styles/auth.css';
 import './PageOne.css';
+import '../styles/page-one-modern.css';
 
 // Function to format search result summaries with custom tags
 const formatSummary = (summary) => {
@@ -85,6 +87,8 @@ const PageOne = () => {
   const dashboardContent = getDashboardContent();
   const [results, setResults] = useState(null);
   const [searchError, setSearchError] = useState(null);
+  const toasterId = 'quick-actions-toaster';
+  const { dispatchToast } = useToastController(toasterId);
 
   const getEntityTypes = () => {
     return ['driveItem']; // Always return driveItem as we've removed the options
@@ -120,6 +124,16 @@ const PageOne = () => {
 
   const handleLoginClick = () => {
     login();
+  };
+
+  const handleQuickAction = (action) => {
+    dispatchToast(
+      <Toast appearance="inverted">
+        <ToastTitle>{action} pressed</ToastTitle>
+        <ToastBody>Demo action executed.</ToastBody>
+      </Toast>,
+      { intent: 'info', timeout: 3000 }
+    );
   };
 
   const renderResults = () => {
@@ -390,6 +404,55 @@ const PageOne = () => {
     );
   };
 
+  // Modern SPE Demo specific renderers
+  const renderModernHero = () => (
+    <div className="po-hero">
+      <div className="po-hero-content">
+        <h1 className="po-hero-title">{dashboardContent.introTitle}</h1>
+        <p className="po-hero-sub">{dashboardContent.introText}</p>
+      </div>
+    </div>
+  );
+
+  const renderModernSearch = () => (
+    <div className="po-section">
+      <div className="po-section-head">
+        <h2 className="po-section-title">Search Your Content</h2>
+        <p className="po-section-desc">Find files and information instantly across your SharePoint Embedded content.</p>
+      </div>
+      <div className="po-search-area">
+        <div className="po-toolbar">
+          <Input
+            appearance="outline"
+            size="large"
+            placeholder="Search for files and content..."
+            value={searchQuery}
+            onChange={(e, data) => setSearchQuery(data.value)}
+            onKeyDown={(e) => { if (e.key === 'Enter') handleSearch(e); }}
+          />
+          <FButton appearance="primary" size="large" icon={<i className="fas fa-search" />} onClick={handleSearch}>Search</FButton>
+        </div>
+        {renderResults() && <div style={{ marginTop: 16 }}>{renderResults()}</div>}
+      </div>
+    </div>
+  );
+
+  const renderModernLogin = () => (
+    <div className="po-section">
+      <Card className="po-login-card" appearance="filled-alternative" style={{ backdropFilter: 'blur(6px)' }}>
+        <div className="po-login-body">
+          <h1 style={{ margin: 0 }}>{currentTheme.name}</h1>
+          <Text size={400} style={{ color: 'var(--colorNeutralForeground3,#5f6a7a)' }}>Sign in to get started.</Text>
+          <FButton appearance="primary" size="large" onClick={handleLoginClick} icon={<i className="fas fa-sign-in-alt" />}>Sign in with Microsoft</FButton>
+          <div className="po-login-footnote" style={{ fontSize: 12 }}>
+            <p style={{ margin: 0 }}>This application uses Microsoft Authentication Library (MSAL) for secure sign-in.</p>
+            <p style={{ margin: '4px 0 0' }}>Your credentials are never stored by this application.</p>
+          </div>
+        </div>
+      </Card>
+    </div>
+  );
+
   const getProgressChartTitle = () => {
     switch (currentThemeId) {
       case 'fabrikam-legal':
@@ -542,69 +605,42 @@ const PageOne = () => {
   };
 
   return (
-    <div className="page-container home-container">
-      {/* Only show intro content for SPE Demo theme */}
-      {currentThemeId === 'spe-demo' && (
-        <div className="home-content">
-          <h1 className="home-headline">{dashboardContent.introTitle}</h1>
-          <p className="home-text">
-            {dashboardContent.introText}
-          </p>
-        </div>
-      )}
-      
-      {/* Dashboard section - only show when logged in */}
-      {accessToken && (
-        <div className="dashboard-section">
-          <h2 className="dashboard-section-title">{dashboardContent.welcomeMessage}</h2>
-          
-          {/* Search section moved under welcome message */}
-          <div className="search-section">
-            <h3 className="search-section-title">Search Your Content</h3>
-            <div className="search-page-content">
-              {renderSearchContent()}
-            </div>
-          </div>
-          
-          <div className="dashboard-cards">
-            <div className="dashboard-card">
-              <h3>Recent Activity</h3>
-              <p className="card-description">{dashboardContent.cardDescription}</p>
-              <ul className="activity-list">
-                {dashboardContent.recentActivities.map((activity, index) => (
-                  <li key={index}>{activity}</li>
-                ))}
-              </ul>
-            </div>
-
-            <div className="dashboard-card">
-              <h3>Quick Actions</h3>
-              <p className="card-description">Common tasks you can perform from your dashboard.</p>
-              <div className="action-buttons">
-                {dashboardContent.quickActions.map((action, index) => (
-                  <button key={index} className="action-button">{action}</button>
-                ))}
+    <div className={`page-container page-one-modern theme-${currentThemeId}`}>
+      <Toaster toasterId={toasterId} position="top-end" />
+      {renderModernHero()}
+      {accessToken ? (
+        <>
+          {renderModernSearch()}
+          <div className="po-section">
+            <div className="dashboard-cards">
+              <div className="dashboard-card">
+                <h3>Recent Activity</h3>
+                <p className="card-description">{dashboardContent.cardDescription}</p>
+                <ul className="activity-list">
+                  {dashboardContent.recentActivities.map((activity, index) => (
+                    <li key={index}>{activity}</li>
+                  ))}
+                </ul>
               </div>
-            </div>
-
-            <div className="dashboard-card">
-              <h3>{getProgressChartTitle()}</h3>
-              <p className="card-description">{getProgressChartDescription()}</p>
-              <div className="progress-chart">
-                {renderProgressChart()}
+              <div className="dashboard-card">
+                <h3>Quick Actions</h3>
+                <p className="card-description">Common tasks you can perform from your dashboard.</p>
+                <div className="action-buttons">
+                  {dashboardContent.quickActions.map((action, index) => (
+                    <FButton key={index} appearance="secondary" onClick={() => handleQuickAction(action)}>{action}</FButton>
+                  ))}
+                </div>
+              </div>
+              <div className="dashboard-card">
+                <h3>{getProgressChartTitle()}</h3>
+                <p className="card-description">{getProgressChartDescription()}</p>
+                <div className="progress-chart">{renderProgressChart()}</div>
               </div>
             </div>
           </div>
-        </div>
-      )}
-      
-      {/* Show login form when not logged in */}
-      {!accessToken && (
-        <div className="home-search-container">
-          <div className="search-page-content">
-            {renderLoginContent()}
-          </div>
-        </div>
+        </>
+      ) : (
+        renderModernLogin()
       )}
     </div>
   );

@@ -23,13 +23,16 @@ import Footer from './components/Footer'
 
 // Add Fluent UI Provider for global theming
 import { FluentProvider, webLightTheme, webDarkTheme } from '@fluentui/react-components'
+import { speLightTheme, speDarkTheme, getGradientBackground } from './theme/speTheme';
 
 import './App.css'
 
 const ThemedAppShell = () => {
   const { isDarkMode } = useTheme();
+  const mode = isDarkMode ? 'dark' : 'light';
+  const activeTheme = isDarkMode ? speDarkTheme : speLightTheme;
   return (
-    <FluentProvider theme={isDarkMode ? webDarkTheme : webLightTheme}>
+    <FluentProvider theme={activeTheme} style={{ minHeight: '100dvh', background: getGradientBackground(mode), transition: 'background .4s ease' }}>
       <Router>
         <AuthenticationStatus />
         <Navbar />
