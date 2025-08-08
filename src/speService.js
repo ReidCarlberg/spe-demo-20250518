@@ -518,178 +518,167 @@ export const speService = {
 
   /**
    * Search for files in a container
-   * @param {string} containerId The ID of the container to search in
-   * @param {string} searchTerm The search term
-   * @param {number} limit The maximum number of results to return (optional)
-   * @returns {Promise<Array>} Search results
+   * @param {string} containerId
+   * @param {string} searchTerm
+   * @param {number} limit
    */
   async searchFiles(containerId, searchTerm, limit = 25) {
     try {
       const token = await getTokenSilent();
-      if (!token) {
-        throw new Error('No access token available');
-      }
-
-      // Construct the search URL with the search term and limit
+      if (!token) throw new Error('No access token available');
       const url = `https://graph.microsoft.com/v1.0/drives/${containerId}/root/search(q='${encodeURIComponent(searchTerm)}')`;
-      
-      const response = await fetch(url, {
-        method: 'GET',
-        headers: {
-          'Authorization': `Bearer ${token}`,
-          'Content-Type': 'application/json'
-        }
-      });
-
+      const response = await fetch(url, { headers: { 'Authorization': `Bearer ${token}`, 'Content-Type': 'application/json' } });
       if (!response.ok) {
         const errorData = await response.json();
         throw new Error(errorData.error?.message || 'Failed to search files');
       }
-
       const data = await response.json();
       return data.value || [];
-    } catch (error) {
-      console.error('Error searching files:', error);
-      throw error;
-    }
+    } catch (e) { console.error('Error searching files:', e); throw e; }
   },
 
   /**
-   * Create a new blank Office file (docx, xlsx, pptx) in the specified folder
-   * @param {string} driveId Container (drive) ID
-   * @param {string} folderId Target folder id (defaults to root)
-   * @param {string} fileName Must end with .docx | .xlsx | .pptx
-   * @returns {Promise<Object>} Created driveItem
+   * Create blank Office file
    */
   async createBlankFile(driveId, folderId = 'root', fileName) {
     if (!fileName) throw new Error('File name required');
-    const valid = /\.(docx|xlsx|pptx)$/i.test(fileName);
-    if (!valid) throw new Error('File name must end with .docx, .xlsx, or .pptx');
-
+    if (!/\.(docx|xlsx|pptx)$/i.test(fileName)) throw new Error('File name must end with .docx, .xlsx, or .pptx');
     const token = await getTokenSilent();
     if (!token) throw new Error('No access token available');
-
     const url = `https://graph.microsoft.com/v1.0/drives/${driveId}/items/${folderId}:/${encodeURIComponent(fileName)}:/content`;
-
-    const response = await fetch(url, {
-      method: 'PUT',
-      headers: { 'Authorization': `Bearer ${token}`, 'Content-Type': 'application/octet-stream' },
-      body: new Blob(['']) // empty body creates blank file
-    });
-
-    if (!response.ok) {
-      const errorData = await response.json().catch(() => ({}));
-      throw new Error(errorData.error?.message || 'Failed to create file');
-    }
-    return await response.json();
+    const resp = await fetch(url, { method: 'PUT', headers: { 'Authorization': `Bearer ${token}`, 'Content-Type': 'application/octet-stream' }, body: new Blob(['']) });
+    if (!resp.ok) { const err = await resp.json().catch(()=>({})); throw new Error(err.error?.message || 'Failed to create file'); }
+    return await resp.json();
   },
 
-  /**
-   * Advanced Search across SharePoint Embedded using Microsoft Graph Search API
-   * @param {Object} searchOptions Search configuration options
-   * @param {string[]} searchOptions.entityTypes Entity types to search (drive, driveItem, or both)
-   * @param {string} searchOptions.query The search query string
-   * @param {string} searchOptions.mode Search mode (term or exact)
-   * @param {string[]} [searchOptions.fields] Optional fields to include in results
-   * @returns {Promise<Object>} Search results
-   */
+  /** Advanced Search (Graph search/query) */
   async advancedSearch(searchOptions) {
     try {
       const token = await getTokenSilent();
-      if (!token) {
-        throw new Error('No access token available');
-      }
-
+      if (!token) throw new Error('No access token available');
       const { entityTypes, query, mode, fields } = searchOptions;
-
-      // Validate entity types
-      if (!entityTypes || !entityTypes.length) {
-        throw new Error('Entity types must be specified');
-      }
-
+      if (!entityTypes || !entityTypes.length) throw new Error('Entity types must be specified');
       let queryString = query;
-      
-      // If using term mode and containerTypeId is available, append it to the query
       if (mode === 'term' && speConfig.containerTypeId) {
         queryString = `${queryString} AND ContainerTypeId:${speConfig.containerTypeId}`;
       }
-
-      // Construct request body
-      const requestBody = {
-        requests: [
-          {
-            entityTypes: entityTypes,
-            query: {
-              queryString: queryString
-            },
-            sharePointOneDriveOptions: {
-              includeHiddenContent: true
-            }
-          }
-        ]
-      };
-
-      // Add fields if specified
-      if (fields && fields.length) {
-        requestBody.requests[0].fields = fields;
-      }
-
-      const url = 'https://graph.microsoft.com/v1.0/search/query';
-      
-      const response = await fetch(url, {
-        method: 'POST',
-        headers: {
-          'Authorization': `Bearer ${token}`,
-          'Content-Type': 'application/json'
-        },
-        body: JSON.stringify(requestBody)
-      });
-
-      if (!response.ok) {
-        const errorData = await response.json();
-        throw new Error(errorData.error?.message || 'Failed to perform search');
-      }
-
-      const data = await response.json();
-      return data;
-    } catch (error) {
-      console.error('Error performing advanced search:', error);
-      throw error;
-    }
+      const body = { requests: [{ entityTypes, query: { queryString }, sharePointOneDriveOptions: { includeHiddenContent: true } }] };
+      if (fields && fields.length) body.requests[0].fields = fields;
+      const resp = await fetch('https://graph.microsoft.com/v1.0/search/query', { method: 'POST', headers: { 'Authorization': `Bearer ${token}`, 'Content-Type': 'application/json' }, body: JSON.stringify(body) });
+      if (!resp.ok) { const err = await resp.json(); throw new Error(err.error?.message || 'Failed to perform search'); }
+      return await resp.json();
+    } catch (e) { console.error('Error performing advanced search:', e); throw e; }
   },
 
-  /**
-   * Get drive information for a container
-   * @param {string} containerId The ID of the container
-   * @returns {Promise<Object>} Drive information
-   */
+  /** Get drive info */
   async getDriveInfo(containerId) {
     try {
       const token = await getTokenSilent();
-      if (!token) {
-        throw new Error('No access token available');
-      }
-
+      if (!token) throw new Error('No access token available');
       const url = `https://graph.microsoft.com/v1.0/storage/fileStorage/containers/${containerId}/drive`;
-      
-      const response = await fetch(url, {
-        method: 'GET',
-        headers: {
-          'Authorization': `Bearer ${token}`,
-          'Content-Type': 'application/json'
-        }
-      });
+      const resp = await fetch(url, { headers: { 'Authorization': `Bearer ${token}`, 'Content-Type': 'application/json' } });
+      if (!resp.ok) { const err = await resp.json(); throw new Error(err.error?.message || 'Failed to fetch drive information'); }
+      return await resp.json();
+    } catch (e) { console.error('Error fetching drive information:', e); throw e; }
+  },
 
-      if (!response.ok) {
-        const errorData = await response.json();
-        throw new Error(errorData.error?.message || 'Failed to fetch drive information');
-      }
+  /** Container custom properties */
+  async getContainerProperties(containerId) {
+    const token = await getTokenSilent();
+    if (!token) throw new Error('No access token available');
+    const url = `https://graph.microsoft.com/v1.0/storage/fileStorage/containers/${containerId}/customProperties`;
+    const resp = await fetch(url, { headers: { 'Authorization': `Bearer ${token}` } });
+    if (!resp.ok) { const err = await resp.json().catch(()=>({})); throw new Error(err.error?.message || 'Failed to fetch custom properties'); }
+    return await resp.json();
+  },
+  async addContainerProperty(containerId, name, value, isSearchable = false) {
+    if (!name) throw new Error('Property name required');
+    const token = await getTokenSilent();
+    if (!token) throw new Error('No access token available');
+    const url = `https://graph.microsoft.com/v1.0/storage/fileStorage/containers/${containerId}/customProperties`;
+    const body = { [name]: { value, isSearchable: !!isSearchable } };
+    const resp = await fetch(url, { method: 'PATCH', headers: { 'Authorization': `Bearer ${token}`, 'Content-Type': 'application/json' }, body: JSON.stringify(body) });
+    if (!resp.ok) { const err = await resp.json().catch(()=>({})); throw new Error(err.error?.message || 'Failed to add property'); }
+    return await resp.json();
+  },
 
-      const data = await response.json();
-      return data;
-    } catch (error) {
-      console.error('Error fetching drive information:', error);
-      throw error;
+  // Container column definition methods (beta)
+  async listContainerColumns(containerId) {
+    const token = await getTokenSilent();
+    if (!token) throw new Error('No access token available');
+    const url = `https://graph.microsoft.com/beta/storage/fileStorage/containers/${containerId}/columns`;
+    const resp = await fetch(url, { headers: { 'Authorization': `Bearer ${token}` } });
+    if (!resp.ok) { const err = await resp.json().catch(()=>({})); throw new Error(err.error?.message || 'Failed to list columns'); }
+    const data = await resp.json();
+    return data.value || [];
+  },
+  async createContainerColumn(containerId, columnPayload) {
+    const token = await getTokenSilent();
+    if (!token) throw new Error('No access token available');
+    const url = `https://graph.microsoft.com/beta/storage/fileStorage/containers/${containerId}/columns`;
+    const resp = await fetch(url, { method: 'POST', headers: { 'Authorization': `Bearer ${token}`, 'Content-Type': 'application/json' }, body: JSON.stringify(columnPayload) });
+    if (!resp.ok) { const err = await resp.json().catch(()=>({})); throw new Error(err.error?.message || 'Failed to create column'); }
+    return await resp.json();
+  },
+  async deleteContainerColumn(containerId, columnId) {
+    const token = await getTokenSilent();
+    if (!token) throw new Error('No access token available');
+    const url = `https://graph.microsoft.com/beta/storage/fileStorage/containers/${containerId}/columns/${columnId}`;
+    const resp = await fetch(url, { method: 'DELETE', headers: { 'Authorization': `Bearer ${token}` } });
+    if (!resp.ok && resp.status !== 204) {
+      let msg = 'Failed to delete column';
+      try { const err = await resp.json(); msg = err.error?.message || msg; } catch {}
+      throw new Error(msg);
     }
+    return true;
+  },
+
+  // File (DriveItem) list item field values
+  async getFileFields(driveId, itemId) {
+    const token = await getTokenSilent();
+    if (!token) throw new Error('No access token available');
+    const url = `https://graph.microsoft.com/v1.0/drives/${driveId}/items/${itemId}/listItem/fields`;
+    const resp = await fetch(url, { headers: { 'Authorization': `Bearer ${token}` } });
+    if (!resp.ok) { const err = await resp.json().catch(()=>({})); throw new Error(err.error?.message || 'Failed to fetch file fields'); }
+    return await resp.json();
+  },
+  async updateFileField(driveId, itemId, fieldName, fieldValue) {
+    if (!fieldName) throw new Error('fieldName required');
+    const token = await getTokenSilent();
+    if (!token) throw new Error('No access token available');
+    const url = `https://graph.microsoft.com/v1.0/drives/${driveId}/items/${itemId}/listItem/fields`;
+    const body = { [fieldName]: fieldValue };
+    const resp = await fetch(url, { method: 'PATCH', headers: { 'Authorization': `Bearer ${token}`, 'Content-Type': 'application/json' }, body: JSON.stringify(body) });
+    if (!resp.ok) { const err = await resp.json().catch(()=>({})); throw new Error(err.error?.message || 'Failed to update field'); }
+    return await resp.json();
+  },
+
+  /**
+   * Invite (share) a drive item with a user.
+   * @param {string} driveId
+   * @param {string} itemId
+   * @param {string} email Recipient email
+   * @param {('read'|'write')} role Access role (read or write)
+   * @param {Object} options Optional flags { sendInvitation, message, requireSignIn }
+   * @returns {Promise<Object>} Graph invite response
+   */
+  async inviteFileAccess(driveId, itemId, email, role = 'read', options = {}) {
+    if (!driveId || !itemId) throw new Error('driveId and itemId required');
+    if (!email) throw new Error('Recipient email required');
+    const token = await getTokenSilent();
+    if (!token) throw new Error('No access token available');
+    const validRole = role.toLowerCase() === 'write' ? 'write' : 'read';
+    const { sendInvitation = false, message = null, requireSignIn = true } = options;
+    const url = `https://graph.microsoft.com/v1.0/drives/${driveId}/items/${itemId}/invite`;
+    const body = {
+      requireSignIn,
+      sendInvitation,
+      roles: [validRole],
+      recipients: [{ email }],
+      message
+    };
+    const resp = await fetch(url, { method: 'POST', headers: { 'Authorization': `Bearer ${token}`, 'Content-Type': 'application/json' }, body: JSON.stringify(body) });
+    if (!resp.ok) { let msg = 'Failed to invite user'; try { const err = await resp.json(); msg = err.error?.message || msg; } catch {} throw new Error(msg); }
+    return await resp.json();
   }
 };

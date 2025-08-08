@@ -22,7 +22,8 @@ import {
   BreadcrumbItem,
   BreadcrumbDivider,
   BreadcrumbButton,
-  tokens
+  tokens,
+  Menu, MenuTrigger, MenuPopover, MenuList, MenuItem
 } from '@fluentui/react-components';
 import {
   ArrowClockwise24Regular,
@@ -34,7 +35,8 @@ import {
   Delete24Regular,
   Search24Regular,
   Dismiss24Regular,
-  Document24Regular
+  Document24Regular,
+  MoreHorizontal24Regular
 } from '@fluentui/react-icons';
 // Add dialog components
 import { Dialog, DialogTrigger, DialogSurface, DialogBody, DialogTitle, DialogContent, DialogActions } from '@fluentui/react-components';
@@ -112,6 +114,46 @@ const FileBrowserPage = () => {
   const [newFileName, setNewFileName] = useState('');
   const [showCreateDialog, setShowCreateDialog] = useState(false);
   const [createFileError, setCreateFileError] = useState(null);
+  const [showMetaDialog, setShowMetaDialog] = useState(false);
+  const [metaLoading, setMetaLoading] = useState(false);
+  const [metaError, setMetaError] = useState(null);
+  const [properties, setProperties] = useState(null);
+  const [propName, setPropName] = useState('');
+  const [propValue, setPropValue] = useState('');
+  const [propSearchable, setPropSearchable] = useState(true);
+  const [addingProp, setAddingProp] = useState(false);
+  // Columns (container column definitions)
+  const [showColumnsDialog, setShowColumnsDialog] = useState(false);
+  const [columnsLoading, setColumnsLoading] = useState(false);
+  const [columnsError, setColumnsError] = useState(null);
+  const [columns, setColumns] = useState([]);
+  const [colName, setColName] = useState('');
+  const [colDisplayName, setColDisplayName] = useState('');
+  const [colDescription, setColDescription] = useState('');
+  const [colType, setColType] = useState('text');
+  const [colChoices, setColChoices] = useState(''); // for choice type
+  const [colMaxLength, setColMaxLength] = useState('255'); // for text type
+  const [creatingColumn, setCreatingColumn] = useState(false);
+  const [deletingColumnId, setDeletingColumnId] = useState(null);
+  
+  // Document (per-file) fields editing state
+  const [showFieldsDialog, setShowFieldsDialog] = useState(false);
+  const [fieldsLoading, setFieldsLoading] = useState(false);
+  const [fieldsError, setFieldsError] = useState(null);
+  const [activeFile, setActiveFile] = useState(null);
+  const [fieldsColumns, setFieldsColumns] = useState([]); // container column definitions for fields dialog
+  const [fileFieldValues, setFileFieldValues] = useState({}); // original values
+  const [fieldEdits, setFieldEdits] = useState({}); // draft edits
+  const [savingFields, setSavingFields] = useState(false);
+  const [saveMessage, setSaveMessage] = useState(null);
+  // Share dialog state
+  const [showShareDialog, setShowShareDialog] = useState(false);
+  const [shareFile, setShareFile] = useState(null);
+  const [shareEmail, setShareEmail] = useState('');
+  const [shareRole, setShareRole] = useState('read');
+  const [sharing, setSharing] = useState(false);
+  const [shareError, setShareError] = useState(null);
+  const [shareMessage, setShareMessage] = useState(null);
 
   useEffect(() => {
     // Redirect to login if not authenticated
@@ -467,66 +509,194 @@ const FileBrowserPage = () => {
     } finally { setCreating(false); }
   };
   
-  // Handle search
+  const openMetadata = async () => {
+    if (!containerId) return;
+    setShowMetaDialog(true);
+    setMetaError(null);
+    setMetaLoading(true);
+    try {
+      const props = await speService.getContainerProperties(containerId);
+      setProperties(props);
+    } catch (e) { setMetaError(e.message); }
+    finally { setMetaLoading(false); }
+  };
+
+  const addProperty = async () => {
+    if (!propName.trim()) { setMetaError('Name required'); return; }
+    setMetaError(null);
+    setAddingProp(true);
+    try {
+      await speService.addContainerProperty(containerId, propName.trim(), propValue, propSearchable);
+      // Re-fetch full list to avoid losing previously loaded properties
+      const refreshed = await speService.getContainerProperties(containerId);
+      setProperties(refreshed);
+      setPropName(''); setPropValue(''); setPropSearchable(true);
+    } catch (e) { setMetaError(e.message); }
+    finally { setAddingProp(false); }
+  };
+
+  // Container Columns handlers
+  const openColumns = async () => {
+    if (!containerId) return;
+    setShowColumnsDialog(true);
+    setColumnsError(null);
+    setColumns([]);
+    setColumnsLoading(true);
+    try {
+      const data = await speService.listContainerColumns(containerId);
+      setColumns(data);
+    } catch (e) { setColumnsError(e.message); }
+    finally { setColumnsLoading(false); }
+  };
+
+  const inferColumnType = (col) => {
+    if (!col) return 'unknown';
+    const known = ['text','choice','boolean','dateTime','currency','number','personOrGroup','hyperlinkOrPicture'];
+    return known.find(k => col[k]) || 'unknown';
+  };
+
+  const resetColumnForm = () => {
+    setColName(''); setColDisplayName(''); setColDescription(''); setColType('text'); setColChoices(''); setColMaxLength('255');
+  };
+
+  const createColumn = async () => {
+    if (!colName.trim()) { setColumnsError('Column name required'); return; }
+    setColumnsError(null);
+    setCreatingColumn(true);
+    try {
+      const payload = {
+        name: colName.trim(),
+        displayName: colDisplayName.trim() || colName.trim(),
+        description: colDescription.trim(),
+        enforceUniqueValues: false,
+        hidden: false,
+        indexed: false
+      };
+      switch(colType){
+        case 'text':
+          payload.text = { maxLength: parseInt(colMaxLength)||255, allowMultipleLines:false, appendChangesToExistingText:false, linesForEditing:0 }; break;
+        case 'choice':
+          payload.choice = { allowTextEntry:false, displayAs:'dropDownMenu', choices: colChoices.split(',').map(c=>c.trim()).filter(Boolean) }; break;
+        case 'boolean': payload.boolean = {}; break;
+        case 'number': payload.number = { decimalPlaces:'automatic' }; break;
+        case 'dateTime': payload.dateTime = { displayAs:'default', format:'dateOnly' }; break;
+        default: payload.text = { maxLength:255, allowMultipleLines:false, appendChangesToExistingText:false, linesForEditing:0 }; break;
+      }
+      await speService.createContainerColumn(containerId, payload);
+      // refresh list
+      const data = await speService.listContainerColumns(containerId);
+      setColumns(data);
+      resetColumnForm();
+    } catch(e){ setColumnsError(e.message); }
+    finally { setCreatingColumn(false); }
+  };
+
+  const deleteColumn = async (col) => {
+    if (!window.confirm(`Delete column ${col.displayName || col.name}?`)) return;
+    setDeletingColumnId(col.id);
+    try {
+      await speService.deleteContainerColumn(containerId, col.id);
+      const data = await speService.listContainerColumns(containerId);
+      setColumns(data);
+    } catch(e){ setColumnsError(e.message); }
+    finally { setDeletingColumnId(null); }
+  };
+  
+  // Open per-file fields editing dialog
+  const openFieldsDialog = async (file) => {
+    if (!containerId || !file || file.folder) return;
+    setActiveFile(file);
+    setShowFieldsDialog(true);
+    setFieldsLoading(true);
+    setFieldsError(null);
+    setSaveMessage(null);
+    try {
+      const [cols, fields] = await Promise.all([
+        speService.listContainerColumns(containerId),
+        speService.getFileFields(containerId, file.id)
+      ]);
+      setFieldsColumns(cols);
+      setFileFieldValues(fields);
+      setFieldEdits(fields);
+    } catch(e){ setFieldsError(e.message); }
+    finally { setFieldsLoading(false); }
+  };
+
+  const closeFieldsDialog = () => {
+    setShowFieldsDialog(false);
+    setActiveFile(null);
+    setFieldsColumns([]);
+    setFileFieldValues({});
+    setFieldEdits({});
+    setFieldsError(null);
+    setSaveMessage(null);
+    setSavingFields(false);
+  };
+
+  const handleFieldChange = (fieldName, value) => {
+    setFieldEdits(prev => ({ ...prev, [fieldName]: value }));
+  };
+
+  const saveFieldChanges = async () => {
+    if (!activeFile) return;
+    setSavingFields(true);
+    setFieldsError(null);
+    setSaveMessage(null);
+    try {
+      const diffEntries = Object.entries(fieldEdits).filter(([k,v]) => fileFieldValues[k] !== v);
+      for (const [name, val] of diffEntries) {
+        await speService.updateFileField(containerId, activeFile.id, name, val);
+      }
+      setFileFieldValues(fieldEdits);
+      setSaveMessage(diffEntries.length ? 'Fields saved successfully.' : 'No changes to save.');
+      // Optionally refresh files list to show any column-bound fields changes in list (future enhancement)
+    } catch(e){ setFieldsError(e.message); }
+    finally { setSavingFields(false); }
+  };
+
+  // Added: search handlers
   const handleSearch = async (e) => {
-    e.preventDefault();
-    
-    if (!searchTerm.trim()) {
-      // If search term is empty, clear search results and show all files
-      setSearchResults(null);
-      return;
-    }
-    
-    setIsSearching(true);
-    setError(null);
-    
+    if (e) e.preventDefault();
+    const term = searchTerm.trim();
+    if (!term) { setSearchResults(null); return; }
+    setIsSearching(true); setError(null);
     try {
-      const results = await speService.searchFiles(containerId, searchTerm);
-      setSearchResults(results);
-    } catch (error) {
-      console.error('Error searching files:', error);
-      setError(`Search failed: ${error.message}`);
-    } finally {
-      setIsSearching(false);
-    }
+      const results = await speService.searchFiles(containerId, term, 100);
+      setSearchResults(results || []);
+    } catch(err){ setError('Search failed: ' + err.message); }
+    finally { setIsSearching(false); }
   };
-  
-  // Clear search results and reset to current folder view
-  const clearSearch = () => {
-    setSearchTerm('');
-    setSearchResults(null);
-    if (searchInputRef.current) {
-      searchInputRef.current.focus();
-    }
-  };
+  const clearSearch = () => { setSearchResults(null); setSearchTerm(''); };
 
-  // Handle drive info modal
+  // Added: drive info handlers
   const handleDriveInfoClick = async () => {
-    if (!containerId) {
-      setError('Container ID not available');
-      return;
-    }
-
-    setIsLoading(true);
-    setError(null);
-
     try {
-      const driveData = await speService.getDriveInfo(containerId);
-      setDriveInfo(driveData);
-      setShowDriveInfo(true);
-    } catch (error) {
-      console.error('Error fetching drive info:', error);
-      setError(`Failed to fetch drive information: ${error.message}`);
-    } finally {
-      setIsLoading(false);
-    }
+      const info = await speService.getDriveInfo(containerId);
+      setDriveInfo(info); setShowDriveInfo(true);
+    } catch(err){ setError('Failed to load drive info: ' + err.message); }
+  };
+  const closeDriveInfo = () => { setShowDriveInfo(false); };
+
+  // Added: share placeholder
+  const handleSharePlaceholder = (file) => {
+    console.log('Share action placeholder for', file?.name);
+    alert('Share functionality not implemented yet.');
+  };
+  // Replace placeholder with real openShareDialog
+  const openShareDialog = (file) => {
+    setShareFile(file); setShareEmail(''); setShareRole('read'); setShareError(null); setShareMessage(null); setShowShareDialog(true);
+  };
+  const closeShareDialog = () => { setShowShareDialog(false); setShareFile(null); };
+  const submitShare = async () => {
+    if (!shareEmail.trim()) { setShareError('Email required'); return; }
+    setShareError(null); setShareMessage(null); setSharing(true);
+    try {
+      const resp = await speService.inviteFileAccess(containerId, shareFile.id, shareEmail.trim(), shareRole);
+      setShareMessage('Invitation created. (sendInvitation=false)');
+    } catch(e){ setShareError(e.message); }
+    finally { setSharing(false); }
   };
 
-  const closeDriveInfo = () => {
-    setShowDriveInfo(false);
-    setDriveInfo(null);
-  };
-  
   // If still loading or not authenticated, show loading
   if (loading || !isAuthenticated) {
     return (
@@ -607,41 +777,55 @@ const FileBrowserPage = () => {
           </div>
 
           <div style={{ display: 'flex', gap: 8, marginTop: 12, flexWrap: 'wrap' }}>
-            <Button icon={<ArrowClockwise24Regular />} onClick={() => fetchFiles(currentFolderId)} disabled={isLoading}>
-              {isLoading ? 'Loading…' : 'Refresh'}
-            </Button>
-            <Button icon={<ArrowUpload24Regular />} onClick={triggerFileInput} disabled={isUploading}>
-              {isUploading ? 'Uploading…' : 'Upload Files'}
-            </Button>
-            <Button icon={<Info24Regular />} onClick={handleDriveInfoClick} disabled={isLoading}>
-              Drive Info
-            </Button>
-            <Button onClick={() => navigate('/spe-explore')}>
-              Back to Containers
-            </Button>
-            <Dialog open={showCreateDialog} onOpenChange={(_, data) => { setShowCreateDialog(!!data.open); if (!data.open) { setNewFileName(''); setCreateFileError(null); } }}>
-              <DialogTrigger disableButtonEnhancement>
-                <Button icon={<Document24Regular />} onClick={() => setShowCreateDialog(true)}>New Office File</Button>
-              </DialogTrigger>
-              <DialogSurface>
-                <DialogBody>
-                  <DialogTitle>Create blank file</DialogTitle>
-                  <DialogContent>
-                    <p style={{ marginBottom: 8 }}>Enter a file name ending with .docx, .xlsx, or .pptx</p>
-                    {createFileError && (
-                      <div style={{ marginBottom: 8, color: tokens.colorPaletteRedForeground2, fontSize: 12 }} role="alert">
-                        {createFileError}
-                      </div>
-                    )}
-                    <Input value={newFileName} onChange={(_, d) => { setNewFileName(d.value); if (createFileError) setCreateFileError(null); }} placeholder="QuarterlyReport.docx" autoFocus onKeyDown={e => { if (e.key === 'Enter') { e.preventDefault(); handleCreateBlankFile(); } }} />
-                  </DialogContent>
-                  <DialogActions>
-                    <Button appearance="secondary" onClick={() => { setShowCreateDialog(false); setNewFileName(''); setCreateFileError(null); }}>Cancel</Button>
-                    <Button appearance="primary" disabled={creating} onClick={handleCreateBlankFile}>{creating ? 'Creating...' : 'Create'}</Button>
-                  </DialogActions>
-                </DialogBody>
-              </DialogSurface>
-            </Dialog>
+            {/* Reworked toolbar layout: left group actions + right aligned More menu */}
+            <div style={{ display:'flex', gap:8, flexWrap:'wrap', flexGrow:1 }}>
+              <Button icon={<ArrowClockwise24Regular />} onClick={() => fetchFiles(currentFolderId)} disabled={isLoading}>
+                {isLoading ? 'Loading…' : 'Refresh'}
+              </Button>
+              <Button icon={<ArrowUpload24Regular />} onClick={triggerFileInput} disabled={isUploading}>
+                {isUploading ? 'Uploading…' : 'Upload Files'}
+              </Button>
+              <Dialog open={showCreateDialog} onOpenChange={(_, data) => { setShowCreateDialog(!!data.open); if (!data.open) { setNewFileName(''); setCreateFileError(null); } }}>
+                <DialogTrigger disableButtonEnhancement>
+                  <Button icon={<Document24Regular />} onClick={() => setShowCreateDialog(true)}>New Office File</Button>
+                </DialogTrigger>
+                <DialogSurface>
+                  <DialogBody>
+                    <DialogTitle>Create blank file</DialogTitle>
+                    <DialogContent>
+                      <p style={{ marginBottom: 8 }}>Enter a file name ending with .docx, .xlsx, or .pptx</p>
+                      {createFileError && (
+                        <div style={{ marginBottom: 8, color: tokens.colorPaletteRedForeground2, fontSize: 12 }} role="alert">
+                          {createFileError}
+                        </div>
+                      )}
+                      <Input value={newFileName} onChange={(_, d) => { setNewFileName(d.value); if (createFileError) setCreateFileError(null); }} placeholder="QuarterlyReport.docx" autoFocus onKeyDown={e => { if (e.key === 'Enter') { e.preventDefault(); handleCreateBlankFile(); } }} />
+                    </DialogContent>
+                    <DialogActions>
+                      <Button appearance="secondary" onClick={() => { setShowCreateDialog(false); setNewFileName(''); setCreateFileError(null); }}>Cancel</Button>
+                      <Button appearance="primary" disabled={creating} onClick={handleCreateBlankFile}>{creating ? 'Creating...' : 'Create'}</Button>
+                    </DialogActions>
+                  </DialogBody>
+                </DialogSurface>
+              </Dialog>
+              <Button onClick={() => navigate('/spe-explore')}>
+                Back to Containers
+              </Button>
+            </div>
+            <div style={{ marginLeft:'auto' }}>
+              <Menu positioning="below-end">
+                <MenuTrigger disableButtonEnhancement>
+                  <Button icon={<MoreHorizontal24Regular />}>More</Button>
+                </MenuTrigger>
+                <MenuPopover>
+                  <MenuList>
+                    <MenuItem icon={<Info24Regular />} onClick={handleDriveInfoClick} disabled={isLoading}>Drive Info</MenuItem>
+                    <MenuItem onClick={openMetadata}>Container Properties</MenuItem>
+                    <MenuItem onClick={() => { openColumns(); }}>Container Columns</MenuItem>
+                  </MenuList>
+                </MenuPopover>
+              </Menu>
+            </div>
             <input
               type="file"
               ref={fileInputRef}
@@ -666,9 +850,10 @@ const FileBrowserPage = () => {
           ) : isLoading ? (
             <p className="loading-text">Loading files...</p>
           ) : (searchResults ? (Array.isArray(searchResults) && searchResults.length === 0) : (files.length === 0)) ? (
-            <div className="empty-state drop-zone" onDragOver={handleDragOver} onDrop={handleDrop}>
-              <p>No files found.</p>
-              <p className="drop-instructions">Drop files here to upload or use the Upload button above.</p>
+            <div className="empty-state drop-zone" onDragOver={handleDragOver} onDrop={handleDrop} style={{ padding:40, border:'2px dashed #bbb', textAlign:'center', borderRadius:8 }}>
+              <p style={{ fontSize:16, marginBottom:8 }}>No files here yet.</p>
+              <p style={{ fontSize:13, color:'#666', marginBottom:16 }}>Drag & drop files to upload or use the Upload / New buttons.</p>
+              <Button appearance="primary" onClick={triggerFileInput}>Upload Files</Button>
             </div>
           ) : (
             <Table>
@@ -685,6 +870,7 @@ const FileBrowserPage = () => {
                   const fileType = file.folder ? 'folder' : getFileTypeFromMime(file.file?.mimeType, file.name);
                   const sizeLabel = !file.folder && file.size ? `${Math.round(file.size / 1024)} KB` : (file.folder ? `${file.folder.childCount ?? ''} ${file.folder.childCount === 1 ? 'item' : 'items'}` : '');
                   const modified = file.lastModifiedDateTime ? new Date(file.lastModifiedDateTime).toLocaleString() : '';
+                  const previewable = !file.folder && isPreviewableFile(file) && !isOfficeFile(file);
                   return (
                     <TableRow key={file.id}>
                       <TableCell className="col-name">
@@ -701,20 +887,36 @@ const FileBrowserPage = () => {
                       <TableCell className="col-modified">{modified}</TableCell>
                       <TableCell className="col-size" style={{ textAlign: 'right' }}>{sizeLabel}</TableCell>
                       <TableCell className="col-actions" style={{ textAlign: 'right' }}>
-                        {file.folder ? (
-                          <div style={{ display: 'inline-flex', gap: 8 }}>
-                            <Button appearance="subtle" icon={<FolderOpen24Regular />} onClick={(e) => { e.stopPropagation(); navigateToFolder(file); }} />
-                            <Button appearance="subtle" icon={<Delete24Regular />} onClick={(e) => handleDeleteFile(e, file)} />
-                          </div>
-                        ) : (
-                          <div style={{ display: 'inline-flex', gap: 8 }}>
-                            {isPreviewableFile(file) && !isOfficeFile(file) && (
-                              <Button appearance="subtle" icon={<Eye24Regular />} onClick={(e) => handlePreviewClick(e, file)} />
+                        {/* Inline action buttons for files */}
+                        {!file.folder && (
+                          <div style={{ display:'inline-flex', gap:4, alignItems:'center', marginRight:4 }}>
+                            {previewable && (
+                              <Button appearance="subtle" icon={<Eye24Regular />} aria-label="Preview" onClick={(e)=>{ e.stopPropagation(); handlePreviewClick(e,file); }} />
                             )}
-                            <Button appearance="subtle" icon={<ArrowDownload24Regular />} onClick={(e) => handleDownloadClick(e, file)} />
-                            <Button appearance="subtle" icon={<Delete24Regular />} onClick={(e) => handleDeleteFile(e, file)} />
+                            <Button appearance="subtle" icon={<ArrowDownload24Regular />} aria-label="Download" onClick={(e)=>{ e.stopPropagation(); handleDownloadClick(e,file); }} />
                           </div>
                         )}
+                        <Menu positioning="below-end">
+                          <MenuTrigger disableButtonEnhancement>
+                            <Button appearance="subtle" icon={<MoreHorizontal24Regular />} aria-label="More actions" />
+                          </MenuTrigger>
+                          <MenuPopover>
+                            <MenuList>
+                              {file.folder ? (
+                                <>
+                                  <MenuItem onClick={(e)=>{ e.stopPropagation(); navigateToFolder(file); }}>Open</MenuItem>
+                                  <MenuItem onClick={(e)=>{ e.stopPropagation(); handleDeleteFile(e, file); }}>Delete</MenuItem>
+                                </>
+                              ) : (
+                                <>
+                                  <MenuItem onClick={(e)=>{ e.stopPropagation(); openFieldsDialog(file); }}>Edit Document Fields</MenuItem>
+                                  <MenuItem onClick={(e)=>{ e.stopPropagation(); handleDeleteFile(e,file); }}>Delete</MenuItem>
+                                  <MenuItem onClick={(e)=>{ e.stopPropagation(); openShareDialog(file); }}>Share</MenuItem>
+                                </>
+                              )}
+                            </MenuList>
+                          </MenuPopover>
+                        </Menu>
                       </TableCell>
                     </TableRow>
                   );
@@ -733,6 +935,189 @@ const FileBrowserPage = () => {
         {showDriveInfo && (
           <DriveInfoModal driveInfo={driveInfo} onClose={closeDriveInfo} />
         )}
+
+        {/* Metadata Dialog */}
+        <Dialog open={showMetaDialog} onOpenChange={(_,d)=>{ setShowMetaDialog(!!d.open); if(!d.open){ setProperties(null); setMetaError(null);} }}>
+          <DialogSurface style={{ maxWidth: 640 }}>
+            <DialogBody>
+              <DialogTitle>Container Properties</DialogTitle>
+              <DialogContent>
+                {metaLoading && <p>Loading properties...</p>}
+                {metaError && <p style={{ color: 'crimson', fontSize: 12 }} role="alert">{metaError}</p>}
+                {!metaLoading && properties && (
+                  <div style={{ marginBottom:16 }}>
+                    {Object.keys(properties).filter(k=>!k.startsWith('@')).length === 0 && <p style={{ fontStyle:'italic' }}>No properties set.</p>}
+                    {Object.entries(properties)
+                      .filter(([k]) => !k.startsWith('@'))
+                      .map(([k,v]) => (
+                        <div key={k} style={{ padding:'6px 8px', border:'1px solid #ddd', borderRadius:6, marginBottom:6 }}>
+                          <strong>{k}</strong>: <span>{v?.value ?? ''}</span>{v?.isSearchable ? <span style={{ marginLeft:8, fontSize:11, background:'#eef', padding:'2px 6px', borderRadius:12 }}>searchable</span>:null}
+                        </div>
+                    ))}
+                  </div>
+                )}
+                <div style={{ borderTop:'1px solid #e1e4e8', paddingTop:12, marginTop:8 }}>
+                  <h4 style={{ margin:'4px 0 8px' }}>Add Property</h4>
+                  <div style={{ display:'flex', flexDirection:'column', gap:8 }}>
+                    <Input size="small" value={propName} placeholder="Property name" onChange={(_,d)=>setPropName(d.value)} />
+                    <Input size="small" value={propValue} placeholder="Property value" onChange={(_,d)=>setPropValue(d.value)} />
+                    <label style={{ display:'flex', alignItems:'center', gap:6, fontSize:12 }}>
+                      <input type="checkbox" checked={propSearchable} onChange={e=>setPropSearchable(e.target.checked)} /> Searchable
+                    </label>
+                    <div style={{ display:'flex', gap:8 }}>
+                      <Button appearance="primary" size="small" disabled={addingProp} onClick={addProperty}>{addingProp? 'Adding...' : 'Add'}</Button>
+                      <Button size="small" appearance="secondary" onClick={()=>{ setPropName(''); setPropValue(''); setPropSearchable(true);}}>Reset</Button>
+                    </div>
+                  </div>
+                </div>
+              </DialogContent>
+              <DialogActions>
+                <Button appearance="secondary" onClick={()=>setShowMetaDialog(false)}>Close</Button>
+              </DialogActions>
+            </DialogBody>
+          </DialogSurface>
+        </Dialog>
+
+        {/* Container Columns Dialog */}
+        <Dialog open={showColumnsDialog} onOpenChange={(_,d)=>{ setShowColumnsDialog(!!d.open); if(!d.open){ setColumns([]); setColumnsError(null); } }}>
+          <DialogSurface style={{ maxWidth: 760 }}>
+            <DialogBody>
+              <DialogTitle>Container Columns</DialogTitle>
+              <DialogContent>
+                {columnsLoading && <p>Loading columns...</p>}
+                {columnsError && <p style={{ color:'crimson', fontSize:12 }} role="alert">{columnsError}</p>}
+                {!columnsLoading && !columnsError && columns.length === 0 && <p style={{ fontStyle:'italic' }}>No columns defined.</p>}
+                {!columnsLoading && columns.length > 0 && (
+                  <div style={{ marginBottom:16 }}>
+                    {columns.map(col => (
+                      <div key={col.id} style={{ display:'flex', alignItems:'center', justifyContent:'space-between', border:'1px solid #ddd', padding:'6px 10px', borderRadius:6, marginBottom:6 }}>
+                        <div>
+                          <strong>{col.displayName || col.name}</strong> <span style={{ fontSize:11, background:'#eef', padding:'2px 6px', borderRadius:12, marginLeft:4 }}>{inferColumnType(col)}</span>
+                          {col.description && <div style={{ fontSize:11, color:'#555', marginTop:2 }}>{col.description}</div>}
+                        </div>
+                        <div>
+                          <Button appearance="subtle" size="small" disabled={deletingColumnId===col.id} onClick={()=>deleteColumn(col)}>{deletingColumnId===col.id ? 'Deleting…' : 'Delete'}</Button>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                )}
+                <div style={{ borderTop:'1px solid #e1e4e8', paddingTop:12 }}>
+                  <h4 style={{ margin:'4px 0 8px' }}>Add Column</h4>
+                  <div style={{ display:'grid', gap:8, gridTemplateColumns:'1fr 1fr', marginBottom:8 }}>
+                    <Input size="small" value={colName} placeholder="Name *" onChange={(_,d)=>setColName(d.value)} />
+                    <Input size="small" value={colDisplayName} placeholder="Display name" onChange={(_,d)=>setColDisplayName(d.value)} />
+                    <Input size="small" value={colDescription} placeholder="Description" onChange={(_,d)=>setColDescription(d.value)} />
+                    <select value={colType} onChange={e=>setColType(e.target.value)} style={{ fontSize:12, padding:6, borderRadius:4, border:'1px solid #ccc' }}>
+                      <option value="text">Text</option>
+                      <option value="choice">Choice</option>
+                      <option value="boolean">Boolean</option>
+                      <option value="number">Number</option>
+                      <option value="dateTime">Date/Time</option>
+                    </select>
+                  </div>
+                  {colType === 'text' && (
+                    <div style={{ marginBottom:8 }}>
+                      <Input size="small" value={colMaxLength} placeholder="Max length" onChange={(_,d)=>setColMaxLength(d.value)} />
+                    </div>
+                  )}
+                  {colType === 'choice' && (
+                    <div style={{ marginBottom:8 }}>
+                      <Input size="small" value={colChoices} placeholder="Choices (comma separated)" onChange={(_,d)=>setColChoices(d.value)} />
+                    </div>
+                  )}
+                  <div style={{ display:'flex', gap:8 }}>
+                    <Button appearance="primary" size="small" disabled={creatingColumn} onClick={createColumn}>{creatingColumn ? 'Creating…' : 'Create Column'}</Button>
+                    <Button size="small" appearance="secondary" onClick={resetColumnForm}>Reset</Button>
+                  </div>
+                </div>
+              </DialogContent>
+              <DialogActions>
+                <Button appearance="secondary" onClick={()=>setShowColumnsDialog(false)}>Close</Button>
+              </DialogActions>
+            </DialogBody>
+          </DialogSurface>
+        </Dialog>
+
+        {/* Document Fields Dialog */}
+        <Dialog open={showFieldsDialog} onOpenChange={(_,d)=>{ if(!d.open) closeFieldsDialog(); }}>
+          <DialogSurface style={{ maxWidth: 720 }}>
+            <DialogBody>
+              <DialogTitle>Edit Document Fields{activeFile? ` – ${activeFile.name}`:''}</DialogTitle>
+              <DialogContent>
+                {fieldsLoading && <p>Loading fields...</p>}
+                {fieldsError && <p style={{ color:'crimson', fontSize:12 }} role="alert">{fieldsError}</p>}
+                {!fieldsLoading && !fieldsError && (
+                  <div style={{ display:'flex', flexDirection:'column', gap:12 }}>
+                    {fieldsColumns.length === 0 && <p style={{ fontStyle:'italic' }}>No columns defined for this container.</p>}
+                    {fieldsColumns.map(col => {
+                      const type = inferColumnType(col);
+                      const name = col.name;
+                      let value = fieldEdits[name];
+                      const onChange = (val) => handleFieldChange(name, val);
+                      return (
+                        <div key={col.id} style={{ display:'flex', flexDirection:'column', gap:4 }}>
+                          <label style={{ fontWeight:600, fontSize:13 }}>{col.displayName || name}</label>
+                          {type === 'choice' && col.choice?.choices ? (
+                            <select value={value ?? ''} onChange={e=>onChange(e.target.value)} style={{ padding:6, fontSize:13, borderRadius:4, border:'1px solid #ccc' }}>
+                              <option value="">-- Select --</option>
+                              {col.choice.choices.map(c=> <option key={c} value={c}>{c}</option>)}
+                            </select>
+                          ) : type === 'boolean' ? (
+                            <label style={{ display:'flex', alignItems:'center', gap:6 }}>
+                              <input type="checkbox" checked={!!value} onChange={e=>onChange(e.target.checked)} />
+                              <span style={{ fontSize:12 }}>True / False</span>
+                            </label>
+                          ) : type === 'number' ? (
+                            <Input type="number" value={value ?? ''} onChange={(_,d)=>onChange(d.value === '' ? '' : Number(d.value))} />
+                          ) : type === 'dateTime' ? (
+                            <Input type="datetime-local" value={value ? new Date(value).toISOString().slice(0,16) : ''} onChange={(_,d)=>{ const iso = d.value ? new Date(d.value).toISOString() : ''; onChange(iso); }} />
+                          ) : (
+                            <Input value={value ?? ''} onChange={(_,d)=>onChange(d.value)} />
+                          )}
+                          {col.description && <div style={{ fontSize:11, color:'#666' }}>{col.description}</div>}
+                        </div>
+                      );
+                    })}
+                    {saveMessage && <div style={{ fontSize:12, color:'green' }}>{saveMessage}</div>}
+                  </div>
+                )}
+              </DialogContent>
+              <DialogActions>
+                <Button appearance="secondary" onClick={closeFieldsDialog}>Close</Button>
+                <Button appearance="primary" disabled={savingFields || fieldsLoading} onClick={saveFieldChanges}>{savingFields ? 'Saving…' : 'Save Changes'}</Button>
+              </DialogActions>
+            </DialogBody>
+          </DialogSurface>
+        </Dialog>
+
+        {/* Share Dialog */}
+        <Dialog open={showShareDialog} onOpenChange={(_,d)=>{ if(!d.open) closeShareDialog(); }}>
+          <DialogSurface style={{ maxWidth:480 }}>
+            <DialogBody>
+              <DialogTitle>Share File{shareFile? ` – ${shareFile.name}`:''}</DialogTitle>
+              <DialogContent>
+                {shareError && <p style={{ color:'crimson', fontSize:12 }} role="alert">{shareError}</p>}
+                {shareMessage && <p style={{ color:'green', fontSize:12 }} role="status">{shareMessage}</p>}
+                <div style={{ display:'flex', flexDirection:'column', gap:10 }}>
+                  <Input value={shareEmail} placeholder="Recipient email" onChange={(_,d)=>{ setShareEmail(d.value); if(shareError) setShareError(null); }} />
+                  <div style={{ display:'flex', gap:8, alignItems:'center' }}>
+                    <label style={{ fontSize:13, fontWeight:600 }}>Role:</label>
+                    <select value={shareRole} onChange={e=>setShareRole(e.target.value)} style={{ padding:6, fontSize:13, borderRadius:4, border:'1px solid #ccc' }}>
+                      <option value="read">Read</option>
+                      <option value="write">Write</option>
+                    </select>
+                  </div>
+                  <div style={{ fontSize:11, color:'#666' }}>Creates an invite granting the selected role. Invitations are not emailed (sendInvitation=false).</div>
+                </div>
+              </DialogContent>
+              <DialogActions>
+                <Button appearance="secondary" onClick={closeShareDialog}>Close</Button>
+                <Button appearance="primary" disabled={sharing} onClick={submitShare}>{sharing? 'Sharing…':'Share'}</Button>
+              </DialogActions>
+            </DialogBody>
+          </DialogSurface>
+        </Dialog>
       </div>
     </div>
   );
