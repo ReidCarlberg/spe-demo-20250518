@@ -154,6 +154,7 @@ const FileBrowserPage = () => {
   const [sharing, setSharing] = useState(false);
   const [shareError, setShareError] = useState(null);
   const [shareMessage, setShareMessage] = useState(null);
+  const [shareSendInvitation, setShareSendInvitation] = useState(false);
 
   useEffect(() => {
     // Redirect to login if not authenticated
@@ -684,15 +685,15 @@ const FileBrowserPage = () => {
   };
   // Replace placeholder with real openShareDialog
   const openShareDialog = (file) => {
-    setShareFile(file); setShareEmail(''); setShareRole('read'); setShareError(null); setShareMessage(null); setShowShareDialog(true);
+    setShareFile(file); setShareEmail(''); setShareRole('read'); setShareError(null); setShareMessage(null); setShareSendInvitation(false); setShowShareDialog(true);
   };
   const closeShareDialog = () => { setShowShareDialog(false); setShareFile(null); };
   const submitShare = async () => {
     if (!shareEmail.trim()) { setShareError('Email required'); return; }
     setShareError(null); setShareMessage(null); setSharing(true);
     try {
-      const resp = await speService.inviteFileAccess(containerId, shareFile.id, shareEmail.trim(), shareRole);
-      setShareMessage('Invitation created. (sendInvitation=false)');
+      const resp = await speService.inviteFileAccess(containerId, shareFile.id, shareEmail.trim(), shareRole, { sendInvitation: shareSendInvitation });
+      setShareMessage(shareSendInvitation ? 'Invitation created and email sent.' : 'Invitation created (email not sent).');
     } catch(e){ setShareError(e.message); }
     finally { setSharing(false); }
   };
@@ -994,9 +995,12 @@ const FileBrowserPage = () => {
                         <div>
                           <strong>{col.displayName || col.name}</strong> <span style={{ fontSize:11, background:'#eef', padding:'2px 6px', borderRadius:12, marginLeft:4 }}>{inferColumnType(col)}</span>
                           {col.description && <div style={{ fontSize:11, color:'#555', marginTop:2 }}>{col.description}</div>}
+                          {col.isDeletable === false && <div style={{ fontSize:10, color:'#888', marginTop:2 }}>System / non-deletable</div>}
                         </div>
                         <div>
-                          <Button appearance="subtle" size="small" disabled={deletingColumnId===col.id} onClick={()=>deleteColumn(col)}>{deletingColumnId===col.id ? 'Deleting…' : 'Delete'}</Button>
+                          {col.isDeletable !== false && (
+                            <Button appearance="subtle" size="small" disabled={deletingColumnId===col.id} onClick={()=>deleteColumn(col)}>{deletingColumnId===col.id ? 'Deleting…' : 'Delete'}</Button>
+                          )}
                         </div>
                       </div>
                     ))}
@@ -1108,7 +1112,10 @@ const FileBrowserPage = () => {
                       <option value="write">Write</option>
                     </select>
                   </div>
-                  <div style={{ fontSize:11, color:'#666' }}>Creates an invite granting the selected role. Invitations are not emailed (sendInvitation=false).</div>
+                  <label style={{ display:'flex', gap:6, alignItems:'center', fontSize:13 }}>
+                    <input type="checkbox" checked={shareSendInvitation} onChange={e=>setShareSendInvitation(e.target.checked)} /> Send email invitation
+                  </label>
+                  <div style={{ fontSize:11, color:'#666' }}>Creates an invite granting the selected role. {shareSendInvitation ? 'An email invitation will be sent.' : 'Email invitation will NOT be sent.'}</div>
                 </div>
               </DialogContent>
               <DialogActions>
