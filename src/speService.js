@@ -606,6 +606,59 @@ export const speService = {
     }
   },
 
+  /**
+   * Rename a drive item (file or folder)
+   * @param {string} driveId The ID of the drive/container
+   * @param {string} itemId The ID of the item to rename
+   * @param {string} newName The new name for the item
+   * @returns {Promise<Object>} The updated item object
+   */
+  async renameItem(driveId, itemId, newName) {
+    try {
+      if (!newName || !newName.trim()) {
+        throw new Error('Item name cannot be empty');
+      }
+
+      const token = await getTokenSilent();
+      if (!token) {
+        throw new Error('No access token available');
+      }
+
+      // Construct the API URL
+      const url = `https://graph.microsoft.com/v1.0/drives/${driveId}/items/${itemId}`;
+
+      // Construct the body of the PATCH request
+      const body = {
+        name: newName.trim()
+      };
+
+      console.log('Renaming item:', url, 'to:', newName);
+
+      // Make the PATCH request to the Microsoft Graph API
+      const response = await fetch(url, {
+        method: 'PATCH',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`
+        },
+        body: JSON.stringify(body)
+      });
+
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.error?.message || 'Failed to rename item');
+      }
+
+      const result = await response.json();
+      console.log('Rename item result:', result);
+
+      return result;
+    } catch (error) {
+      console.error('Error renaming item:', error);
+      throw error;
+    }
+  },
+
   /** Advanced Search (Graph search/query) */
   async advancedSearch(searchOptions) {
     try {

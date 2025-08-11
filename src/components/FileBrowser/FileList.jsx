@@ -21,6 +21,7 @@ const FileList = ({
   onEditFields,
   onDelete,
   onShare,
+  onRename,
   onNavigateToFolder,
   onDragOver,
   onDrop,
@@ -106,6 +107,7 @@ const FileList = ({
                   onEditFields={onEditFields}
                   onDelete={onDelete}
                   onShare={onShare}
+                  onRename={onRename}
                   onNavigateToFolder={onNavigateToFolder}
                 />
               </TableCell>

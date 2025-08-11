@@ -3,6 +3,7 @@ import { Button, Menu, MenuTrigger, MenuPopover, MenuList, MenuItem } from '@flu
 import { 
   ArrowDownload24Regular, 
   Eye24Regular, 
+  Edit24Regular,
   MoreHorizontal24Regular 
 } from '@fluentui/react-icons';
 import { isPreviewableFile, isOfficeFile } from './fileUtils';
@@ -14,6 +15,7 @@ const FileActions = ({
   onEditFields, 
   onDelete, 
   onShare, 
+  onRename,
   onNavigateToFolder 
 }) => {
   const previewable = !file.folder && isPreviewableFile(file) && !isOfficeFile(file);
@@ -70,6 +72,15 @@ const FileActions = ({
                 <MenuItem 
                   onClick={(e) => {
                     e.stopPropagation();
+                    onRename(file);
+                  }}
+                >
+                  <Edit24Regular style={{ marginRight: 8 }} />
+                  Rename
+                </MenuItem>
+                <MenuItem 
+                  onClick={(e) => {
+                    e.stopPropagation();
                     onDelete(file);
                   }}
                 >
@@ -78,6 +89,15 @@ const FileActions = ({
               </>
             ) : (
               <>
+                <MenuItem 
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    onRename(file);
+                  }}
+                >
+                  <Edit24Regular style={{ marginRight: 8 }} />
+                  Rename
+                </MenuItem>
                 <MenuItem 
                   onClick={(e) => {
                     e.stopPropagation();

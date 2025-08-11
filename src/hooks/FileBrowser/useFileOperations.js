@@ -100,6 +100,42 @@ export const useFileOperations = (containerId, currentFolderId, onFilesUpdated) 
     }
   };
 
+  const renameItem = async (itemId, newName, currentName) => {
+    try {
+      setError(null);
+      
+      // Validate new name
+      if (!newName || newName.trim() === '') {
+        throw new Error('Item name cannot be empty');
+      }
+      
+      if (newName === currentName) {
+        return; // No change needed
+      }
+      
+      // Check for invalid characters
+      const invalidChars = /[<>:"/\\|?*]/;
+      if (invalidChars.test(newName)) {
+        throw new Error('Item name contains invalid characters: < > : " / \\ | ? *');
+      }
+      
+      if (newName.length > 255) {
+        throw new Error('Name is too long (maximum 255 characters)');
+      }
+      
+      await speService.renameItem(containerId, itemId, newName.trim());
+      
+      // Refresh the file list
+      if (onFilesUpdated) await onFilesUpdated();
+      
+      return true;
+    } catch (error) {
+      console.error('Error renaming item:', error);
+      setError(`Failed to rename item: ${error.message}`);
+      throw error;
+    }
+  };
+
   const getFilePreviewUrl = async (file) => {
     try {
       return await speService.getFilePreviewUrl(containerId, file.id);
@@ -142,6 +178,7 @@ export const useFileOperations = (containerId, currentFolderId, onFilesUpdated) 
     deleteFile,
     createBlankFile,
     createFolder,
+    renameItem,
     getFilePreviewUrl,
     shareFile,
     triggerFileInput,

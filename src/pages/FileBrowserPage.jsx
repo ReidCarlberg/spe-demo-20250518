@@ -14,6 +14,7 @@ import FileList from '../components/FileBrowser/FileList';
 import UploadProgress from '../components/FileBrowser/UploadProgress';
 import CreateFileDialog from '../components/FileBrowser/dialogs/CreateFileDialog';
 import CreateFolderDialog from '../components/FileBrowser/dialogs/CreateFolderDialog';
+import RenameItemDialog from '../components/FileBrowser/dialogs/RenameItemDialog';
 import MetadataDialog from '../components/FileBrowser/dialogs/MetadataDialog';
 import ColumnsDialog from '../components/FileBrowser/dialogs/ColumnsDialog';
 import DocumentFieldsDialog from '../components/FileBrowser/dialogs/DocumentFieldsDialog';
@@ -56,6 +57,8 @@ function FileBrowserPage() {
   // Dialog states
   const [showCreateDialog, setShowCreateDialog] = useState(false);
   const [showCreateFolderDialog, setShowCreateFolderDialog] = useState(false);
+  const [showRenameDialog, setShowRenameDialog] = useState(false);
+  const [itemToRename, setItemToRename] = useState(null);
   const [showMetaDialog, setShowMetaDialog] = useState(false);
   const [showColumnsDialog, setShowColumnsDialog] = useState(false);
   const [showFieldsDialog, setShowFieldsDialog] = useState(false);
@@ -282,6 +285,26 @@ function FileBrowserPage() {
     return await fileOps.shareFile(file, email, role, sendInvitation);
   };
 
+  const handleRename = (item) => {
+    setItemToRename(item);
+    setShowRenameDialog(true);
+  };
+
+  const handleRenameSubmit = async (itemId, newName, oldName) => {
+    try {
+      await fileOps.renameItem(itemId, newName, oldName);
+      setShowRenameDialog(false);
+      setItemToRename(null);
+    } catch (error) {
+      // Error is handled by the hook
+    }
+  };
+
+  const handleRenameCancel = () => {
+    setShowRenameDialog(false);
+    setItemToRename(null);
+  };
+
   if (loading || !isAuthenticated) {
     return (
       <div className="file-browser-loading">
@@ -364,6 +387,7 @@ function FileBrowserPage() {
               onEditFields={handleOpenFieldsDialog}
               onDelete={handleDeleteFile}
               onShare={handleOpenShareDialog}
+              onRename={handleRename}
               onNavigateToFolder={navigateToFolder}
               onDragOver={handleDragOver}
               onDrop={handleDrop}
@@ -398,6 +422,14 @@ function FileBrowserPage() {
           open={showCreateFolderDialog}
           onOpenChange={setShowCreateFolderDialog}
           onCreateFolder={fileOps.createFolder}
+        />
+
+        <RenameItemDialog
+          open={showRenameDialog}
+          onOpenChange={setShowRenameDialog}
+          onRename={handleRenameSubmit}
+          item={itemToRename}
+          error={fileOps.error}
         />
 
         <MetadataDialog
