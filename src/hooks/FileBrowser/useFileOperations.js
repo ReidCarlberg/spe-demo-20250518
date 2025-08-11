@@ -82,6 +82,24 @@ export const useFileOperations = (containerId, currentFolderId, onFilesUpdated) 
     }
   };
 
+  const createFolder = async (folderName) => {
+    if (!folderName.trim()) {
+      throw new Error('Folder name required');
+    }
+    
+    setError(null);
+    
+    try {
+      await speService.createFolder(containerId, currentFolderId, folderName.trim());
+      if (onFilesUpdated) await onFilesUpdated();
+      return true;
+    } catch (error) {
+      console.error('Error creating folder:', error);
+      setError(`Failed to create folder: ${error.message}`);
+      throw error;
+    }
+  };
+
   const getFilePreviewUrl = async (file) => {
     try {
       return await speService.getFilePreviewUrl(containerId, file.id);
@@ -123,6 +141,7 @@ export const useFileOperations = (containerId, currentFolderId, onFilesUpdated) 
     uploadFiles,
     deleteFile,
     createBlankFile,
+    createFolder,
     getFilePreviewUrl,
     shareFile,
     triggerFileInput,

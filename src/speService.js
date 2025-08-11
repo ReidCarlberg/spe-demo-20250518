@@ -551,6 +551,61 @@ export const speService = {
     return await resp.json();
   },
 
+  /**
+   * Create a new folder in a container or folder
+   * @param {string} driveId The ID of the drive/container
+   * @param {string} folderId The ID of the parent folder (optional, defaults to 'root')
+   * @param {string} folderName The name of the folder to create
+   * @returns {Promise<Object>} Created folder details
+   */
+  async createFolder(driveId, folderId = 'root', folderName) {
+    try {
+      if (!folderName || !folderName.trim()) {
+        throw new Error('Folder name required');
+      }
+
+      const token = await getTokenSilent();
+      if (!token) {
+        throw new Error('No access token available');
+      }
+
+      // Construct the API URL
+      const url = `https://graph.microsoft.com/v1.0/drives/${driveId}/items/${folderId}/children`;
+
+      // Construct the body of the POST request
+      const body = {
+        name: folderName.trim(),
+        folder: {},
+        "@microsoft.graph.conflictBehavior": "rename"
+      };
+
+      console.log('Creating folder:', url);
+
+      // Make the POST request to the Microsoft Graph API
+      const response = await fetch(url, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`
+        },
+        body: JSON.stringify(body)
+      });
+
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.error?.message || 'Failed to create folder');
+      }
+
+      const result = await response.json();
+      console.log('Create folder result:', result);
+
+      return result;
+    } catch (error) {
+      console.error('Error creating folder:', error);
+      throw error;
+    }
+  },
+
   /** Advanced Search (Graph search/query) */
   async advancedSearch(searchOptions) {
     try {

@@ -4,6 +4,7 @@ import {
   ArrowClockwise24Regular,
   ArrowUpload24Regular,
   Document24Regular,
+  Folder24Regular,
   MoreHorizontal24Regular,
   Info24Regular
 } from '@fluentui/react-icons';
@@ -14,6 +15,7 @@ const Toolbar = ({
   onRefresh,
   onUpload,
   onCreateFile,
+  onCreateFolder,
   onBackToContainers,
   onDriveInfo,
   onMetadata,
@@ -43,6 +45,13 @@ const Toolbar = ({
           onClick={onCreateFile}
         >
           New Office File
+        </Button>
+        
+        <Button 
+          icon={<Folder24Regular />} 
+          onClick={onCreateFolder}
+        >
+          New Folder
         </Button>
         
         <Button onClick={onBackToContainers}>

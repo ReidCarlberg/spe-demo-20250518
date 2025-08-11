@@ -13,6 +13,7 @@ import Toolbar from '../components/FileBrowser/Toolbar';
 import FileList from '../components/FileBrowser/FileList';
 import UploadProgress from '../components/FileBrowser/UploadProgress';
 import CreateFileDialog from '../components/FileBrowser/dialogs/CreateFileDialog';
+import CreateFolderDialog from '../components/FileBrowser/dialogs/CreateFolderDialog';
 import MetadataDialog from '../components/FileBrowser/dialogs/MetadataDialog';
 import ColumnsDialog from '../components/FileBrowser/dialogs/ColumnsDialog';
 import DocumentFieldsDialog from '../components/FileBrowser/dialogs/DocumentFieldsDialog';
@@ -54,6 +55,7 @@ function FileBrowserPage() {
   
   // Dialog states
   const [showCreateDialog, setShowCreateDialog] = useState(false);
+  const [showCreateFolderDialog, setShowCreateFolderDialog] = useState(false);
   const [showMetaDialog, setShowMetaDialog] = useState(false);
   const [showColumnsDialog, setShowColumnsDialog] = useState(false);
   const [showFieldsDialog, setShowFieldsDialog] = useState(false);
@@ -329,6 +331,7 @@ function FileBrowserPage() {
           onRefresh={fetchFiles}
           onUpload={fileOps.triggerFileInput}
           onCreateFile={() => setShowCreateDialog(true)}
+          onCreateFolder={() => setShowCreateFolderDialog(true)}
           onBackToContainers={() => navigate('/spe-explore')}
           onDriveInfo={handleDriveInfoClick}
           onMetadata={() => setShowMetaDialog(true)}
@@ -389,6 +392,12 @@ function FileBrowserPage() {
           open={showCreateDialog}
           onOpenChange={setShowCreateDialog}
           onCreateFile={fileOps.createBlankFile}
+        />
+
+        <CreateFolderDialog
+          open={showCreateFolderDialog}
+          onOpenChange={setShowCreateFolderDialog}
+          onCreateFolder={fileOps.createFolder}
         />
 
         <MetadataDialog
