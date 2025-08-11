@@ -1,0 +1,131 @@
+import { useState, useRef } from 'react';
+import { speService } from '../../services';
+
+export const useFileOperations = (containerId, currentFolderId, onFilesUpdated) => {
+  const [isUploading, setIsUploading] = useState(false);
+  const [uploadProgress, setUploadProgress] = useState(0);
+  const [error, setError] = useState(null);
+  const fileInputRef = useRef(null);
+
+  const uploadFiles = async (files) => {
+    if (!containerId || !currentFolderId) {
+      setError('Container or folder not specified');
+      return;
+    }
+    
+    setIsUploading(true);
+    setError(null);
+    
+    try {
+      for (let i = 0; i < files.length; i++) {
+        const file = files[i];
+        
+        setUploadProgress((i / files.length) * 100);
+        
+        await speService.uploadFile(
+          containerId,
+          currentFolderId,
+          file,
+          (progress) => {
+            const overallProgress = ((i + progress) / files.length) * 100;
+            setUploadProgress(overallProgress);
+          }
+        );
+      }
+      
+      setUploadProgress(100);
+      if (onFilesUpdated) await onFilesUpdated();
+    } catch (error) {
+      console.error('Upload failed:', error);
+      setError('File upload failed: ' + error.message);
+    } finally {
+      setIsUploading(false);
+      if (fileInputRef.current) {
+        fileInputRef.current.value = '';
+      }
+    }
+  };
+
+  const deleteFile = async (file) => {
+    if (!window.confirm(`Are you sure you want to delete ${file.name}?`)) {
+      return false;
+    }
+    
+    setError(null);
+    
+    try {
+      await speService.deleteFile(containerId, file.id);
+      if (onFilesUpdated) await onFilesUpdated();
+      return true;
+    } catch (error) {
+      console.error('Error deleting file:', error);
+      setError(`Failed to delete file: ${error.message}`);
+      return false;
+    }
+  };
+
+  const createBlankFile = async (fileName) => {
+    if (!fileName.trim()) {
+      throw new Error('File name required');
+    }
+    
+    setError(null);
+    
+    try {
+      await speService.createBlankFile(containerId, currentFolderId, fileName.trim());
+      if (onFilesUpdated) await onFilesUpdated();
+      return true;
+    } catch (error) {
+      console.error('Error creating file:', error);
+      setError(`Failed to create file: ${error.message}`);
+      throw error;
+    }
+  };
+
+  const getFilePreviewUrl = async (file) => {
+    try {
+      return await speService.getFilePreviewUrl(containerId, file.id);
+    } catch (error) {
+      console.error('Error getting preview URL:', error);
+      throw new Error(error.message || 'Failed to load file preview');
+    }
+  };
+
+  const shareFile = async (file, email, role, sendInvitation) => {
+    try {
+      const response = await speService.inviteFileAccess(
+        containerId, 
+        file.id, 
+        email.trim(), 
+        role, 
+        { sendInvitation }
+      );
+      return sendInvitation ? 
+        'Invitation created and email sent.' : 
+        'Invitation created (email not sent).';
+    } catch (error) {
+      console.error('Error sharing file:', error);
+      throw new Error(error.message || 'Failed to share file');
+    }
+  };
+
+  const triggerFileInput = () => {
+    if (fileInputRef.current) {
+      fileInputRef.current.click();
+    }
+  };
+
+  return {
+    isUploading,
+    uploadProgress,
+    error,
+    fileInputRef,
+    uploadFiles,
+    deleteFile,
+    createBlankFile,
+    getFilePreviewUrl,
+    shareFile,
+    triggerFileInput,
+    setError
+  };
+};

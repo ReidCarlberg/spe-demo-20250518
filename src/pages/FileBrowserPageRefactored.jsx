@@ -58,7 +58,7 @@ function FileBrowserPage() {
   const [showColumnsDialog, setShowColumnsDialog] = useState(false);
   const [showFieldsDialog, setShowFieldsDialog] = useState(false);
   const [showShareDialog, setShowShareDialog] = useState(false);
-  const [shareFile, setShareFile] = useState(null);
+  const [deletingColumnId, setDeletingColumnId] = useState(null);
 
   // Custom hooks
   const fileOps = useFileOperations(containerId, currentFolderId, fetchFiles);
@@ -271,15 +271,6 @@ function FileBrowserPage() {
     }
   };
 
-  const handleOpenShareDialog = (file) => {
-    setShareFile(file);
-    setShowShareDialog(true);
-  };
-
-  const handleShareFile = async (file, email, role, sendInvitation) => {
-    return await fileOps.shareFile(file, email, role, sendInvitation);
-  };
-
   if (loading || !isAuthenticated) {
     return (
       <div className="file-browser-loading">
@@ -360,7 +351,7 @@ function FileBrowserPage() {
               onDownload={handleDownloadClick}
               onEditFields={handleOpenFieldsDialog}
               onDelete={handleDeleteFile}
-              onShare={handleOpenShareDialog}
+              onShare={(file) => setShowShareDialog(true)}
               onNavigateToFolder={navigateToFolder}
               onDragOver={handleDragOver}
               onDrop={handleDrop}
@@ -412,15 +403,12 @@ function FileBrowserPage() {
           onUpdateColumn={containerData.updateColumn}
           onDeleteColumn={containerData.deleteColumn}
           inferColumnType={containerData.inferColumnType}
-          deletingColumnId={null}
+          deletingColumnId={deletingColumnId}
         />
 
         <DocumentFieldsDialog
           open={showFieldsDialog}
-          onOpenChange={(open) => {
-            setShowFieldsDialog(open);
-            if (!open) fileFields.resetFields();
-          }}
+          onOpenChange={setShowFieldsDialog}
           activeFile={fileFields.activeFile}
           fieldsColumns={fileFields.fieldsColumns}
           fieldEdits={fileFields.fieldEdits}
@@ -435,12 +423,9 @@ function FileBrowserPage() {
 
         <ShareDialog
           open={showShareDialog}
-          onOpenChange={(open) => {
-            setShowShareDialog(open);
-            if (!open) setShareFile(null);
-          }}
-          shareFile={shareFile}
-          onShare={handleShareFile}
+          onOpenChange={setShowShareDialog}
+          shareFile={previewFile} // Placeholder - you'd track which file to share
+          onShare={fileOps.shareFile}
         />
       </div>
     </div>
