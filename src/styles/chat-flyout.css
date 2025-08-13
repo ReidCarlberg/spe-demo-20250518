@@ -28,7 +28,8 @@
   left: 0;
   width: 100%;
   height: 100%;
-  z-index: 999;
+  /* Raised above footer (footer z-index: 1000) so overlay covers entire page */
+  z-index: 1990;
   background-color: rgba(0, 0, 0, 0.3);
 }
 
@@ -39,7 +40,8 @@
   width: 50vw;
   height: 100vh;
   background: white;
-  z-index: 1000;
+  /* Ensure the flyout is above the fixed footer */
+  z-index: 2000;
   display: flex;
   flex-direction: column;
   box-shadow: -4px 0 20px rgba(0, 0, 0, 0.15);
@@ -132,7 +134,8 @@
   border: none;
   padding: 12px 6px;
   cursor: pointer;
-  z-index: 999;
+  /* Keep toggle above footer when visible */
+  z-index: 2001;
   border-top-left-radius: 8px;
   border-bottom-left-radius: 8px;
   box-shadow: -2px 0 8px rgba(0, 120, 212, 0.3);
