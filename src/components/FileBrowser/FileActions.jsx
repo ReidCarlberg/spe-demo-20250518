@@ -16,7 +16,9 @@ const FileActions = ({
   onDelete, 
   onShare, 
   onRename,
-  onNavigateToFolder 
+  onNavigateToFolder,
+  onViewVersions,
+  onDownloadPdf
 }) => {
   const previewable = !file.folder && isPreviewableFile(file) && !isOfficeFile(file);
 
@@ -105,6 +107,22 @@ const FileActions = ({
                   }}
                 >
                   Edit Document Fields
+                </MenuItem>
+                <MenuItem 
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    onViewVersions && onViewVersions(file);
+                  }}
+                >
+                  Versions
+                </MenuItem>
+                <MenuItem 
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    onDownloadPdf && onDownloadPdf(file);
+                  }}
+                >
+                  Download as PDF
                 </MenuItem>
                 <MenuItem 
                   onClick={(e) => {

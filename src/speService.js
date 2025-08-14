@@ -788,5 +788,33 @@ export const speService = {
     const resp = await fetch(url, { method: 'POST', headers: { 'Authorization': `Bearer ${token}`, 'Content-Type': 'application/json' }, body: JSON.stringify(body) });
     if (!resp.ok) { let msg = 'Failed to invite user'; try { const err = await resp.json(); msg = err.error?.message || msg; } catch {} throw new Error(msg); }
     return await resp.json();
+  },
+
+  /** List versions for a drive item */
+  async listItemVersions(driveId, itemId) {
+    if (!driveId || !itemId) throw new Error('driveId and itemId required');
+    const token = await getTokenSilent();
+    if (!token) throw new Error('No access token available');
+    const url = `https://graph.microsoft.com/v1.0/drives/${driveId}/items/${itemId}/versions`;
+    const resp = await fetch(url, { headers: { 'Authorization': `Bearer ${token}`, 'Content-Type': 'application/json' } });
+    if (!resp.ok) { let msg = 'Failed to fetch versions'; try { const err = await resp.json(); msg = err.error?.message || msg; } catch {} throw new Error(msg); }
+    const data = await resp.json();
+    return data.value || [];
+  },
+
+  /** Download a drive item as PDF (when supported by Graph for Office docs) */
+  async downloadItemAsPdf(driveId, itemId) {
+    if (!driveId || !itemId) throw new Error('driveId and itemId required');
+    const token = await getTokenSilent();
+    if (!token) throw new Error('No access token available');
+    const url = `https://graph.microsoft.com/v1.0/drives/${driveId}/items/${itemId}/content?format=pdf`;
+    const resp = await fetch(url, { headers: { 'Authorization': `Bearer ${token}` } });
+    if (!resp.ok) {
+      let msg = 'Failed to download PDF';
+      try { const err = await resp.json(); msg = err.error?.message || msg; } catch {}
+      throw new Error(msg);
+    }
+    const blob = await resp.blob();
+    return blob;
   }
 };

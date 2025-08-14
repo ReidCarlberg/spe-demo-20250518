@@ -25,7 +25,9 @@ const FileList = ({
   onNavigateToFolder,
   onDragOver,
   onDrop,
-  onTriggerFileInput
+  onTriggerFileInput,
+  onViewVersions,
+  onDownloadPdf
 }) => {
   if (isLoading) {
     return <p className="loading-text">Loading files...</p>;
@@ -109,6 +111,8 @@ const FileList = ({
                   onShare={onShare}
                   onRename={onRename}
                   onNavigateToFolder={onNavigateToFolder}
+                  onViewVersions={onViewVersions}
+                  onDownloadPdf={onDownloadPdf}
                 />
               </TableCell>
             </TableRow>

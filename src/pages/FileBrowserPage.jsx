@@ -19,6 +19,7 @@ import MetadataDialog from '../components/FileBrowser/dialogs/MetadataDialog';
 import ColumnsDialog from '../components/FileBrowser/dialogs/ColumnsDialog';
 import DocumentFieldsDialog from '../components/FileBrowser/dialogs/DocumentFieldsDialog';
 import ShareDialog from '../components/FileBrowser/dialogs/ShareDialog';
+import { Dialog, DialogSurface, DialogBody, DialogTitle, DialogContent, DialogActions, Button } from '@fluentui/react-components';
 
 // Custom hooks
 import { useFileOperations } from '../hooks/FileBrowser/useFileOperations';
@@ -64,6 +65,11 @@ function FileBrowserPage() {
   const [showFieldsDialog, setShowFieldsDialog] = useState(false);
   const [showShareDialog, setShowShareDialog] = useState(false);
   const [shareFile, setShareFile] = useState(null);
+
+  // New state for versions viewer
+  const [versionsOpen, setVersionsOpen] = useState(false);
+  const [versionsData, setVersionsData] = useState([]);
+  const [versionsFile, setVersionsFile] = useState(null);
 
   // Custom hooks
   const fileOps = useFileOperations(containerId, currentFolderId, fetchFiles);
@@ -305,6 +311,27 @@ function FileBrowserPage() {
     setItemToRename(null);
   };
 
+  // New: show versions
+  const handleViewVersions = async (file) => {
+    try {
+      const versions = await fileOps.listVersions(file);
+      setVersionsData(versions);
+      setVersionsFile(file);
+      setVersionsOpen(true);
+    } catch (e) {
+      setError(e.message);
+    }
+  };
+
+  // New: download as PDF
+  const handleDownloadPdf = async (file) => {
+    try {
+      await fileOps.downloadAsPdf(file);
+    } catch (e) {
+      // error already handled in hook
+    }
+  };
+
   if (loading || !isAuthenticated) {
     return (
       <div className="file-browser-loading">
@@ -392,6 +419,9 @@ function FileBrowserPage() {
               onDragOver={handleDragOver}
               onDrop={handleDrop}
               onTriggerFileInput={fileOps.triggerFileInput}
+              // New callbacks
+              onViewVersions={handleViewVersions}
+              onDownloadPdf={handleDownloadPdf}
             />
           )}
         </div>
@@ -483,6 +513,42 @@ function FileBrowserPage() {
           shareFile={shareFile}
           onShare={handleShareFile}
         />
+
+        {/* New simple versions dialog */}
+        <Dialog open={versionsOpen} onOpenChange={(_, d) => setVersionsOpen(d.open)}>
+          <DialogSurface>
+            <DialogBody>
+              <DialogTitle>Versions{versionsFile ? `: ${versionsFile.name}` : ''}</DialogTitle>
+              <DialogContent>
+                {versionsData && versionsData.length ? (
+                  <ul style={{ paddingLeft: 16 }}>
+                    {versionsData.map(v => (
+                      <li key={v.id} style={{ marginBottom: 6 }}>
+                        <div>
+                          <strong>Version:</strong> {v.id || v.name || '(unnamed)'}
+                        </div>
+                        {v.lastModifiedBy?.user?.displayName && (
+                          <div>By: {v.lastModifiedBy.user.displayName}</div>
+                        )}
+                        {v.lastModifiedDateTime && (
+                          <div>Date: {new Date(v.lastModifiedDateTime).toLocaleString()}</div>
+                        )}
+                        {typeof v.size === 'number' && (
+                          <div>Size: {v.size} bytes</div>
+                        )}
+                      </li>
+                    ))}
+                  </ul>
+                ) : (
+                  <p>No versions found.</p>
+                )}
+              </DialogContent>
+              <DialogActions>
+                <Button appearance="primary" onClick={() => setVersionsOpen(false)}>Close</Button>
+              </DialogActions>
+            </DialogBody>
+          </DialogSurface>
+        </Dialog>
       </div>
     </div>
   );
