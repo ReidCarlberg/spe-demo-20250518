@@ -19,6 +19,7 @@ import MetadataDialog from '../components/FileBrowser/dialogs/MetadataDialog';
 import ColumnsDialog from '../components/FileBrowser/dialogs/ColumnsDialog';
 import DocumentFieldsDialog from '../components/FileBrowser/dialogs/DocumentFieldsDialog';
 import ShareDialog from '../components/FileBrowser/dialogs/ShareDialog';
+import RecycleBinDialog from '../components/FileBrowser/dialogs/RecycleBinDialog';
 import { Dialog, DialogSurface, DialogBody, DialogTitle, DialogContent, DialogActions, Button } from '@fluentui/react-components';
 
 // Custom hooks
@@ -70,6 +71,9 @@ function FileBrowserPage() {
   const [versionsOpen, setVersionsOpen] = useState(false);
   const [versionsData, setVersionsData] = useState([]);
   const [versionsFile, setVersionsFile] = useState(null);
+
+  // Recycle bin state
+  const [showRecycleBinDialog, setShowRecycleBinDialog] = useState(false);
 
   // Custom hooks
   const fileOps = useFileOperations(containerId, currentFolderId, fetchFiles);
@@ -332,6 +336,11 @@ function FileBrowserPage() {
     }
   };
 
+  // Recycle bin handler
+  const handleRecycleBinClick = () => {
+    setShowRecycleBinDialog(true);
+  };
+
   if (loading || !isAuthenticated) {
     return (
       <div className="file-browser-loading">
@@ -386,6 +395,7 @@ function FileBrowserPage() {
           onDriveInfo={handleDriveInfoClick}
           onMetadata={() => setShowMetaDialog(true)}
           onColumns={() => setShowColumnsDialog(true)}
+          onRecycleBin={handleRecycleBinClick}
         />
 
         <input
@@ -549,6 +559,13 @@ function FileBrowserPage() {
             </DialogBody>
           </DialogSurface>
         </Dialog>
+
+        <RecycleBinDialog
+          open={showRecycleBinDialog}
+          onOpenChange={setShowRecycleBinDialog}
+          containerId={containerId}
+          onRefreshFiles={fetchFiles}
+        />
       </div>
     </div>
   );
