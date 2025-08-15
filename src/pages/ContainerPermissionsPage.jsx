@@ -172,9 +172,6 @@ const ContainerPermissionsPage = () => {
           >
             {isLoading ? 'Loading...' : 'Refresh'}
           </Button>
-          <Button as={Link} to={`/file-browser/${containerId}`} appearance="secondary">
-            View Files
-          </Button>
           <Button appearance="secondary" onClick={() => navigate('/spe-explore')}>
             Back to Containers
           </Button>
