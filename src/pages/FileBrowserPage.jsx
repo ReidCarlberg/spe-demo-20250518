@@ -39,41 +39,7 @@ function FileBrowserPage() {
   const { setContainer } = useChatFlyout();
   const navigate = useNavigate();
   const { containerId, folderId } = useParams();
-  // Show versions for a file (simple alert for now)
-  const handleShowVersions = async (file) => {
-    try {
-      if (!file || !file.id || !containerId) return;
-      const versions = await speService.listItemVersions(containerId, file.id);
-      if (!versions.length) {
-        window.alert('No versions found for this file.');
-        return;
-      }
-      const versionList = versions.map(v => `v${v.id}: ${v.lastModifiedDateTime} (${v.size} bytes)`).join('\n');
-      window.alert(`Versions for ${file.name}:\n${versionList}`);
-    } catch (err) {
-      window.alert('Failed to fetch versions: ' + (err.message || err));
-    }
-  };
-
-  // Download as PDF
-  const handleDownloadPdf = async (file) => {
-    try {
-      if (!file || !file.id || !containerId) return;
-      const blob = await speService.downloadItemAsPdf(containerId, file.id);
-      const url = window.URL.createObjectURL(blob);
-      const a = document.createElement('a');
-      a.href = url;
-      a.download = file.name.replace(/\.[^.]+$/, '') + '.pdf';
-      document.body.appendChild(a);
-      a.click();
-      setTimeout(() => {
-        window.URL.revokeObjectURL(url);
-        document.body.removeChild(a);
-      }, 500);
-    } catch (err) {
-      window.alert('Failed to download PDF: ' + (err.message || err));
-    }
-  };
+  
   
   // Core state
   const [files, setFiles] = useState([]);
@@ -477,7 +443,7 @@ function FileBrowserPage() {
               onDragOver={handleDragOver}
               onDrop={handleDrop}
               onTriggerFileInput={fileOps.triggerFileInput}
-              onShowVersions={handleShowVersions}
+              onShowVersions={handleViewVersions}
               onDownloadPdf={handleDownloadPdf}
             />
           )}
