@@ -25,7 +25,10 @@ const FileList = ({
   onNavigateToFolder,
   onDragOver,
   onDrop,
-  onTriggerFileInput
+  onTriggerFileInput,
+  onPreviewInIframe,
+  onShowVersions = () => {},
+  onDownloadPdf = () => {}
 }) => {
   if (isLoading) {
     return <p className="loading-text">Loading files...</p>;
@@ -75,12 +78,10 @@ const FileList = ({
       </TableHeader>
       <TableBody>
         {files.map((file) => {
-          const fileType = file.folder ? 'folder' : getFileTypeFromMime(file.file?.mimeType, file.name);
           const sizeLabel = !file.folder && file.size ? 
             formatFileSize(file.size) : 
             formatFolderChildCount(file);
           const modified = formatDate(file.lastModifiedDateTime);
-          
           return (
             <TableRow key={file.id}>
               <TableCell className="col-name">
@@ -100,16 +101,19 @@ const FileList = ({
                 {sizeLabel}
               </TableCell>
               <TableCell className="col-actions" style={{ textAlign: 'right' }}>
-                <FileActions
-                  file={file}
-                  onPreview={onPreview}
-                  onDownload={onDownload}
-                  onEditFields={onEditFields}
-                  onDelete={onDelete}
-                  onShare={onShare}
-                  onRename={onRename}
-                  onNavigateToFolder={onNavigateToFolder}
-                />
+                 <FileActions
+                   file={file}
+                   onPreview={onPreview}
+                   onPreviewInIframe={onPreviewInIframe}
+                   onDownload={onDownload}
+                   onEditFields={onEditFields}
+                   onDelete={onDelete}
+                   onShare={onShare}
+                   onRename={onRename}
+                   onNavigateToFolder={onNavigateToFolder}
+                   onShowVersions={onShowVersions}
+                   onDownloadPdf={onDownloadPdf}
+                 />
               </TableCell>
             </TableRow>
           );

@@ -6,8 +6,8 @@ export const ThemeContext = createContext();
 const THEMES = {
   'spe-demo': {
     id: 'spe-demo',
-    name: 'SPE Demo',
-    appName: 'SPE Demo',
+    name: 'Boulder Innovations',
+    appName: 'Boulder Innovations',
     backgroundColor: '#f0f4f8', // Soft blue-gray pastel
     cardBackgroundColor: 'rgba(240, 244, 248, 0.7)', // Semi-transparent version
     surfaceBackgroundColor: 'rgba(255, 255, 255, 0.8)', // Mostly white with slight transparency

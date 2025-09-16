@@ -355,6 +355,80 @@ export const speService = {
   },
 
   /**
+   * List versions for a DriveItem
+   * @param {string} driveId The ID of the drive (container)
+   * @param {string} itemId The ID of the file
+   * @returns {Promise<Array>} Array of version objects
+   */
+  async listItemVersions(driveId, itemId) {
+    try {
+      const token = await getTokenSilent();
+      if (!token) {
+        throw new Error('No access token available');
+      }
+
+      const url = `https://graph.microsoft.com/v1.0/drives/${driveId}/items/${itemId}/versions?$select=id,lastModifiedDateTime,size`;
+      const response = await fetch(url, {
+        method: 'GET',
+        headers: {
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'application/json'
+        }
+      });
+
+      if (!response.ok) {
+        const errorData = await response.json().catch(() => ({}));
+        throw new Error(errorData.error?.message || 'Failed to list item versions');
+      }
+
+      const data = await response.json();
+      return data.value || [];
+    } catch (error) {
+      console.error('Error listing item versions:', error);
+      throw error;
+    }
+  },
+
+  /**
+   * Download a DriveItem as PDF (if supported)
+   * @param {string} driveId The ID of the drive (container)
+   * @param {string} itemId The ID of the file
+   * @returns {Promise<Blob>} The PDF content as a Blob
+   */
+  async downloadItemAsPdf(driveId, itemId) {
+    try {
+      const token = await getTokenSilent();
+      if (!token) {
+        throw new Error('No access token available');
+      }
+
+      const url = `https://graph.microsoft.com/v1.0/drives/${driveId}/items/${itemId}/content?format=pdf`;
+      const response = await fetch(url, {
+        method: 'GET',
+        headers: {
+          'Authorization': `Bearer ${token}`,
+          // Let the server choose; many files will return application/pdf
+          'Accept': 'application/pdf,application/octet-stream'
+        }
+      });
+
+      if (!response.ok) {
+        let message = 'Failed to download PDF';
+        try {
+          const err = await response.json();
+          message = err.error?.message || message;
+        } catch {}
+        throw new Error(message);
+      }
+
+      return await response.blob();
+    } catch (error) {
+      console.error('Error downloading item as PDF:', error);
+      throw error;
+    }
+  },
+
+  /**
    * Delete a file or folder (DriveItem) from a container
    * @param {string} driveId The ID of the container (drive)
    * @param {string} itemId The ID of the file or folder to delete

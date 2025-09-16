@@ -404,7 +404,7 @@ const PageOne = () => {
     );
   };
 
-  // Modern SPE Demo specific renderers
+  // Modern Boulder Innovations specific renderers
   const renderModernHero = () => (
     <div className="po-hero">
       <div className="po-hero-content">

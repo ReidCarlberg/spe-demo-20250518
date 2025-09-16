@@ -1,4 +1,4 @@
-// Brand-specific Fluent UI v9 themes for SPE Demo
+// Brand-specific Fluent UI v9 themes for Boulder Innovations
 // Light and Dark variants with a modern feel.
 import { createLightTheme, createDarkTheme, webLightTheme, webDarkTheme } from '@fluentui/react-components';
 

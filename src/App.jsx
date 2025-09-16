@@ -11,6 +11,7 @@ import SpeExplorePage from './pages/SpeExplorePage'
 import FileBrowserPage from './pages/FileBrowserPage'
 import ContainerPermissionsPage from './pages/ContainerPermissionsPage'
 import PreviewPage from './pages/PreviewPage'
+import IframePreviewPage from './pages/IframePreviewPage'
 import ListItemsPage from './pages/ListItemsPage'
 import SearchPage from './pages/SearchPage'
 import AgentPage from './pages/AgentPage'
@@ -50,6 +51,8 @@ const ThemedAppShell = () => {
             <Route path="/chat" element={<ProtectedRoute><Chat /></ProtectedRoute>} />
             <Route path="/container-permissions" element={<ProtectedRoute><ContainerPermissionsPage /></ProtectedRoute>} />
             <Route path="/preview/:driveId/:itemId" element={<ProtectedRoute><PreviewPage /></ProtectedRoute>} />
+            <Route path="/iframe-preview" element={<ProtectedRoute><IframePreviewPage /></ProtectedRoute>} />
+            <Route path="/iframe-preview/:driveId/:itemId" element={<ProtectedRoute><IframePreviewPage /></ProtectedRoute>} />
             <Route path="/list/:driveId/:folderId?" element={<ProtectedRoute><ListItemsPage /></ProtectedRoute>} />
             <Route path="/search" element={<ProtectedRoute><SearchPage /></ProtectedRoute>} />
             <Route path="/agent" element={<ProtectedRoute><AgentPage /></ProtectedRoute>} />
