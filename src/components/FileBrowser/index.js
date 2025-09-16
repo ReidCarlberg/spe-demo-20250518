@@ -14,6 +14,7 @@ export { default as ColumnsDialog } from './dialogs/ColumnsDialog';
 export { default as EditColumnDialog } from './dialogs/EditColumnDialog';
 export { default as DocumentFieldsDialog } from './dialogs/DocumentFieldsDialog';
 export { default as ShareDialog } from './dialogs/ShareDialog';
+export { default as RecycleBinDialog } from './dialogs/RecycleBinDialog';
 
 // Utilities
 export * from './fileUtils';

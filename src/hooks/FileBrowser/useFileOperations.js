@@ -169,6 +169,38 @@ export const useFileOperations = (containerId, currentFolderId, onFilesUpdated) 
     }
   };
 
+  // New: list versions for a file
+  const listVersions = async (file) => {
+    try {
+      if (!file || !file.id) throw new Error('Invalid file');
+      return await speService.listItemVersions(containerId, file.id);
+    } catch (e) {
+      console.error('Error listing versions:', e);
+      throw new Error(e.message || 'Failed to fetch versions');
+    }
+  };
+
+  // New: download as PDF
+  const downloadAsPdf = async (file) => {
+    try {
+      if (!file || !file.id) throw new Error('Invalid file');
+      const blob = await speService.downloadItemAsPdf(containerId, file.id);
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      const base = file.name.replace(/\.[^.]+$/, '');
+      a.download = `${base}.pdf`;
+      document.body.appendChild(a);
+      a.click();
+      a.remove();
+      URL.revokeObjectURL(url);
+    } catch (e) {
+      console.error('Error downloading PDF:', e);
+      setError(e.message || 'Failed to download as PDF');
+      throw e;
+    }
+  };
+
   return {
     isUploading,
     uploadProgress,
@@ -182,6 +214,9 @@ export const useFileOperations = (containerId, currentFolderId, onFilesUpdated) 
     getFilePreviewUrl,
     shareFile,
     triggerFileInput,
-    setError
+    setError,
+    // New exports
+    listVersions,
+    downloadAsPdf
   };
 };

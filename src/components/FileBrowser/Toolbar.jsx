@@ -6,7 +6,8 @@ import {
   Document24Regular,
   Folder24Regular,
   MoreHorizontal24Regular,
-  Info24Regular
+  Info24Regular,
+  Delete24Regular
 } from '@fluentui/react-icons';
 
 const Toolbar = ({ 
@@ -19,7 +20,8 @@ const Toolbar = ({
   onBackToContainers,
   onDriveInfo,
   onMetadata,
-  onColumns
+  onColumns,
+  onRecycleBin
 }) => {
   return (
     <div style={{ display: 'flex', gap: 8, marginTop: 12, flexWrap: 'wrap' }}>
@@ -78,6 +80,12 @@ const Toolbar = ({
               </MenuItem>
               <MenuItem onClick={onColumns}>
                 Container Columns
+              </MenuItem>
+              <MenuItem 
+                icon={<Delete24Regular />}
+                onClick={onRecycleBin}
+              >
+                Recycle Bin
               </MenuItem>
             </MenuList>
           </MenuPopover>

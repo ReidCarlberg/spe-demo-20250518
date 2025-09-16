@@ -862,5 +862,143 @@ export const speService = {
     const resp = await fetch(url, { method: 'POST', headers: { 'Authorization': `Bearer ${token}`, 'Content-Type': 'application/json' }, body: JSON.stringify(body) });
     if (!resp.ok) { let msg = 'Failed to invite user'; try { const err = await resp.json(); msg = err.error?.message || msg; } catch {} throw new Error(msg); }
     return await resp.json();
+  },
+
+  /** List versions for a drive item */
+  async listItemVersions(driveId, itemId) {
+    if (!driveId || !itemId) throw new Error('driveId and itemId required');
+    const token = await getTokenSilent();
+    if (!token) throw new Error('No access token available');
+    const url = `https://graph.microsoft.com/v1.0/drives/${driveId}/items/${itemId}/versions`;
+    const resp = await fetch(url, { headers: { 'Authorization': `Bearer ${token}`, 'Content-Type': 'application/json' } });
+    if (!resp.ok) { let msg = 'Failed to fetch versions'; try { const err = await resp.json(); msg = err.error?.message || msg; } catch {} throw new Error(msg); }
+    const data = await resp.json();
+    return data.value || [];
+  },
+
+  /** Download a drive item as PDF (when supported by Graph for Office docs) */
+  async downloadItemAsPdf(driveId, itemId) {
+    if (!driveId || !itemId) throw new Error('driveId and itemId required');
+    const token = await getTokenSilent();
+    if (!token) throw new Error('No access token available');
+    const url = `https://graph.microsoft.com/v1.0/drives/${driveId}/items/${itemId}/content?format=pdf`;
+    const resp = await fetch(url, { headers: { 'Authorization': `Bearer ${token}` } });
+    if (!resp.ok) {
+      let msg = 'Failed to download PDF';
+      try { const err = await resp.json(); msg = err.error?.message || msg; } catch {}
+      throw new Error(msg);
+    }
+    const blob = await resp.blob();
+    return blob;
+  },
+
+  // Recycle bin operations
+  /**
+   * List items in the recycle bin for a container
+   * @param {string} containerId The ID of the container
+   * @returns {Promise<Array>} List of recycled items
+   */
+  async listRecycleBinItems(containerId) {
+    try {
+      const token = await getTokenSilent();
+      if (!token) throw new Error('No access token available');
+      
+      const url = `https://graph.microsoft.com/v1.0/storage/fileStorage/containers/${containerId}/recycleBin/items`;
+      
+      const response = await fetch(url, {
+        method: 'GET',
+        headers: {
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'application/json'
+        }
+      });
+
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.error?.message || 'Failed to fetch recycle bin items');
+      }
+
+      const data = await response.json();
+      return data.value || [];
+    } catch (error) {
+      console.error('Error fetching recycle bin items:', error);
+      throw error;
+    }
+  },
+
+  /**
+   * Permanently delete items from the recycle bin
+   * @param {string} containerId The ID of the container
+   * @param {string|string[]} recycleBinItemIds The ID(s) of the recycle bin item(s) to permanently delete
+   * @returns {Promise<void>}
+   */
+  async permanentlyDeleteRecycleBinItem(containerId, recycleBinItemIds) {
+    try {
+      const token = await getTokenSilent();
+      if (!token) throw new Error('No access token available');
+      
+      // Convert single ID to array for consistent handling
+      const ids = Array.isArray(recycleBinItemIds) ? recycleBinItemIds : [recycleBinItemIds];
+      
+      const url = `https://graph.microsoft.com/v1.0/storage/fileStorage/containers/${containerId}/recycleBin/items/delete`;
+      
+      const response = await fetch(url, {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+          ids: ids
+        })
+      });
+
+      if (!response.ok && response.status !== 204) {
+        const errorData = await response.json();
+        throw new Error(errorData.error?.message || 'Failed to permanently delete items');
+      }
+    } catch (error) {
+      console.error('Error permanently deleting items:', error);
+      throw error;
+    }
+  },
+
+  /**
+   * Restore items from the recycle bin
+   * @param {string} containerId The ID of the container
+   * @param {string|string[]} recycleBinItemIds The ID(s) of the recycle bin item(s) to restore
+   * @returns {Promise<Object>} Restore operation result
+   */
+  async restoreRecycleBinItem(containerId, recycleBinItemIds) {
+    try {
+      const token = await getTokenSilent();
+      if (!token) throw new Error('No access token available');
+      
+      // Convert single ID to array for consistent handling
+      const ids = Array.isArray(recycleBinItemIds) ? recycleBinItemIds : [recycleBinItemIds];
+      
+      const url = `https://graph.microsoft.com/v1.0/storage/fileStorage/containers/${containerId}/recycleBin/items/restore`;
+      
+      const response = await fetch(url, {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+          ids: ids
+        })
+      });
+
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.error?.message || 'Failed to restore items');
+      }
+
+      return await response.json();
+    } catch (error) {
+      console.error('Error restoring items:', error);
+      throw error;
+    }
   }
 };
