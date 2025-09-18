@@ -21,6 +21,9 @@ import AuthenticationStatus from './components/AuthenticationStatus'
 import { ApiDebugPanel, ApiCallNotification } from './components/debug'
 import ChatFlyout from './components/ChatFlyout'
 import Footer from './components/Footer'
+import AdminPage from './pages/AdminPage'
+import AdminContainerTypesPage from './pages/AdminContainerTypesPage'
+import AdminRoute from './components/AdminRoute'
 
 // Add Fluent UI Provider for global theming
 import { FluentProvider, webLightTheme, webDarkTheme } from '@fluentui/react-components'
@@ -56,6 +59,8 @@ const ThemedAppShell = () => {
             <Route path="/list/:driveId/:folderId?" element={<ProtectedRoute><ListItemsPage /></ProtectedRoute>} />
             <Route path="/search" element={<ProtectedRoute><SearchPage /></ProtectedRoute>} />
             <Route path="/agent" element={<ProtectedRoute><AgentPage /></ProtectedRoute>} />
+            <Route path="/admin" element={<AdminRoute><AdminPage /></AdminRoute>} />
+            <Route path="/admin/container-types" element={<AdminRoute><AdminContainerTypesPage /></AdminRoute>} />
             <Route path="*" element={<Navigate to="/" />} />
           </Routes>
         </div>

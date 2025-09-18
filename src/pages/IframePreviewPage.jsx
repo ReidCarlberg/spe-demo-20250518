@@ -12,7 +12,7 @@ const IframePreviewPage = () => {
   const location = useLocation();
   const { driveId, itemId } = useParams();
 
-  const { url: stateUrl, name: stateName } = (location.state || {});
+  const { url: stateUrl, name: stateName, beta: isBetaPreview } = (location.state || {});
 
   const searchParams = new URLSearchParams(location.search);
   const queryUrl = searchParams.get('url');
@@ -78,6 +78,23 @@ const IframePreviewPage = () => {
           minHeight: 0,
           padding: '32px 0 0 0'
         }}>
+          {isBetaPreview && (
+            <div style={{
+              width: '96%',
+              maxWidth: 1200,
+              margin: '0 auto 8px auto',
+              background: 'linear-gradient(90deg,#ffd452,#ffb347)',
+              color: '#3a2f00',
+              padding: '8px 14px',
+              fontSize: 13,
+              fontWeight: 500,
+              border: '1px solid rgba(0,0,0,0.15)',
+              borderRadius: 8,
+              boxShadow: '0 2px 6px rgba(0,0,0,0.15)'
+            }}>
+              <strong>Beta Preview:</strong> This Office editing preview uses a Graph /beta endpoint and is <em>not supported</em> in v1.0 production. Check the browser console for a demo note.
+            </div>
+          )}
           <div style={{
             marginBottom: 12,
             fontWeight: 500,

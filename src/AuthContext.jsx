@@ -16,6 +16,7 @@ export const AuthProvider = ({ children }) => {
   const [error, setError] = useState(null);
   const [accessToken, setAccessToken] = useState(null);
   const [isMsalInitialized, setIsMsalInitialized] = useState(false);
+  const [isAdmin, setIsAdmin] = useState(false);
   
   // Check if MSAL is initialized when component mounts
   useEffect(() => {
@@ -41,7 +42,12 @@ export const AuthProvider = ({ children }) => {
       const authenticated = accounts.length > 0;
       setIsAuthenticated(authenticated);
       if (authenticated) {
-        setUser(accounts[0]);
+        const acct = accounts[0];
+        setUser(acct);
+        // Simplified: all authenticated users are admins for now
+        setIsAdmin(true);
+      } else {
+        setIsAdmin(false);
       }
       setLoading(false);
     };
@@ -114,7 +120,8 @@ export const AuthProvider = ({ children }) => {
     error,
     accessToken,
     inProgress,
-    isMsalInitialized
+    isMsalInitialized,
+    isAdmin
   };
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;

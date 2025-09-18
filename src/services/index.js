@@ -46,6 +46,7 @@ export const speService = {
   getFileDetails: FileService.getFileDetails.bind(FileService),
   uploadFile: FileService.uploadFile.bind(FileService),
   getFilePreviewUrl: FileService.getFilePreviewUrl.bind(FileService),
+  getFilePreviewUrlBeta: FileService.getFilePreviewUrlBeta.bind(FileService),
   deleteFile: FileService.deleteFile.bind(FileService),
   createBlankFile: FileService.createBlankFile.bind(FileService),
   createFolder: FileService.createFolder.bind(FileService),

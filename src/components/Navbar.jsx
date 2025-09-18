@@ -60,6 +60,11 @@ const Navbar = () => {
                 Agent
               </Button>
             </li>
+            <li>
+              <Button appearance="transparent" className={location.pathname.startsWith('/admin') ? 'active' : ''} onClick={() => go('/admin')}>
+                Admin
+              </Button>
+            </li>
           </>
         ) : null}
       </ul>

@@ -13,13 +13,15 @@ export const msalConfig = {
 
 // Add scopes for the ID token to be used at Microsoft identity platform endpoints
 export const loginRequest = {
-  scopes: ["User.Read", "Files.ReadWrite.All"]
+  scopes: ["User.Read", "Files.ReadWrite.All", "Container.Selected"],
 };
 
 // Add endpoints here for Microsoft Graph API services used in your app
 export const graphConfig = {
   graphMeEndpoint: "https://graph.microsoft.com/v1.0/me",
-  graphContainersEndpoint: "https://graph.microsoft.com/v1.0/storage/fileStorage/containers"
+  graphContainersEndpoint: "https://graph.microsoft.com/v1.0/storage/fileStorage/containers",
+  // Beta endpoint used for container type metadata (shape can change)
+  graphContainerTypesEndpointBeta: "https://graph.microsoft.com/beta/storage/fileStorage/containerTypes"
 };
 
 // SharePoint Embedded Configuration

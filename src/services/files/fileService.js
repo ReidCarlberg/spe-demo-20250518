@@ -89,6 +89,53 @@ export class FileService {
   }
 
   /**
+   * Get a preview URL using the Microsoft Graph beta endpoint with additional options.
+   * Defaults to viewer='office' and allowEdit=true for Office docs.
+   * @param {string} driveId The ID of the drive (container)
+   * @param {string} itemId The ID of the file
+   * @param {{viewer?: 'office'|'onedrive'|null, allowEdit?: boolean, chromeless?: boolean, page?: number|string, zoom?: number}} [options]
+   * @returns {Promise<string>} The preview URL to load in an iframe
+   */
+  static async getFilePreviewUrlBeta(driveId, itemId, options = {}) {
+    try {
+      const url = `https://graph.microsoft.com/beta/drives/${driveId}/items/${itemId}/preview`;
+      const body = {
+        viewer: options.viewer ?? 'office',
+        allowEdit: options.allowEdit ?? true,
+      };
+      if (typeof options.chromeless === 'boolean') body.chromeless = options.chromeless;
+      if (typeof options.page !== 'undefined') body.page = options.page;
+      if (typeof options.zoom === 'number') body.zoom = options.zoom;
+
+      const data = await GraphApiClient.post(url, body);
+
+      if (data?.getUrl) {
+        return `${data.getUrl}&nb=true`;
+      }
+
+      if (data?.postUrl) {
+        const params = data.postParameters || '';
+        const html = `<!doctype html><html><body onload="document.forms[0].submit()">
+          <form method="POST" action="${data.postUrl}">
+            ${params.split('&').map(kv => {
+              const [k,v] = kv.split('=');
+              const key = decodeURIComponent(k || '');
+              const val = decodeURIComponent(v || '');
+              return `<input type="hidden" name="${key}" value="${val}">`;
+            }).join('')}
+          </form>
+        </body></html>`;
+        return `data:text/html;base64,${btoa(unescape(encodeURIComponent(html)))}`;
+      }
+
+      throw new Error('No preview URL returned from beta API');
+    } catch (error) {
+      console.error('Error getting beta preview URL:', error);
+      throw error;
+    }
+  }
+
+  /**
    * Delete a file or folder (DriveItem) from a container
    * @param {string} driveId The ID of the container (drive)
    * @param {string} itemId The ID of the file or folder to delete

@@ -355,6 +355,75 @@ export const speService = {
   },
 
   /**
+   * Get a preview URL using the Microsoft Graph beta endpoint with additional options.
+   * This sets viewer='office' and allowEdit=true for Office docs.
+   * @param {string} driveId The ID of the drive (container)
+   * @param {string} itemId The ID of the file
+   * @param {{viewer?: 'office'|'onedrive'|null, allowEdit?: boolean, chromeless?: boolean, page?: number|string, zoom?: number}} [options]
+   * @returns {Promise<string>} The preview URL to load in an iframe
+   */
+  async getFilePreviewUrlBeta(driveId, itemId, options = {}) {
+    try {
+      const token = await getTokenSilent();
+      if (!token) {
+        throw new Error('No access token available');
+      }
+
+      // Default options for beta test: use Office viewer with editing enabled
+      const body = {
+        viewer: options.viewer ?? 'office',
+        allowEdit: options.allowEdit ?? true,
+      };
+      if (typeof options.chromeless === 'boolean') body.chromeless = options.chromeless;
+      if (typeof options.page !== 'undefined') body.page = options.page;
+      if (typeof options.zoom === 'number') body.zoom = options.zoom;
+
+      const url = `https://graph.microsoft.com/beta/drives/${driveId}/items/${itemId}/preview`;
+      const response = await fetch(url, {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify(body)
+      });
+
+      if (!response.ok) {
+        const errorData = await response.json().catch(() => ({}));
+        throw new Error(errorData.error?.message || 'Failed to get beta preview URL');
+      }
+
+      const data = await response.json();
+      // Prefer getUrl, else construct a POST-able form URL for iframe via data URL shim
+      if (data.getUrl) {
+        // Similar to stable, append nb=true to minimize banner
+        return `${data.getUrl}&nb=true`;
+      }
+
+      // If only postUrl/postParameters are provided, we can generate a data URL that auto-posts a form
+      if (data.postUrl) {
+        const params = data.postParameters || '';
+        const html = `<!doctype html><html><body onload="document.forms[0].submit()">
+          <form method="POST" action="${data.postUrl}">
+            ${params.split('&').map(kv => {
+              const [k,v] = kv.split('=');
+              const key = decodeURIComponent(k || '');
+              const val = decodeURIComponent(v || '');
+              return `<input type="hidden" name="${key}" value="${val}">`;
+            }).join('')}
+          </form>
+        </body></html>`;
+        return `data:text/html;base64,${btoa(unescape(encodeURIComponent(html)))}`;
+      }
+
+      throw new Error('No preview URL returned from beta API');
+    } catch (error) {
+      console.error('Error getting beta preview URL:', error);
+      throw error;
+    }
+  },
+
+  /**
    * List versions for a DriveItem
    * @param {string} driveId The ID of the drive (container)
    * @param {string} itemId The ID of the file
@@ -1000,5 +1069,38 @@ export const speService = {
       console.error('Error restoring items:', error);
       throw error;
     }
-  }
+  },
+
+  /**
+   * List all container types (beta)
+   * @returns {Promise<Array>} List of container type objects
+   */
+  async listContainerTypes() {
+    try {
+      const token = await getTokenSilent();
+      if (!token) throw new Error('No access token available');
+      const url = 'https://graph.microsoft.com/beta/storage/fileStorage/containerTypes';
+      console.debug('[speService] GET', url);
+      const resp = await fetch(url, { headers: { 'Authorization': `Bearer ${token}`, 'Content-Type': 'application/json' } });
+      if (!resp.ok) { let msg = 'Failed to list container types'; try { const err = await resp.json(); console.debug('[speService] listContainerTypes error payload', err); msg = err.error?.message || msg; } catch {} throw new Error(msg); }
+      const data = await resp.json();
+      console.debug('[speService] listContainerTypes result', data);
+      return data.value || [];
+    } catch (e) { console.error('Error listing container types:', e); throw e; }
+  },
+
+  async getContainerType(containerTypeId) {
+    if (!containerTypeId) throw new Error('containerTypeId required');
+    try {
+      const token = await getTokenSilent();
+      if (!token) throw new Error('No access token available');
+      const url = `https://graph.microsoft.com/beta/storage/fileStorage/containerTypes/${containerTypeId}`;
+      console.debug('[speService] GET', url);
+      const resp = await fetch(url, { headers: { 'Authorization': `Bearer ${token}`, 'Content-Type': 'application/json' } });
+      if (!resp.ok) { let msg = 'Failed to fetch container type'; try { const err = await resp.json(); console.debug('[speService] getContainerType error payload', err); msg = err.error?.message || msg; } catch {} throw new Error(msg); }
+      const json = await resp.json();
+      console.debug('[speService] getContainerType result', json);
+      return json;
+    } catch (e) { console.error('Error fetching container type:', e); throw e; }
+  },
 };

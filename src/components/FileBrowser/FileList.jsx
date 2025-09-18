@@ -27,6 +27,7 @@ const FileList = ({
   onDrop,
   onTriggerFileInput,
   onPreviewInIframe,
+  onPreviewBeta,
   onShowVersions = () => {},
   onDownloadPdf = () => {}
 }) => {
@@ -105,6 +106,7 @@ const FileList = ({
                    file={file}
                    onPreview={onPreview}
                    onPreviewInIframe={onPreviewInIframe}
+                   onPreviewBeta={onPreviewBeta}
                    onDownload={onDownload}
                    onEditFields={onEditFields}
                    onDelete={onDelete}

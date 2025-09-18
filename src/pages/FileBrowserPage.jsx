@@ -243,6 +243,18 @@ function FileBrowserPage() {
     }
   };
 
+  // New: Beta preview using Office viewer with allowEdit=true
+  const handlePreviewBeta = async (file) => {
+    try {
+      if (!file || !file.id) return null;
+      const url = await speService.getFilePreviewUrlBeta(containerId, file.id, { viewer: 'office', allowEdit: true });
+      return url;
+    } catch (err) {
+      console.error('Failed to get beta preview URL:', err);
+      return null;
+    }
+  };
+
   const handlePathClick = (pathItem, index) => {
     if (index === 0) {
       navigate('/spe-explore');
@@ -433,7 +445,8 @@ function FileBrowserPage() {
               isLoading={isLoading}
               onFileClick={handleFileClick}
               onPreview={openPreview}
-              onPreviewInIframe={handlePreviewInIframe}
+                onPreviewInIframe={handlePreviewInIframe}
+                onPreviewBeta={handlePreviewBeta}
               onDownload={handleDownloadClick}
               onEditFields={handleOpenFieldsDialog}
               onDelete={handleDeleteFile}
