@@ -47,6 +47,68 @@ const RequestDetail = ({ call }) => {
       });
   };
   
+  // Build a single aggregated text block representing the full exchange
+  const buildAggregateText = (c) => {
+    if (!c) return '';
+    const lines = [];
+    // Request line
+    lines.push(`${c.method || 'GET'} ${c.url || ''}`);
+    // Request headers
+    if (c.requestHeaders) {
+      lines.push('\n// Request Headers');
+      try {
+        // Clone and redact sensitive headers
+        const redacted = JSON.parse(JSON.stringify(c.requestHeaders));
+        const authKey = Object.keys(redacted).find(k => k.toLowerCase() === 'authorization');
+        if (authKey && typeof redacted[authKey] === 'string') {
+          const full = redacted[authKey];
+          const truncated = full.slice(0, 20) + (full.length > 20 ? '…' : '');
+            // Add note about truncation
+          redacted[authKey] = truncated + '  (truncated)';
+        }
+        lines.push(JSON.stringify(redacted, null, 2));
+      } catch {
+        lines.push(String(c.requestHeaders));
+      }
+    }
+    // Request body
+    if (c.requestBody) {
+      lines.push('\n// Request Body');
+      if (typeof c.requestBody === 'string') {
+        lines.push(c.requestBody);
+      } else {
+        try { lines.push(JSON.stringify(c.requestBody, null, 2)); } catch { lines.push(String(c.requestBody)); }
+      }
+    }
+    // Response status
+    lines.push('\n// Response Status');
+    lines.push(`${c.status || (c.isError ? 'Error' : 'Pending')}`);
+    // Response headers
+    if (c.responseHeaders) {
+      lines.push('\n// Response Headers');
+      try {
+        lines.push(JSON.stringify(c.responseHeaders, null, 2));
+      } catch {
+        lines.push(String(c.responseHeaders));
+      }
+    }
+    // Response body
+    if (c.responseBody) {
+      lines.push('\n// Response Body');
+      if (typeof c.responseBody === 'string') {
+        lines.push(c.responseBody);
+      } else {
+        try { lines.push(JSON.stringify(c.responseBody, null, 2)); } catch { lines.push(String(c.responseBody)); }
+      }
+    }
+    // Error (if any)
+    if (c.isError && c.error) {
+      lines.push('\n// Error');
+      lines.push(String(c.error));
+    }
+    return lines.join('\n');
+  };
+
   if (!call) {
     return (
       <div className="api-debug-detail-placeholder">
@@ -101,6 +163,16 @@ const RequestDetail = ({ call }) => {
           onClick={() => setActiveTab('timing')}
         >
           Timing
+        </Button>
+        <Button
+          appearance="secondary"
+            /* This is an action button, not a tab we switch to */
+          className="api-debug-tab"
+          onClick={(e) => copyToClipboard(buildAggregateText(call), e)}
+          aria-label="Copy entire request and response"
+          icon={<Copy24Regular />}
+        >
+          Copy All
         </Button>
       </div>
       

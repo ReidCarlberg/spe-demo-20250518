@@ -1103,4 +1103,50 @@ export const speService = {
       return json;
     } catch (e) { console.error('Error fetching container type:', e); throw e; }
   },
+
+  /**
+   * List all container type registrations (beta)
+   * @returns {Promise<Array>} List of fileStorageContainerTypeRegistration objects
+   */
+  async listContainerTypeRegistrations() {
+    try {
+      const token = await getTokenSilent();
+      if (!token) throw new Error('No access token available');
+      const url = 'https://graph.microsoft.com/beta/storage/fileStorage/containerTypeRegistrations';
+      console.debug('[speService] GET', url);
+      const resp = await fetch(url, { headers: { 'Authorization': `Bearer ${token}`, 'Content-Type': 'application/json' } });
+      if (!resp.ok) {
+        let msg = 'Failed to list container type registrations';
+        try { const err = await resp.json(); console.debug('[speService] listContainerTypeRegistrations error payload', err); msg = err.error?.message || msg; } catch {}
+        throw new Error(msg);
+      }
+      const data = await resp.json();
+      console.debug('[speService] listContainerTypeRegistrations result', data);
+      return data.value || [];
+    } catch (e) { console.error('Error listing container type registrations:', e); throw e; }
+  },
+
+  /**
+   * Get a specific container type registration by ID (beta)
+   * @param {string} registrationId
+   * @returns {Promise<Object>}
+   */
+  async getContainerTypeRegistration(registrationId) {
+    if (!registrationId) throw new Error('registrationId required');
+    try {
+      const token = await getTokenSilent();
+      if (!token) throw new Error('No access token available');
+      const url = `https://graph.microsoft.com/beta/storage/fileStorage/containerTypeRegistrations/${registrationId}`;
+      console.debug('[speService] GET', url);
+      const resp = await fetch(url, { headers: { 'Authorization': `Bearer ${token}`, 'Content-Type': 'application/json' } });
+      if (!resp.ok) {
+        let msg = 'Failed to fetch container type registration';
+        try { const err = await resp.json(); console.debug('[speService] getContainerTypeRegistration error payload', err); msg = err.error?.message || msg; } catch {}
+        throw new Error(msg);
+      }
+      const json = await resp.json();
+      console.debug('[speService] getContainerTypeRegistration result', json);
+      return json;
+    } catch (e) { console.error('Error fetching container type registration:', e); throw e; }
+  },
 };

@@ -14,6 +14,7 @@ export { FileSearchService } from './files/fileSearchService.js';
 export { RecycleBinService } from './recycleBin/recycleBinService.js';
 export { ColumnService } from './columns/columnService.js';
 export { GraphApiClient } from './shared/graphApiClient.js';
+export { AuditLogsService } from './audit/auditLogsService.js';
 export * from './shared/constants.js';
 
 // Legacy compatibility object that maintains the same interface as the original speService
@@ -23,6 +24,7 @@ import { FileService } from './files/fileService.js';
 import { FileSearchService } from './files/fileSearchService.js';
 import { RecycleBinService } from './recycleBin/recycleBinService.js';
 import { ColumnService } from './columns/columnService.js';
+import { AuditLogsService } from './audit/auditLogsService.js';
 
 /**
  * Legacy speService object that maintains backward compatibility
@@ -70,6 +72,9 @@ export const speService = {
   listContainerColumns: ColumnService.listContainerColumns.bind(ColumnService),
   createContainerColumn: ColumnService.createContainerColumn.bind(ColumnService),
   deleteContainerColumn: ColumnService.deleteContainerColumn.bind(ColumnService),
+
+  // Audit logs (security)
+  queryRecentFileModificationAuditLogs: AuditLogsService.queryRecentFileModificationAuditLogs.bind(AuditLogsService),
 
   // Deprecated methods that were part of the file upload flow
   simpleUpload: FileService.uploadFile.bind(FileService), // Redirects to uploadFile which handles the logic internally

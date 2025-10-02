@@ -23,6 +23,8 @@ import ChatFlyout from './components/ChatFlyout'
 import Footer from './components/Footer'
 import AdminPage from './pages/AdminPage'
 import AdminContainerTypesPage from './pages/AdminContainerTypesPage'
+import AdminContainerTypeRegistrationPage from './pages/AdminContainerTypeRegistrationPage'
+import AdminAuditLogsPage from './pages/AdminAuditLogsPage'
 import AdminRoute from './components/AdminRoute'
 
 // Add Fluent UI Provider for global theming
@@ -61,6 +63,8 @@ const ThemedAppShell = () => {
             <Route path="/agent" element={<ProtectedRoute><AgentPage /></ProtectedRoute>} />
             <Route path="/admin" element={<AdminRoute><AdminPage /></AdminRoute>} />
             <Route path="/admin/container-types" element={<AdminRoute><AdminContainerTypesPage /></AdminRoute>} />
+            <Route path="/admin/container-type-registrations" element={<AdminRoute><AdminContainerTypeRegistrationPage /></AdminRoute>} />
+            <Route path="/admin/audit-logs" element={<AdminRoute><AdminAuditLogsPage /></AdminRoute>} />
             <Route path="*" element={<Navigate to="/" />} />
           </Routes>
         </div>

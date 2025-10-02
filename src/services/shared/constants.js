@@ -7,7 +7,8 @@ export const GRAPH_ENDPOINTS = {
   CONTAINERS: 'https://graph.microsoft.com/v1.0/storage/fileStorage/containers',
   CONTAINERS_BETA: 'https://graph.microsoft.com/beta/storage/fileStorage/containers',
   DRIVES: 'https://graph.microsoft.com/v1.0/drives',
-  SEARCH: 'https://graph.microsoft.com/v1.0/search/query'
+  SEARCH: 'https://graph.microsoft.com/v1.0/search/query',
+  DIRECTORY_AUDITS: 'https://graph.microsoft.com/v1.0/auditLogs/directoryAudits'
 };
 
 // Valid container permission roles
