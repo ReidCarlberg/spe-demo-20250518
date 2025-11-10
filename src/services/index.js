@@ -58,6 +58,7 @@ export const speService = {
   inviteFileAccess: FileService.inviteFileAccess.bind(FileService),
   listItemVersions: FileService.listItemVersions.bind(FileService),
   downloadItemAsPdf: FileService.downloadItemAsPdf.bind(FileService),
+  downloadItemVersionContent: FileService.downloadItemVersionContent.bind(FileService),
 
   // Search operations
   searchFiles: FileSearchService.searchFiles.bind(FileSearchService),

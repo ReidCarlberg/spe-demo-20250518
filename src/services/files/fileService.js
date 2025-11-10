@@ -337,6 +337,28 @@ export class FileService {
   }
 
   /**
+   * Download the content for a specific DriveItem version
+   * @param {string} driveId The ID of the drive
+   * @param {string} itemId The ID of the item
+   * @param {string} versionId The ID of the version
+   * @returns {Promise<Blob>} The version content as a Blob
+   */
+  static async downloadItemVersionContent(driveId, itemId, versionId) {
+    if (!driveId || !itemId || !versionId) {
+      throw new Error('driveId, itemId and versionId required');
+    }
+
+    try {
+      const url = `${GRAPH_ENDPOINTS.DRIVES}/${driveId}/items/${itemId}/versions/${versionId}/content`;
+      const response = await GraphApiClient.fetchRaw(url);
+      return await response.blob();
+    } catch (error) {
+      console.error('Error downloading version content:', error);
+      throw error;
+    }
+  }
+
+  /**
    * Download a drive item as PDF (when supported by Graph for Office docs)
    * @param {string} driveId The ID of the drive
    * @param {string} itemId The ID of the item

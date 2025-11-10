@@ -201,6 +201,32 @@ export const useFileOperations = (containerId, currentFolderId, onFilesUpdated) 
     }
   };
 
+  // New: download a specific version of a file
+  const downloadVersion = async (file, version) => {
+    try {
+      if (!file || !file.id) throw new Error('Invalid file');
+      if (!version || !version.id) throw new Error('Invalid version');
+
+      const blob = await speService.downloadItemVersionContent(containerId, file.id, version.id);
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      const base = file.name.replace(/\.[^.]+$/, '');
+      const extMatch = file.name.match(/\.[^.]+$/);
+      const ext = extMatch ? extMatch[0] : '';
+      // Use a descriptive filename including the version id
+      a.download = `${base}-version-${version.id}${ext}`;
+      document.body.appendChild(a);
+      a.click();
+      a.remove();
+      URL.revokeObjectURL(url);
+    } catch (e) {
+      console.error('Error downloading version:', e);
+      setError(e.message || 'Failed to download version');
+      throw e;
+    }
+  };
+
   return {
     isUploading,
     uploadProgress,
@@ -218,5 +244,7 @@ export const useFileOperations = (containerId, currentFolderId, onFilesUpdated) 
     // New exports
     listVersions,
     downloadAsPdf
+    ,
+    downloadVersion
   };
 };

@@ -16,7 +16,6 @@ const FileActions = ({
   file,
   onPreview,
   onPreviewInIframe,
-  onPreviewBeta,
   onDownload,
   onEditFields,
   onDelete,
@@ -158,28 +157,7 @@ const FileActions = ({
                     Preview in iframe
                   </MenuItem>
                 )}
-                {isOffice && (
-                  <MenuItem
-                    onClick={async (e) => {
-                      e.stopPropagation();
-                      try {
-                        if (typeof onPreviewBeta === 'function') {
-                          const url = await onPreviewBeta(file);
-                          if (url) {
-                            console.info('[Beta Preview] Using Graph /beta preview endpoint with Office viewer + allowEdit. This is not supported in v1.0 production.');
-                            navigate('/iframe-preview', { state: { url, name: file.name, beta: true } });
-                            return;
-                          }
-                        }
-                      } catch (err) {
-                        console.error('Preview Beta failed', err);
-                      }
-                    }}
-                  >
-                    <Window24Regular style={{ marginRight: 8 }} />
-                    Preview Beta (Office)
-                  </MenuItem>
-                )}
+                {/* Removed Preview Beta (Office) menu item per UX request */}
                 <MenuItem
                   onClick={(e) => {
                     e.stopPropagation();

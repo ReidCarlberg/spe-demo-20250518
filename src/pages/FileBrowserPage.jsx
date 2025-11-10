@@ -243,17 +243,7 @@ function FileBrowserPage() {
     }
   };
 
-  // New: Beta preview using Office viewer with allowEdit=true
-  const handlePreviewBeta = async (file) => {
-    try {
-      if (!file || !file.id) return null;
-      const url = await speService.getFilePreviewUrlBeta(containerId, file.id, { viewer: 'office', allowEdit: true });
-      return url;
-    } catch (err) {
-      console.error('Failed to get beta preview URL:', err);
-      return null;
-    }
-  };
+  // Note: Beta Office preview handler removed — the beta preview option was removed from the file actions menu.
 
   const handlePathClick = (pathItem, index) => {
     if (index === 0) {
@@ -446,7 +436,6 @@ function FileBrowserPage() {
               onFileClick={handleFileClick}
               onPreview={openPreview}
                 onPreviewInIframe={handlePreviewInIframe}
-                onPreviewBeta={handlePreviewBeta}
               onDownload={handleDownloadClick}
               onEditFields={handleOpenFieldsDialog}
               onDelete={handleDeleteFile}
