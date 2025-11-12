@@ -81,7 +81,8 @@ export const AuthProvider = ({ children }) => {
     setLoading(true);
     setError(null);
     try {
-      await instance.loginPopup(loginRequest);
+      // Prefer the centralized signIn helper which will fallback to redirect on mobile
+      await signIn();
     } catch (error) {
       console.error('Login failed:', error);
       setError(error.message || 'Login failed');
@@ -99,9 +100,8 @@ export const AuthProvider = ({ children }) => {
     }
     setLoading(true);
     try {
-      await instance.logoutPopup({
-        postLogoutRedirectUri: window.location.origin,
-      });
+      // Use centralized signOut helper which will fallback to redirect if needed
+      await signOut();
     } catch (error) {
       console.error('Logout failed:', error);
       setError(error.message || 'Logout failed');

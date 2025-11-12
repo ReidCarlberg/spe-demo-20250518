@@ -61,10 +61,19 @@ export const initializeMsal = async () => {
 // Login function
 export const signIn = async () => {
   try {
+    // Try popup first (desktop/modern browsers)
     return await msalInstance.loginPopup(loginRequest);
   } catch (error) {
-    console.error("Login error:", error);
-    return null;
+    console.warn("Login popup failed, falling back to redirect:", error && error.message ? error.message : error);
+    try {
+      // On many mobile browsers popups are blocked — redirect flow is more reliable
+      await msalInstance.loginRedirect(loginRequest);
+      // loginRedirect will navigate away; in some environments it may return a promise that never resolves here
+      return null;
+    } catch (redirErr) {
+      console.error("Login redirect also failed:", redirErr);
+      return null;
+    }
   }
 };
 
@@ -75,7 +84,16 @@ export const signOut = async () => {
       account: getAccount(),
       postLogoutRedirectUri: window.location.origin,
     };
-    await msalInstance.logoutPopup(logoutRequest);
+    try {
+      await msalInstance.logoutPopup(logoutRequest);
+    } catch (err) {
+      console.warn('logoutPopup failed, falling back to logoutRedirect', err);
+      try {
+        await msalInstance.logoutRedirect(logoutRequest);
+      } catch (redirErr) {
+        console.error('logoutRedirect failed:', redirErr);
+      }
+    }
   } catch (error) {
     console.error("Logout error:", error);
   }
@@ -128,8 +146,20 @@ export const getTokenSilent = async () => {
     // If the silent request fails, try interactive
     if (error instanceof InteractionRequiredAuthError) {
       try {
-        const response = await msalInstance.acquireTokenPopup(loginRequest);
-        return response.accessToken;
+        // Try popup (desktop). If popup fails (commonly on mobile), fall back to redirect which is more reliable on mobile.
+        try {
+          const response = await msalInstance.acquireTokenPopup(loginRequest);
+          return response.accessToken;
+        } catch (popupErr) {
+          console.warn('acquireTokenPopup failed, falling back to acquireTokenRedirect', popupErr);
+          try {
+            await msalInstance.acquireTokenRedirect(loginRequest);
+            return null; // redirect will navigate away
+          } catch (redirErr) {
+            console.error('acquireTokenRedirect failed:', redirErr);
+            return null;
+          }
+        }
       } catch (err) {
         console.error("Interactive token acquisition failed:", err);
         return null;
@@ -173,8 +203,19 @@ export const requestSPOAccessToken = async () => {
     // If the silent request fails, try interactive
     if (error instanceof InteractionRequiredAuthError) {
       try {
-        const response = await msalInstance.acquireTokenPopup(spoConfig.spoRequest);
-        return response.accessToken;
+        try {
+          const response = await msalInstance.acquireTokenPopup(spoConfig.spoRequest);
+          return response.accessToken;
+        } catch (popupErr) {
+          console.warn('SPO acquireTokenPopup failed, falling back to acquireTokenRedirect', popupErr);
+          try {
+            await msalInstance.acquireTokenRedirect(spoConfig.spoRequest);
+            return null;
+          } catch (redirErr) {
+            console.error('SPO acquireTokenRedirect failed:', redirErr);
+            return null;
+          }
+        }
       } catch (err) {
         console.error("Interactive SPO token acquisition failed:", err);
         return null;

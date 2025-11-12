@@ -64,6 +64,7 @@
   border-bottom: 1px solid #e5e5e5;
   background-color: #f8f9fa;
   min-height: 60px;
+  position: relative; /* allow absolutely-positioned close button */
 }
 
 .chat-flyout-title {
@@ -91,6 +92,9 @@
   justify-content: center;
   border-radius: 4px;
   transition: all 0.2s ease;
+  position: absolute; /* pin to header corner */
+  top: 12px;
+  right: 12px;
 }
 
 .chat-flyout-close-button:hover {
