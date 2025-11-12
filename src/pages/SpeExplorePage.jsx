@@ -41,9 +41,15 @@ const SpeExplorePage = () => {
   const navigate = useNavigate();
   const styles = useStyles();
 
-  const { setIsPanelVisible } = useContext(DebugModeContext);
+  const debugContext = useContext(DebugModeContext);
+  const { setIsPanelVisible, isDebugModeActive } = debugContext || {};
   const [mobileToolsOpen, setMobileToolsOpen] = useState(false);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  
+  // Log debug mode status on mount and when it changes
+  useEffect(() => {
+    console.log('[SpeExplorePage] Debug context state - isDebugModeActive:', isDebugModeActive, 'setIsPanelVisible available:', !!setIsPanelVisible);
+  }, [isDebugModeActive, setIsPanelVisible]);
 
   const [containers, setContainers] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
@@ -149,7 +155,7 @@ const SpeExplorePage = () => {
       <div className={mergeClasses('spe-container', styles.page)}>
       <div className={styles.headerWrap}>
         <Title1 as="h1">{documentsContent.pageTitle}</Title1>
-        <Subtitle1 as="p">Manage your File Storage Containers (Test 2)</Subtitle1>
+        <Subtitle1 as="p">Manage your File Storage Containers (Test 3)</Subtitle1>
       </div>
 
       {error && <div role="alert"><Text style={{ color: tokens.colorPaletteRedForeground2 }}>{error}</Text></div>}
@@ -293,17 +299,24 @@ const SpeExplorePage = () => {
               // Close drawer first, then show API panel after a small delay to ensure drawer animation completes
               console.log('[SpeExplorePage] API Explorer button clicked');
               console.log('[SpeExplorePage] setIsPanelVisible function:', typeof setIsPanelVisible);
+              console.log('[SpeExplorePage] setIsPanelVisible value:', setIsPanelVisible);
               setMobileToolsOpen(false);
-              console.log('[SpeExplorePage] Closed mobile tools drawer, waiting 250ms...');
+              console.log('[SpeExplorePage] Closed mobile tools drawer, waiting 350ms...');
               setTimeout(() => {
                 try { 
-                  console.log('[SpeExplorePage] Setting isPanelVisible to true');
-                  setIsPanelVisible && setIsPanelVisible(true);
+                  console.log('[SpeExplorePage] After timeout - About to set isPanelVisible to true');
+                  if (!setIsPanelVisible) {
+                    console.error('[SpeExplorePage] ERROR: setIsPanelVisible is null or undefined!');
+                    return;
+                  }
+                  console.log('[SpeExplorePage] Calling setIsPanelVisible(true)');
+                  setIsPanelVisible(true);
                   console.log('[SpeExplorePage] Successfully called setIsPanelVisible(true)');
                 } catch(e) { 
-                  console.error('[SpeExplorePage] Error showing API panel:', e); 
+                  console.error('[SpeExplorePage] Error showing API panel:', e);
+                  console.error('[SpeExplorePage] Stack:', e.stack);
                 }
-              }, 250);
+              }, 350);
             }}>API Explorer</button>
           </div>
         </div>

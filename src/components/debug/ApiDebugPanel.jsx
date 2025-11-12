@@ -149,7 +149,9 @@ const ApiDebugPanel = () => {
     return null;
   }
 
-  console.log('[ApiDebugPanel] Rendering with isPanelVisible =', isPanelVisible, 'isMobile =', isMobile);
+  console.log('[ApiDebugPanel] Main render - isPanelVisible =', isPanelVisible, 'isMobile =', isMobile);
+  console.log('[ApiDebugPanel] isDebugModeActive =', isDebugModeActive);
+  console.log('[ApiDebugPanel] apiCalls count =', apiCalls.length);
 
   return (
     <>
@@ -167,66 +169,79 @@ const ApiDebugPanel = () => {
       {/* Flyout Panel - only when panel is visible */}
       {isPanelVisible && (
         <>
-          {console.log('[ApiDebugPanel] Rendering flyout panel (isMobile=' + isMobile + ')')}
-          <div ref={panelRef} className={"api-debug-panel-flyout open" + (isMobile ? ' bottom-sheet' : '')}>
+          {console.log('[ApiDebugPanel] About to render flyout panel - isMobile =', isMobile)}
+          <div 
+            ref={panelRef} 
+            className={"api-debug-panel-flyout open" + (isMobile ? ' bottom-sheet' : '')}
+            onLoad={() => {
+              console.log('[ApiDebugPanel] Flyout panel DOM element loaded');
+              if (panelRef.current) {
+                const rect = panelRef.current.getBoundingClientRect();
+                const computed = window.getComputedStyle(panelRef.current);
+                console.log('[ApiDebugPanel] Panel rect:', rect);
+                console.log('[ApiDebugPanel] Panel computed style - display:', computed.display, 'opacity:', computed.opacity, 'transform:', computed.transform, 'zIndex:', computed.zIndex);
+              }
+            }}
+          >
             <div className="api-debug-panel-header">
-            <div className="api-debug-panel-title">
-              <i className="fas fa-search"></i>
-              <span>API Explorer</span>
-            </div>
-            <div className="api-debug-panel-controls">
-              <select 
-                value={filter} 
-                onChange={handleFilterChange}
-                className="api-debug-filter"
-                aria-label="Filter API calls"
-              >
-                <option value="all">All Calls</option>
-                <option value="success">Success Only</option>
-                <option value="error">Errors Only</option>
-              </select>
-              <Button 
-                appearance="subtle" 
-                icon={<Delete24Regular />} 
-                onClick={handleClear}
-                aria-label="Clear API calls"
-                className="api-debug-clear-button"
-              />
-              <Button 
-                appearance="subtle" 
-                icon={<Dismiss24Regular />} 
-                onClick={handleClose}
-                aria-label="Close API explorer panel"
-                className="api-debug-close-button"
-              />
-            </div>
-          </div>
-          
-          <div className="api-debug-panel-content">
-            {apiCalls.length === 0 ? (
-              <div className="api-debug-empty">
-                <i className="fas fa-info-circle"></i>
-                <p>No API calls captured yet</p>
-                <p className="api-debug-empty-hint">
-                  API calls will appear here when they occur
-                </p>
+              <div className="api-debug-panel-title">
+                <i className="fas fa-search"></i>
+                <span>API Explorer</span>
               </div>
-            ) : (
-              <>
-                <div className="api-debug-left-pane">
-                  <RequestList 
-                    calls={filteredCalls} 
-                    selectedCall={selectedCall} 
-                    onSelectCall={setSelectedCall} 
-                  />
+              <div className="api-debug-panel-controls">
+                <select 
+                  value={filter} 
+                  onChange={handleFilterChange}
+                  className="api-debug-filter"
+                  aria-label="Filter API calls"
+                >
+                  <option value="all">All Calls</option>
+                  <option value="success">Success Only</option>
+                  <option value="error">Errors Only</option>
+                </select>
+                <Button 
+                  appearance="subtle" 
+                  icon={<Delete24Regular />} 
+                  onClick={handleClear}
+                  aria-label="Clear API calls"
+                  className="api-debug-clear-button"
+                />
+                <Button 
+                  appearance="subtle" 
+                  icon={<Dismiss24Regular />} 
+                  onClick={handleClose}
+                  aria-label="Close API explorer panel"
+                  className="api-debug-close-button"
+                />
+              </div>
+            </div>
+            
+            <div className="api-debug-panel-content">
+              {apiCalls.length === 0 ? (
+                <div className="api-debug-empty">
+                  <i className="fas fa-info-circle"></i>
+                  <p>No API calls captured yet</p>
+                  <p className="api-debug-empty-hint">
+                    API calls will appear here when they occur
+                  </p>
                 </div>
-                <div className="api-debug-right-pane">
-                  <RequestDetail call={selectedCall} />
-                </div>
-              </>
-            )}
+              ) : (
+                <>
+                  <div className="api-debug-left-pane">
+                    <RequestList 
+                      calls={filteredCalls} 
+                      selectedCall={selectedCall} 
+                      onSelectCall={setSelectedCall} 
+                    />
+                  </div>
+                  <div className="api-debug-right-pane">
+                    <RequestDetail call={selectedCall} />
+                  </div>
+                </>
+              )}
+            </div>
           </div>
-        </div>
+        </>
       )}
 
       {/* Toggle Button - only when panel is NOT visible */}

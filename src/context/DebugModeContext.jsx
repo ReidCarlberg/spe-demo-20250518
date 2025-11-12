@@ -27,6 +27,11 @@ export const DebugModeProvider = ({ children }) => {
     console.log('[DebugModeContext] Initialized with isDebugModeActive =', isDebugModeActive, 'isPanelVisible =', isPanelVisible);
   }, []);
 
+  // Log whenever isPanelVisible changes
+  useEffect(() => {
+    console.log('[DebugModeContext] isPanelVisible changed to:', isPanelVisible);
+  }, [isPanelVisible]);
+
   // Filter options
   const [filter, setFilter] = useState("all"); // "all", "success", "error"
 
@@ -121,8 +126,10 @@ export const DebugModeProvider = ({ children }) => {
       isPanelVisible,
       setIsPanelVisible: useCallback((visible) => {
         console.log('[DebugModeContext] setIsPanelVisible called with:', visible);
+        console.log('[DebugModeContext] Current state - isDebugModeActive:', isDebugModeActive, 'isPanelVisible (before):', isPanelVisible);
+        console.log('[DebugModeContext] Stack trace:', new Error().stack);
         setIsPanelVisible(visible);
-      }, []),
+      }, [isDebugModeActive, isPanelVisible]),
       filter,
       setFilter,
     }}>
