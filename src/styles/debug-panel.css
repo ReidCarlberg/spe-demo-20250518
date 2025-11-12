@@ -771,6 +771,11 @@ input:checked + .debug-toggle-slider:before {
   .api-debug-panel-toggle { display: none !important; }
 }
 
+/* Also hide the API Explorer left toggle on desktop — we only want the bottom-right FAB visible */
+@media (min-width: 769px) {
+  .api-debug-panel-toggle { display: none !important; }
+}
+
 @media (max-width: 480px) {
   .api-debug-panel-flyout {
     width: 100vw;

@@ -43,6 +43,7 @@ const SpeExplorePage = () => {
 
   const { setIsPanelVisible } = useContext(DebugModeContext);
   const [mobileToolsOpen, setMobileToolsOpen] = useState(false);
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
   const [containers, setContainers] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
@@ -148,12 +149,12 @@ const SpeExplorePage = () => {
       <div className={mergeClasses('spe-container', styles.page)}>
       <div className={styles.headerWrap}>
         <Title1 as="h1">{documentsContent.pageTitle}</Title1>
-        <Subtitle1 as="p">{documentsContent.pageSubtitle}</Subtitle1>
+        <Subtitle1 as="p">Manage your File Storage Containers</Subtitle1>
       </div>
 
       {error && <div role="alert"><Text style={{ color: tokens.colorPaletteRedForeground2 }}>{error}</Text></div>}
 
-      <Toolbar className={styles.toolbar} aria-label="container actions">
+  <Toolbar className={mergeClasses(styles.toolbar, 'desktop-explore-toolbar')} aria-label="container actions">
         <ToolbarButton icon={<Add24Regular />} appearance="primary" onClick={() => setShowCreateForm(p => !p)}>{showCreateForm ? 'Close Form' : 'New Container'}</ToolbarButton>
         <Input className={styles.searchInput} contentBefore={<Search24Regular />} placeholder="Search" value={query} onChange={(e, data) => setQuery(data.value)} appearance="filled-darker" />
         <ToolbarButton appearance={sort === 'recent' ? 'primary' : 'subtle'} onClick={() => setSort('recent')}>Recent</ToolbarButton>
@@ -161,6 +162,22 @@ const SpeExplorePage = () => {
         <ToolbarButton icon={<Dismiss24Regular />} appearance="subtle" disabled={!query} onClick={() => setQuery('')}>Clear</ToolbarButton>
         <ToolbarButton appearance="subtle" onClick={fetchContainers}>Refresh</ToolbarButton>
       </Toolbar>
+
+      {/* Mobile compact toolbar: visible only on small screens via CSS */}
+      <div className="mobile-explore-toolbar" role="toolbar" aria-label="mobile container actions">
+        <Input className="mobile-search" contentBefore={<Search24Regular />} placeholder="Search" value={query} onChange={(e, data) => setQuery(data.value)} appearance="filled-darker" />
+        <div className="mobile-menu-wrap">
+          <Button className="mobile-menu-button" appearance="subtle" onClick={() => setMobileMenuOpen(s => !s)} aria-expanded={mobileMenuOpen} aria-haspopup="true">⋯</Button>
+          {mobileMenuOpen && (
+            <div className="mobile-menu-popover" role="menu">
+              <button className="mobile-menu-item" onClick={() => { setShowCreateForm(true); setMobileMenuOpen(false); }}>New Container</button>
+              <button className="mobile-menu-item" onClick={() => { setSort('recent'); setMobileMenuOpen(false); }}>Sort by recent</button>
+              <button className="mobile-menu-item" onClick={() => { setSort('name'); setMobileMenuOpen(false); }}>Sort by name</button>
+              <button className="mobile-menu-item" onClick={() => { fetchContainers(); setMobileMenuOpen(false); }}>Refresh</button>
+            </div>
+          )}
+        </div>
+      </div>
 
       {showCreateForm && (
         <Card className={styles.createForm} appearance="filled-alternative">

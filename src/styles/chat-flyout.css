@@ -210,6 +210,12 @@
   .chat-flyout-toggle { display: none !important; }
 }
 
+/* Additionally hide the right-side floating chat toggle on larger (desktop) screens
+   so the only floating action on desktop is the bottom-right FAB. */
+@media (min-width: 769px) {
+  .chat-flyout-toggle { display: none !important; }
+}
+
 /* Bottom-sheet variant for mobile touch devices */
 .chat-flyout-container.bottom-sheet {
   top: auto;

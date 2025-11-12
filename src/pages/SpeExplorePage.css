@@ -87,3 +87,26 @@
   .container-actions { flex-direction:column; }
   .container-actions .spe-button { width:100%; }
 }
+
+/* Mobile compact toolbar for SPE Explore page */
+/* default: hide mobile toolbar, ensure desktop toolbar displays */
+.mobile-explore-toolbar { display: none; }
+.desktop-explore-toolbar { display: flex; }
+
+@media (max-width: 480px) {
+  /* hide the desktop toolbar and show mobile toolbar */
+  .desktop-explore-toolbar { display: none !important; }
+
+  .mobile-explore-toolbar { display: flex; gap: 8px; align-items: center; padding: 8px; background: transparent; }
+  .mobile-explore-toolbar .mobile-search { flex: 1; }
+  .mobile-explore-toolbar .mobile-search .ms-TextField-field { padding: 8px 10px; }
+
+  .mobile-menu-wrap { position: relative; }
+  .mobile-menu-button { min-width: 40px; height: 40px; padding: 0 10px; border-radius: 8px; }
+  .mobile-menu-popover { position: absolute; right: 0; top: 44px; background: var(--background-light); color: var(--text); border: 1px solid rgba(0,0,0,0.08); border-radius: 8px; box-shadow: 0 8px 24px rgba(0,0,0,0.12); z-index: 1100; display: flex; flex-direction: column; min-width: 160px; }
+  .mobile-menu-item { background: transparent; border: none; text-align: left; padding: 10px 12px; font-size: 14px; cursor: pointer; }
+  .mobile-menu-item:hover { background: rgba(0,0,0,0.04); }
+
+  /* ensure the larger grid/cards remain usable */
+  .containers-grid { gap: 12px; }
+}
