@@ -659,9 +659,18 @@ function FileBrowserPage() {
 
               <button className="mobile-tool-btn" onClick={() => {
                 // Close drawer first, then show API panel after a small delay to ensure drawer animation completes
+                console.log('[FileBrowserPage] API Explorer button clicked');
+                console.log('[FileBrowserPage] setIsPanelVisible function:', typeof setIsPanelVisible);
                 setMobileToolsOpen(false);
+                console.log('[FileBrowserPage] Closed mobile tools drawer, waiting 250ms...');
                 setTimeout(() => {
-                  try { setIsPanelVisible && setIsPanelVisible(true); } catch(e) { console.error('Error showing API panel:', e); }
+                  try { 
+                    console.log('[FileBrowserPage] Setting isPanelVisible to true');
+                    setIsPanelVisible && setIsPanelVisible(true);
+                    console.log('[FileBrowserPage] Successfully called setIsPanelVisible(true)');
+                  } catch(e) { 
+                    console.error('[FileBrowserPage] Error showing API panel:', e); 
+                  }
                 }, 250);
               }}>API Explorer</button>
             </div>

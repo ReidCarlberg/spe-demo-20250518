@@ -21,6 +21,11 @@ export const DebugModeProvider = ({ children }) => {
 
   // Panel visibility state
   const [isPanelVisible, setIsPanelVisible] = useState(false);
+  
+  // Log initial debug mode state
+  useEffect(() => {
+    console.log('[DebugModeContext] Initialized with isDebugModeActive =', isDebugModeActive, 'isPanelVisible =', isPanelVisible);
+  }, []);
 
   // Filter options
   const [filter, setFilter] = useState("all"); // "all", "success", "error"

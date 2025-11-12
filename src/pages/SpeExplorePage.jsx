@@ -291,9 +291,18 @@ const SpeExplorePage = () => {
           <div className="mobile-tools-body">
             <button className="mobile-tool-btn" onClick={() => { 
               // Close drawer first, then show API panel after a small delay to ensure drawer animation completes
+              console.log('[SpeExplorePage] API Explorer button clicked');
+              console.log('[SpeExplorePage] setIsPanelVisible function:', typeof setIsPanelVisible);
               setMobileToolsOpen(false);
+              console.log('[SpeExplorePage] Closed mobile tools drawer, waiting 250ms...');
               setTimeout(() => {
-                try { setIsPanelVisible && setIsPanelVisible(true); } catch(e) { console.error('Error showing API panel:', e); }
+                try { 
+                  console.log('[SpeExplorePage] Setting isPanelVisible to true');
+                  setIsPanelVisible && setIsPanelVisible(true);
+                  console.log('[SpeExplorePage] Successfully called setIsPanelVisible(true)');
+                } catch(e) { 
+                  console.error('[SpeExplorePage] Error showing API panel:', e); 
+                }
               }, 250);
             }}>API Explorer</button>
           </div>
