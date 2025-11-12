@@ -149,7 +149,7 @@ const SpeExplorePage = () => {
       <div className={mergeClasses('spe-container', styles.page)}>
       <div className={styles.headerWrap}>
         <Title1 as="h1">{documentsContent.pageTitle}</Title1>
-        <Subtitle1 as="p">Manage your File Storage Containers</Subtitle1>
+        <Subtitle1 as="p">Manage your File Storage Containers (Test 1)</Subtitle1>
       </div>
 
       {error && <div role="alert"><Text style={{ color: tokens.colorPaletteRedForeground2 }}>{error}</Text></div>}
