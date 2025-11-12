@@ -19,12 +19,18 @@ const ThemeSelector = () => {
         <Button 
           appearance="secondary"
           className="theme-selector-button"
-          onClick={() => setIsOpen(!isOpen)}
+          onClick={() => {
+            // Only allow opening the theme dropdown if there is more than one theme available
+            if (availableThemes && availableThemes.length > 1) {
+              setIsOpen(!isOpen);
+            }
+          }}
           aria-label="Change theme"
           icon={<Color24Regular />}
         >
           <span className="theme-label">Theme: {currentTheme.name}</span>
-          {isOpen ? <ChevronUp24Regular className="theme-chevron" /> : <ChevronDown24Regular className="theme-chevron" />}
+          {/* Only show chevron when there are multiple themes to choose from */}
+          {availableThemes && availableThemes.length > 1 ? (isOpen ? <ChevronUp24Regular className="theme-chevron" /> : <ChevronDown24Regular className="theme-chevron" />) : null}
         </Button>
         <Button 
           appearance="secondary"
@@ -37,7 +43,7 @@ const ThemeSelector = () => {
         </Button>
       </div>
       
-      {isOpen && (
+      {isOpen && availableThemes && availableThemes.length > 1 && (
         <div className="theme-dropdown">
           {availableThemes.map((theme) => (
             <Button

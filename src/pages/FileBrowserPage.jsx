@@ -1,7 +1,8 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useContext } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { useAuth } from '../AuthContext';
 import { useChatFlyout } from '../hooks/useChatFlyout';
+import { DebugModeContext } from '../context/DebugModeContext';
 import { speService } from '../services';
 import FilePreview from '../components/FilePreview';
 import DriveInfoModal from '../components/DriveInfoModal';
@@ -27,6 +28,8 @@ import { useFileOperations } from '../hooks/FileBrowser/useFileOperations';
 import { useSearch } from '../hooks/FileBrowser/useSearch';
 import { useContainerData } from '../hooks/FileBrowser/useContainerData';
 import { useFileFields } from '../hooks/FileBrowser/useFileFields';
+import { Menu, MenuTrigger, MenuPopover, MenuList, MenuItem } from '@fluentui/react-components';
+import { ArrowClockwise24Regular, ArrowUpload24Regular, Document24Regular, Folder24Regular, Info24Regular, Delete24Regular } from '@fluentui/react-icons';
 
 // Utils
 import { isPreviewableFile, isOfficeFile } from '../components/FileBrowser/fileUtils';
@@ -36,7 +39,8 @@ import '../styles/page-one-modern.css';
 
 function FileBrowserPage() {
   const { isAuthenticated, loading } = useAuth();
-  const { setContainer } = useChatFlyout();
+  const { setContainer, toggleChatFlyout } = useChatFlyout();
+  const { setIsPanelVisible } = useContext(DebugModeContext);
   const navigate = useNavigate();
   const { containerId, folderId } = useParams();
   
@@ -75,6 +79,17 @@ function FileBrowserPage() {
 
   // Recycle bin state
   const [showRecycleBinDialog, setShowRecycleBinDialog] = useState(false);
+
+  // Mobile UI state
+  const [mobileToolsOpen, setMobileToolsOpen] = useState(false);
+  const [isMobile, setIsMobile] = useState(false);
+
+  useEffect(() => {
+    const check = () => setIsMobile(window.innerWidth <= 768);
+    check();
+    window.addEventListener('resize', check);
+    return () => window.removeEventListener('resize', check);
+  }, []);
 
   // Custom hooks
   const fileOps = useFileOperations(containerId, currentFolderId, fetchFiles);
@@ -367,14 +382,37 @@ function FileBrowserPage() {
   const displayFiles = search.searchResults || files;
   const isSearchMode = !!search.searchResults;
 
+  // Mobile compact menu for toolbar actions (passed into SearchBar)
+  const mobileMenu = isMobile ? (
+    <Menu>
+      <MenuTrigger>
+        <Button appearance="primary" size="medium" aria-label="Open actions">⋯</Button>
+      </MenuTrigger>
+      <MenuPopover>
+        <MenuList>
+          <MenuItem icon={<ArrowClockwise24Regular />} onClick={fetchFiles}>Refresh</MenuItem>
+          <MenuItem icon={<ArrowUpload24Regular />} onClick={fileOps.triggerFileInput}>Upload Files</MenuItem>
+          <MenuItem icon={<Document24Regular />} onClick={() => setShowCreateDialog(true)}>New Office File</MenuItem>
+          <MenuItem icon={<Folder24Regular />} onClick={() => setShowCreateFolderDialog(true)}>New Folder</MenuItem>
+          <MenuItem onClick={() => navigate('/spe-explore')}>Back to Containers</MenuItem>
+          <MenuItem icon={<Info24Regular />} onClick={handleDriveInfoClick}>Drive Info</MenuItem>
+          <MenuItem onClick={() => setShowMetaDialog(true)}>Container Properties</MenuItem>
+          <MenuItem onClick={() => setShowColumnsDialog(true)}>Container Columns</MenuItem>
+          <MenuItem icon={<Delete24Regular />} onClick={handleRecycleBinClick}>Recycle Bin</MenuItem>
+        </MenuList>
+      </MenuPopover>
+    </Menu>
+  ) : null;
+
   return (
     <div className="file-browser-wrapper">
       <div className="file-browser-container">
         <div className="file-browser-header">
           <div className="file-browser-title">
             <h1>File Browser</h1>
+            {/* subtitle showing current container/display name (keeps markup consistent with other variants) */}
             <p className="file-browser-subtitle">
-              {container ? container.displayName : 'Loading container...'}
+              {container ? container.displayName : (currentPath && currentPath.length ? currentPath[currentPath.length - 1].name : 'Loading container...')}
             </p>
           </div>
         </div>
@@ -397,21 +435,24 @@ function FileBrowserPage() {
           onClear={search.clearSearch}
           hasResults={isSearchMode}
           isSearching={search.isSearching}
+          mobileMenu={mobileMenu}
         />
-
-        <Toolbar
-          isLoading={isLoading}
-          isUploading={fileOps.isUploading}
-          onRefresh={fetchFiles}
-          onUpload={fileOps.triggerFileInput}
-          onCreateFile={() => setShowCreateDialog(true)}
-          onCreateFolder={() => setShowCreateFolderDialog(true)}
-          onBackToContainers={() => navigate('/spe-explore')}
-          onDriveInfo={handleDriveInfoClick}
-          onMetadata={() => setShowMetaDialog(true)}
-          onColumns={() => setShowColumnsDialog(true)}
-          onRecycleBin={handleRecycleBinClick}
-        />
+        {/* Hide the full toolbar on mobile; use the compact dropdown in the search bar */}
+        {!isMobile && (
+          <Toolbar
+            isLoading={isLoading}
+            isUploading={fileOps.isUploading}
+            onRefresh={fetchFiles}
+            onUpload={fileOps.triggerFileInput}
+            onCreateFile={() => setShowCreateDialog(true)}
+            onCreateFolder={() => setShowCreateFolderDialog(true)}
+            onBackToContainers={() => navigate('/spe-explore')}
+            onDriveInfo={handleDriveInfoClick}
+            onMetadata={() => setShowMetaDialog(true)}
+            onColumns={() => setShowColumnsDialog(true)}
+            onRecycleBin={handleRecycleBinClick}
+          />
+        )}
 
         <input
           type="file"
@@ -581,6 +622,38 @@ function FileBrowserPage() {
           containerId={containerId}
           onRefreshFiles={fetchFiles}
         />
+
+        {/* Tools FAB + Drawer (always visible). Button uses primary appearance to match Search/Logout */}
+        <>
+          <Button
+            appearance="primary"
+            className={"mobile-fab" + (mobileToolsOpen ? ' open' : '')}
+            onClick={() => setMobileToolsOpen(s => !s)}
+            title="Open tools"
+            aria-label="Open tools"
+          >
+            ⋯
+          </Button>
+
+          <div className={"mobile-tools-drawer" + (mobileToolsOpen ? ' open' : '')} role="dialog" aria-label="Mobile tools drawer">
+            <div className="mobile-tools-header">
+              <strong>Tools</strong>
+              <button className="mobile-tools-close" onClick={() => setMobileToolsOpen(false)} aria-label="Close">✕</button>
+            </div>
+            <div className="mobile-tools-body">
+              <button className="mobile-tool-btn" onClick={() => {
+                if (container) setContainer(container.id, container.displayName);
+                toggleChatFlyout && toggleChatFlyout();
+                setMobileToolsOpen(false);
+              }}>Open Chat</button>
+
+              <button className="mobile-tool-btn" onClick={() => {
+                try { setIsPanelVisible && setIsPanelVisible(true); } catch(e) { /* ignore */ }
+                setMobileToolsOpen(false);
+              }}>API Explorer</button>
+            </div>
+          </div>
+        </>
       </div>
     </div>
   );

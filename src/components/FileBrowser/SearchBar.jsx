@@ -9,7 +9,7 @@ const SearchBar = ({
   onClear, 
   hasResults, 
   isSearching 
-}) => {
+  , mobileMenu } ) => {
   const handleKeyDown = (e) => {
     if (e.key === 'Enter') {
       e.preventDefault();
@@ -27,7 +27,7 @@ const SearchBar = ({
           onChange={(_, data) => onSearchTermChange(data.value)}
           onKeyDown={handleKeyDown}
         />
-        <div style={{ display: 'flex', gap: 8 }}>
+        <div style={{ display: 'flex', gap: 8, alignItems: 'center' }}>
           <Button 
             appearance="primary" 
             size="large" 
@@ -46,6 +46,12 @@ const SearchBar = ({
             >
               Clear
             </Button>
+          )}
+          {/* Render a compact mobile menu next to buttons when provided */}
+          {mobileMenu && (
+            <div style={{ marginLeft: 6 }}>
+              {mobileMenu}
+            </div>
           )}
         </div>
       </div>

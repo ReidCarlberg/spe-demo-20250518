@@ -313,6 +313,19 @@
   }
 }
 
+/* Mobile compact list: hide some columns and reduce spacing so list appears higher */
+@media (max-width: 768px) {
+  .files-section { margin-top: 6px !important; }
+  .files-section .col-modified, .files-section .col-size { display: none !important; }
+  .files-section .col-actions { width: 64px !important; }
+  .files-section .col-name { width: auto !important; }
+  /* make table header compact */
+  .files-section thead th { font-size: 14px; padding: 10px 12px; }
+}
+
+/* Mobile menu trigger styling (used in SearchBar when on mobile) */
+/* removed: using Fluent primary Button for mobile trigger so no custom styles required */
+
 /* File browser actions */
 .file-browser-actions {
   display: flex;
@@ -364,7 +377,10 @@
 
 /* Table spacing improvements */
 .files-section .fui-Table { width: 100%; }
-.files-section .fui-TableRow { border-bottom: 1px solid rgba(0,0,0,0.05); }
+.files-section .fui-TableRow { border-bottom: 1px solid rgba(0,0,0,0.06); }
+.files-section .fui-TableRow { background: white; }
+.files-section .fui-TableRow:nth-child(even) { background: #fbfbfb; }
+.files-section .fui-TableCell { padding: 12px 14px; vertical-align: middle; }
 .files-section .fui-TableCell.col-name { padding-right: 12px; }
 .files-section .fui-TableCell.col-modified { color: var(--text-medium); }
 .files-section .fui-TableCell.col-size { font-variant-numeric: tabular-nums; }
@@ -372,6 +388,46 @@
 .files-section .item-link { gap: 8px; }
 .files-section .fui-Button.item-button { padding-left: 0; }
 .files-section .fui-TableRow:hover { background: rgba(0,0,0,0.03); }
+
+/* Make filenames more readable and limit extreme height from long names */
+.files-section .col-name .item-text {
+  font-size: 15px;
+  line-height: 1.35;
+  color: #111;
+  display: -webkit-box;
+  -webkit-line-clamp: 2; /* show up to 2 lines */
+  line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: normal;
+}
+
+/* Smaller meta columns and right alignment */
+.files-section .fui-TableCell.col-modified,
+.files-section .fui-TableCell.col-size,
+.files-section .fui-TableCell.col-actions {
+  white-space: nowrap;
+  text-align: center;
+  font-size: 13px;
+  color: var(--text-medium, #666);
+}
+
+/* Increase touch target for action icons */
+.files-section .fui-TableCell.col-actions .fui-Button,
+.files-section .fui-TableCell.col-actions button {
+  padding: 8px 10px;
+  min-width: 44px;
+  min-height: 44px;
+}
+
+/* Make table header clearer */
+.files-section thead th {
+  padding: 12px 14px;
+  font-weight: 600;
+  color: #333;
+  background: transparent;
+}
 
 /* Ensure filename text is left-aligned, not centered */
 .files-section .col-name { text-align: left; }
@@ -440,3 +496,68 @@
 .fb-breadcrumb .fb-link:hover { text-decoration: underline; }
 .fb-breadcrumb .fb-sep { opacity: 0.5; }
 .fb-breadcrumb .fb-current { font-weight: 600; color: inherit; min-width: 0; overflow: hidden; text-overflow: ellipsis; }
+
+/* Mobile FAB and tools drawer */
+.mobile-fab {
+  position: fixed;
+  right: 18px;
+  bottom: 18px;
+  width: 52px;
+  height: 52px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1200;
+}
+.mobile-fab.open { transform: scale(0.98); }
+
+.mobile-tools-drawer {
+  display: none;
+  position: fixed;
+  left: 8px;
+  right: 8px;
+  bottom: 18px;
+  height: 56vh;
+  max-height: 80vh;
+  background: var(--surface, #fff);
+  box-shadow: 0 12px 40px rgba(0,0,0,0.18);
+  border-radius: 12px;
+  transform: translateY(110%);
+  transition: transform 240ms ease;
+  z-index: 1199;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+}
+.mobile-tools-drawer.open { transform: translateY(0); }
+.mobile-tools-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 12px 16px;
+  border-bottom: 1px solid rgba(0,0,0,0.06);
+}
+.mobile-tools-close { background: none; border: none; font-size: 18px; cursor: pointer; }
+.mobile-tools-body { padding: 12px 16px; display: flex; flex-direction: column; gap: 10px; }
+.mobile-tool-btn { padding: 12px 16px; border-radius: 8px; background: #0078d4; color: #fff; border: none; font-size: 15px; cursor: pointer; }
+.mobile-tool-btn:nth-child(2) { background: #6b6bff; }
+
+/* Hide hover-only tooltips on mobile to avoid accidental occlusion */
+@media (max-width: 768px) {
+  /* no-op: FAB is intentionally visible on all sizes; primary Button styles control color */
+  .mobile-tools-drawer { display: flex; }
+  .chat-restore-tooltip { display: none !important; }
+  .chat-restore-button:hover .chat-restore-tooltip,
+  .chat-restore-button:focus .chat-restore-tooltip { opacity: 0; pointer-events: none; }
+  /* make action icons easier to tap */
+  .files-section .fui-TableCell.col-actions .fui-Button,
+  .files-section .item-button { padding: 8px 12px; min-height: 44px; }
+}
+
+/* On small screens hide the main page title + subtitle — keep breadcrumbs visible */
+@media (max-width: 480px) {
+  .file-browser-title {
+    display: none !important;
+  }
+}

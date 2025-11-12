@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useContext, useCallback } from 'react';
+import React, { useState, useEffect, useContext, useCallback, useRef } from 'react';
 import { DebugModeContext } from '../../context/DebugModeContext';
 import RequestList from './RequestList';
 import RequestDetail from './RequestDetail';
@@ -49,6 +49,58 @@ const ApiDebugPanel = () => {
     };
   }, [isDebugModeActive, isPanelVisible, setIsPanelVisible]);
 
+  const [isMobile, setIsMobile] = useState(false);
+  const panelRef = useRef(null);
+  const touchStartYRef = useRef(0);
+  const lastTranslateYRef = useRef(0);
+
+  useEffect(() => {
+    const checkMobile = () => setIsMobile(window.innerWidth <= 768);
+    checkMobile();
+    window.addEventListener('resize', checkMobile);
+    return () => window.removeEventListener('resize', checkMobile);
+  }, []);
+
+  // Drag-to-dismiss handlers for mobile bottom sheet
+  useEffect(() => {
+    const el = panelRef.current;
+    if (!el || !isMobile) return;
+
+    const onTouchStart = (e) => {
+      touchStartYRef.current = e.touches[0].clientY;
+      lastTranslateYRef.current = 0;
+      el.style.transition = 'none';
+    };
+
+    const onTouchMove = (e) => {
+      const delta = e.touches[0].clientY - touchStartYRef.current;
+      if (delta > 0) {
+        lastTranslateYRef.current = delta;
+        el.style.transform = `translateY(${delta}px)`;
+      }
+    };
+
+    const onTouchEnd = () => {
+      el.style.transition = '';
+      if (lastTranslateYRef.current > 120) {
+        setIsPanelVisible(false);
+        el.style.transform = '';
+      } else {
+        el.style.transform = '';
+      }
+    };
+
+    el.addEventListener('touchstart', onTouchStart, { passive: true });
+    el.addEventListener('touchmove', onTouchMove, { passive: true });
+    el.addEventListener('touchend', onTouchEnd);
+
+    return () => {
+      el.removeEventListener('touchstart', onTouchStart);
+      el.removeEventListener('touchmove', onTouchMove);
+      el.removeEventListener('touchend', onTouchEnd);
+    };
+  }, [isMobile, setIsPanelVisible]);
+
   const handleFilterChange = useCallback((e) => {
     setFilter(e.target.value);
   }, [setFilter]);
@@ -87,7 +139,7 @@ const ApiDebugPanel = () => {
       
       {/* Flyout Panel - only when panel is visible */}
       {isPanelVisible && (
-        <div className="api-debug-panel-flyout open">
+        <div ref={panelRef} className={"api-debug-panel-flyout open" + (isMobile ? ' bottom-sheet' : '')}>
           <div className="api-debug-panel-header">
             <div className="api-debug-panel-title">
               <i className="fas fa-search"></i>

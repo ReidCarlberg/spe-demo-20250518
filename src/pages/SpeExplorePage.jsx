@@ -1,4 +1,4 @@
-import { useState, useEffect, useMemo } from 'react';
+import { useState, useEffect, useMemo, useContext } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../AuthContext';
 import { useTheme } from '../context/ThemeContext';
@@ -14,6 +14,8 @@ import {
 } from '@fluentui/react-components';
 import { Add24Regular, Delete24Regular, Folder24Regular, ShieldLock24Regular, Search24Regular, Dismiss24Regular } from '@fluentui/react-icons';
 import './SpeExplorePage.css';
+import './FileBrowserPage.css';
+import { DebugModeContext } from '../context/DebugModeContext';
 
 const useStyles = makeStyles({
   page: { padding: '48px clamp(1rem,3vw,3rem)', minHeight: '100vh' },
@@ -38,6 +40,9 @@ const SpeExplorePage = () => {
   const { getDocumentsContent } = useTheme();
   const navigate = useNavigate();
   const styles = useStyles();
+
+  const { setIsPanelVisible } = useContext(DebugModeContext);
+  const [mobileToolsOpen, setMobileToolsOpen] = useState(false);
 
   const [containers, setContainers] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
@@ -139,7 +144,8 @@ const SpeExplorePage = () => {
   }
 
   return (
-    <div className={mergeClasses('spe-container', styles.page)}>
+    <>
+      <div className={mergeClasses('spe-container', styles.page)}>
       <div className={styles.headerWrap}>
         <Title1 as="h1">{documentsContent.pageTitle}</Title1>
         <Subtitle1 as="p">{documentsContent.pageSubtitle}</Subtitle1>
@@ -235,7 +241,32 @@ const SpeExplorePage = () => {
           </DialogBody>
         </DialogSurface>
       </Dialog>
-    </div>
+
+      </div>
+
+      {/* Mobile FAB + Drawer (API Explorer only for the explore page) — placed outside the transformed .spe-container so it stays fixed to the viewport */}
+      <>
+        <Button
+          appearance="primary"
+          className={"mobile-fab" + (mobileToolsOpen ? ' open' : '')}
+          onClick={() => setMobileToolsOpen(s => !s)}
+          title="Open tools"
+          aria-label="Open tools"
+        >
+          ⋯
+        </Button>
+
+        <div className={"mobile-tools-drawer" + (mobileToolsOpen ? ' open' : '')} role="dialog" aria-label="Mobile tools drawer">
+          <div className="mobile-tools-header">
+            <strong>Tools</strong>
+            <button className="mobile-tools-close" onClick={() => setMobileToolsOpen(false)} aria-label="Close">✕</button>
+          </div>
+          <div className="mobile-tools-body">
+            <button className="mobile-tool-btn" onClick={() => { try { setIsPanelVisible && setIsPanelVisible(true); } catch(e){} setMobileToolsOpen(false); }}>API Explorer</button>
+          </div>
+        </div>
+      </>
+    </>
   );
 };
 

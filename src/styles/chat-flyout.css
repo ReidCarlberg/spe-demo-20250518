@@ -200,3 +200,39 @@
     font-size: 11px;
   }
 }
+
+/* Hide desktop right-side chat toggle on small screens — mobile FAB opens chat instead */
+@media (max-width: 768px) {
+  .chat-flyout-toggle { display: none !important; }
+}
+
+/* Bottom-sheet variant for mobile touch devices */
+.chat-flyout-container.bottom-sheet {
+  top: auto;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  width: 100vw;
+  height: 80vh;
+  max-height: 90vh;
+  border-top-left-radius: 12px;
+  border-top-right-radius: 12px;
+  box-shadow: 0 -12px 40px rgba(0,0,0,0.18);
+  transform: translateY(110%);
+  animation: slideInFromBottom 260ms ease-out forwards;
+}
+
+@keyframes slideInFromBottom {
+  from { transform: translateY(110%); }
+  to { transform: translateY(0); }
+}
+
+/* remove right-side toggle when in bottom sheet mode */
+.chat-flyout-toggle { display: block; }
+.chat-flyout-container.bottom-sheet .chat-flyout-header {
+  border-radius: 12px 12px 0 0;
+}
+
+.chat-flyout-container.bottom-sheet.dragging {
+  transition: none !important;
+}

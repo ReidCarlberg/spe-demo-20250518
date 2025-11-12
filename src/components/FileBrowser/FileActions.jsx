@@ -45,15 +45,7 @@ const FileActions = ({
               }}
             />
           )}
-          <Button
-            appearance="subtle"
-            icon={<ArrowDownload24Regular />}
-            aria-label="Download"
-            onClick={(e) => {
-              e.stopPropagation();
-              onDownload(file);
-            }}
-          />
+          {/* Download moved into the More menu on mobile per UX request */}
         </div>
       )}
 
@@ -121,6 +113,15 @@ const FileActions = ({
                 >
                   <History24Regular style={{ marginRight: 8 }} />
                   Version
+                </MenuItem>
+                <MenuItem
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    onDownload(file);
+                  }}
+                >
+                  <ArrowDownload24Regular style={{ marginRight: 8 }} />
+                  Download
                 </MenuItem>
                 <MenuItem
                   onClick={async (e) => {

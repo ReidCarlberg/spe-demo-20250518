@@ -128,9 +128,19 @@ const THEMES = {
 };
 
 export const ThemeProvider = ({ children }) => {
-  // Initialize theme from localStorage or default to 'spe-demo'
+  // Initialize theme from localStorage or default to 'spe-demo'.
+  // To ensure the app defaults to "Boulder Innovations" on first visit, only accept a stored
+  // theme if it's the allowed default. This prevents an older stored value like 'contoso-audit'
+  // from showing when we intentionally only expose the 'spe-demo' theme.
   const [currentThemeId, setCurrentThemeId] = useState(() => {
-    return localStorage.getItem("app_theme") || "spe-demo";
+    try {
+      const stored = localStorage.getItem("app_theme");
+      // Only accept stored value if it's exactly the default 'spe-demo'
+      if (stored === 'spe-demo') return stored;
+    } catch (e) {
+      // ignore localStorage errors and fall back to default
+    }
+    return 'spe-demo';
   });
   // Add dark mode flag
   const [isDarkMode, setIsDarkMode] = useState(() => {
@@ -175,10 +185,11 @@ export const ThemeProvider = ({ children }) => {
     setIsDarkMode(prev => !prev);
   }, []);
 
-  // Get all available themes
-  const getAvailableThemes = useCallback(() => {
-    return Object.values(THEMES);
-  }, []);
+    // Get all available themes
+    // For now we only expose the default 'spe-demo' (Boulder Innovations) theme.
+    const getAvailableThemes = useCallback(() => {
+      return [THEMES['spe-demo']];
+    }, []);
 
   // Get dashboard content based on theme
   const getDashboardContent = useCallback(() => {
