@@ -273,13 +273,29 @@ const SpeExplorePage = () => {
           ⋯
         </Button>
 
+        {/* Backdrop for mobile tools drawer - click to close */}
+        {mobileToolsOpen && (
+          <div 
+            className="mobile-tools-backdrop open"
+            onClick={() => setMobileToolsOpen(false)}
+            role="presentation"
+            aria-hidden="true"
+          />
+        )}
+
         <div className={"mobile-tools-drawer" + (mobileToolsOpen ? ' open' : '')} role="dialog" aria-label="Mobile tools drawer">
           <div className="mobile-tools-header">
             <strong>Tools</strong>
             <button className="mobile-tools-close" onClick={() => setMobileToolsOpen(false)} aria-label="Close">✕</button>
           </div>
           <div className="mobile-tools-body">
-            <button className="mobile-tool-btn" onClick={() => { try { setIsPanelVisible && setIsPanelVisible(true); } catch(e){} setMobileToolsOpen(false); }}>API Explorer</button>
+            <button className="mobile-tool-btn" onClick={() => { 
+              // Close drawer first, then show API panel after a small delay to ensure drawer animation completes
+              setMobileToolsOpen(false);
+              setTimeout(() => {
+                try { setIsPanelVisible && setIsPanelVisible(true); } catch(e) { console.error('Error showing API panel:', e); }
+              }, 250);
+            }}>API Explorer</button>
           </div>
         </div>
       </>
