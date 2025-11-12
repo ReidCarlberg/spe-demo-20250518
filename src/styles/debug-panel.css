@@ -245,15 +245,20 @@ input:checked + .debug-toggle-slider:before {
   border-top-left-radius: 12px;
   border-top-right-radius: 12px;
   box-shadow: 0 -12px 40px rgba(0,0,0,0.18);
-  transform: translateY(110%);
-  animation: slideInFromBottom 260ms ease-out forwards;
+  animation: slideInFromBottom 260ms cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
   -webkit-user-select: text;
   user-select: text;
 }
 
 @keyframes slideInFromBottom {
-  from { transform: translateY(110%); }
-  to { transform: translateY(0); }
+  from { 
+    transform: translateY(110%);
+    opacity: 0;
+  }
+  to { 
+    transform: translateY(0);
+    opacity: 1;
+  }
 }
 
 .api-debug-panel-overlay {
@@ -268,7 +273,8 @@ input:checked + .debug-toggle-slider:before {
   animation: fadeIn 0.3s ease-out;
   -webkit-user-select: none;
   user-select: none;
-  touch-action: none;
+  pointer-events: auto;
+  touch-action: auto;
 }
 
 @keyframes slideInFromLeft {

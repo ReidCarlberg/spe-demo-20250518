@@ -70,6 +70,7 @@ const ApiDebugPanel = () => {
       touchStartYRef.current = e.touches[0].clientY;
       lastTranslateYRef.current = 0;
       el.style.transition = 'none';
+      el.style.willChange = 'transform';
     };
 
     const onTouchMove = (e) => {
@@ -81,12 +82,23 @@ const ApiDebugPanel = () => {
     };
 
     const onTouchEnd = () => {
-      el.style.transition = '';
+      el.style.willChange = 'auto';
+      el.style.transition = 'transform 250ms cubic-bezier(0.34, 1.56, 0.64, 1)';
+      
       if (lastTranslateYRef.current > 120) {
-        setIsPanelVisible(false);
-        el.style.transform = '';
+        // User swiped down past threshold - close the panel
+        el.style.transform = 'translateY(110%)';
+        setTimeout(() => {
+          setIsPanelVisible(false);
+          el.style.transform = '';
+          el.style.transition = '';
+        }, 250);
       } else {
-        el.style.transform = '';
+        // User didn't swipe far enough - snap back to top
+        el.style.transform = 'translateY(0)';
+        setTimeout(() => {
+          el.style.transition = '';
+        }, 250);
       }
     };
 
