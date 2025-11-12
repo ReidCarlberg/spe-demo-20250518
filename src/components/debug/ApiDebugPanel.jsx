@@ -143,15 +143,7 @@ const ApiDebugPanel = () => {
       ? apiCalls.filter(call => !call.isError)
       : apiCalls.filter(call => call.isError);
 
-  // Don't render if debug mode is not active
-  if (!isDebugModeActive) {
-    console.log('[ApiDebugPanel] Debug mode not active, returning null');
-    return null;
-  }
-
-  console.log('[ApiDebugPanel] Main render - isPanelVisible =', isPanelVisible, 'isMobile =', isMobile);
-  console.log('[ApiDebugPanel] isDebugModeActive =', isDebugModeActive);
-  console.log('[ApiDebugPanel] apiCalls count =', apiCalls.length);
+  console.log('[ApiDebugPanel] Render - isPanelVisible =', isPanelVisible, 'isMobile =', isMobile, 'apiCalls count =', apiCalls.length);
 
   return (
     <>

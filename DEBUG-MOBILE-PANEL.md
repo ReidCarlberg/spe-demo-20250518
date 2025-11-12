@@ -1,7 +1,38 @@
 # Mobile API Explorer Panel Debugging Guide
 
-## Issue
-When clicking "API Explorer" on mobile (Safari/Chrome), the panel doesn't appear even though `setIsPanelVisible(true)` is being called.
+## Root Cause Found! 🎯
+
+**The issue is NOT with the API Explorer panel itself - it's that DEBUG MODE was never enabled!**
+
+The `DebugModeToggle` component existed but was never added to the UI, so there was no way to enable debug mode on mobile (or desktop).
+
+### The Logs Proved It:
+```
+[SpeExplorePage] Debug context state - isDebugModeActive: false
+[ApiDebugPanel] Debug mode not active, returning null
+```
+
+Debug mode was `false`, so the panel wouldn't render even though `setIsPanelVisible(true)` was being called!
+
+## Solution ✅
+
+I've added the `DebugModeToggle` component to the Navbar in two places:
+
+1. **Desktop (nav-actions area)** - Right side next to Logout button
+2. **Mobile (nav-items menu)** - In the hamburger menu, separated with a divider
+
+Now you can:
+1. **On Desktop:** Click the "API Explorer" toggle in the top-right navbar
+2. **On Mobile:** Tap the ☰ menu → scroll down → toggle "API Explorer"
+3. Then use the floating action button (⋯) menu → "API Explorer" to open the panel
+
+## How It Works
+
+The flow is now:
+1. **Enable Debug Mode** via the navbar toggle (this activates `isDebugModeActive = true`)
+2. **Click the FAB (⋯) menu** on mobile or the toggle button on desktop
+3. **Click "API Explorer"** option
+4. **Panel appears with all API calls logged**
 
 ## Comprehensive Logging Added
 
