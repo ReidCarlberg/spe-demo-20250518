@@ -66,7 +66,10 @@ const ApiDebugPanel = () => {
     const el = panelRef.current;
     if (!el || !isMobile) return;
 
+    console.log('[ApiDebugPanel] Setting up touch handlers for mobile');
+
     const onTouchStart = (e) => {
+      console.log('[ApiDebugPanel] Touch started at Y:', e.touches[0].clientY);
       touchStartYRef.current = e.touches[0].clientY;
       lastTranslateYRef.current = 0;
       el.style.transition = 'none';
@@ -78,15 +81,20 @@ const ApiDebugPanel = () => {
       if (delta > 0) {
         lastTranslateYRef.current = delta;
         el.style.transform = `translateY(${delta}px)`;
+        if (delta % 50 < 10) { // Log every ~50px
+          console.log('[ApiDebugPanel] Touch moved, delta:', delta);
+        }
       }
     };
 
     const onTouchEnd = () => {
+      console.log('[ApiDebugPanel] Touch ended, lastTranslateY:', lastTranslateYRef.current);
       el.style.willChange = 'auto';
       el.style.transition = 'transform 250ms cubic-bezier(0.34, 1.56, 0.64, 1)';
       
       if (lastTranslateYRef.current > 120) {
         // User swiped down past threshold - close the panel
+        console.log('[ApiDebugPanel] User swiped past threshold, closing panel');
         el.style.transform = 'translateY(110%)';
         setTimeout(() => {
           setIsPanelVisible(false);
@@ -95,6 +103,7 @@ const ApiDebugPanel = () => {
         }, 250);
       } else {
         // User didn't swipe far enough - snap back to top
+        console.log('[ApiDebugPanel] User did not swipe far enough, snapping back');
         el.style.transform = 'translateY(0)';
         setTimeout(() => {
           el.style.transition = '';
@@ -136,23 +145,31 @@ const ApiDebugPanel = () => {
 
   // Don't render if debug mode is not active
   if (!isDebugModeActive) {
+    console.log('[ApiDebugPanel] Debug mode not active, returning null');
     return null;
   }
+
+  console.log('[ApiDebugPanel] Rendering with isPanelVisible =', isPanelVisible, 'isMobile =', isMobile);
 
   return (
     <>
       {/* Overlay - only when panel is visible */}
       {isPanelVisible && (
-        <div 
-          className="api-debug-panel-overlay"
-          onClick={handleClose}
-        />
+        <>
+          {console.log('[ApiDebugPanel] Rendering overlay')}
+          <div 
+            className="api-debug-panel-overlay"
+            onClick={handleClose}
+          />
+        </>
       )}
       
       {/* Flyout Panel - only when panel is visible */}
       {isPanelVisible && (
-        <div ref={panelRef} className={"api-debug-panel-flyout open" + (isMobile ? ' bottom-sheet' : '')}>
-          <div className="api-debug-panel-header">
+        <>
+          {console.log('[ApiDebugPanel] Rendering flyout panel (isMobile=' + isMobile + ')')}
+          <div ref={panelRef} className={"api-debug-panel-flyout open" + (isMobile ? ' bottom-sheet' : '')}>
+            <div className="api-debug-panel-header">
             <div className="api-debug-panel-title">
               <i className="fas fa-search"></i>
               <span>API Explorer</span>

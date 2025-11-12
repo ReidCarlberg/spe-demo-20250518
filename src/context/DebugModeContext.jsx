@@ -119,7 +119,10 @@ export const DebugModeProvider = ({ children }) => {
       selectedCall,
       setSelectedCall,
       isPanelVisible,
-      setIsPanelVisible,
+      setIsPanelVisible: useCallback((visible) => {
+        console.log('[DebugModeContext] setIsPanelVisible called with:', visible);
+        setIsPanelVisible(visible);
+      }, []),
       filter,
       setFilter,
     }}>
