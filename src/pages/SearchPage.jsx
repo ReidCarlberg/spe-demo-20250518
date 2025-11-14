@@ -30,6 +30,7 @@ const SearchPage = () => {
   const [isLoading, setIsLoading] = useState(false);
   const [results, setResults] = useState(null);
   const [error, setError] = useState(null);
+  const [showAdvancedOptions, setShowAdvancedOptions] = useState(false);
 
   const handleEntityChange = (entity) => {
     setEntities(prev => ({
@@ -233,84 +234,97 @@ const SearchPage = () => {
           <div className="search-bar">
             <input 
               className="search-input"
-              placeholder="Enter search query..." 
+              placeholder="Search query..." 
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
+              autoComplete="off"
             />
             <button className="search-submit-button" type="submit">Search</button>
           </div>
           
-          <div className="form-row">
-            <label>Search Entity Types</label>
-            <div className="entity-checkboxes">
-              <label>
-                <input 
-                  type="checkbox" 
-                  checked={entities.drive}
-                  onChange={() => handleEntityChange('drive')}
-                />
-                Drive
-              </label>
-              <label>
-                <input 
-                  type="checkbox" 
-                  checked={entities.driveItem}
-                  onChange={() => handleEntityChange('driveItem')}
-                />
-                Drive Item (files/folders)
-              </label>
+          <button 
+            type="button" 
+            className="advanced-options-toggle"
+            onClick={() => setShowAdvancedOptions(!showAdvancedOptions)}
+            aria-expanded={showAdvancedOptions}
+          >
+            <span className="toggle-icon">{showAdvancedOptions ? '−' : '+'}</span>
+            Advanced Options
+          </button>
+
+          <div className={`advanced-options ${showAdvancedOptions ? 'open' : 'closed'}`}>
+            <div className="form-row">
+              <label className="section-label">Search Entity Types</label>
+              <div className="entity-checkboxes">
+                <label className="checkbox-label">
+                  <input 
+                    type="checkbox" 
+                    checked={entities.drive}
+                    onChange={() => handleEntityChange('drive')}
+                  />
+                  Drive
+                </label>
+                <label className="checkbox-label">
+                  <input 
+                    type="checkbox" 
+                    checked={entities.driveItem}
+                    onChange={() => handleEntityChange('driveItem')}
+                  />
+                  Drive Item (files/folders)
+                </label>
+              </div>
             </div>
-          </div>
-          
-          <div className="form-row">
-            <label>Search Mode</label>
-            <div className="radio-group">
-              <label>
-                <input 
-                  type="radio" 
-                  value="term"
-                  checked={searchMode === 'term'}
-                  onChange={() => setSearchMode('term')}
-                />
-                Term (auto-append container filter)
-              </label>
-              <label>
-                <input 
-                  type="radio" 
-                  value="exact"
-                  checked={searchMode === 'exact'}
-                  onChange={() => setSearchMode('exact')}
-                />
-                Exact (use query as provided)
-              </label>
+            
+            <div className="form-row">
+              <label className="section-label">Search Mode</label>
+              <div className="radio-group">
+                <label className="radio-label">
+                  <input 
+                    type="radio" 
+                    value="term"
+                    checked={searchMode === 'term'}
+                    onChange={() => setSearchMode('term')}
+                  />
+                  Term (auto-append container filter)
+                </label>
+                <label className="radio-label">
+                  <input 
+                    type="radio" 
+                    value="exact"
+                    checked={searchMode === 'exact'}
+                    onChange={() => setSearchMode('exact')}
+                  />
+                  Exact (use query as provided)
+                </label>
+              </div>
             </div>
-          </div>
-          
-          <div className="form-row">
-            <label htmlFor="fieldsInput">Optional Fields (comma-separated)</label>
-            <input 
-              id="fieldsInput"
-              className="fields-input"
-              placeholder="E.g., name,size,lastModifiedDateTime" 
-              value={fields}
-              onChange={(e) => setFields(e.target.value)}
-            />
-            <div className="help-text">
-              Specify fields to include in results (leave empty for defaults)
+            
+            <div className="form-row">
+              <label htmlFor="fieldsInput">Optional Fields (comma-separated)</label>
+              <input 
+                id="fieldsInput"
+                className="fields-input"
+                placeholder="E.g., name,size,lastModifiedDateTime" 
+                value={fields}
+                onChange={(e) => setFields(e.target.value)}
+              />
+              <div className="help-text">
+                Specify fields to include in results (leave empty for defaults)
+              </div>
+            </div>
+
+            <div className="search-guide">
+              <div className="guide-title">Search Tips</div>
+              <ul className="guide-list">
+                <li>Use metadata queries with suffixes like <code>filename:OWSTEXT:"example"</code></li>
+                <li>Wildcard searches: <code>exam*</code> or <code>*ample</code></li>
+                <li>Prefix searches: <code>prefix:"doc"</code></li>
+                <li>Term search automatically filters to your container type</li>
+                <li>Exact search uses your query exactly as written</li>
+              </ul>
             </div>
           </div>
         </form>
-        
-        <div className="search-guide">
-          <div className="guide-title">Search Tips</div>
-          <ul className="guide-list">
-            <li>Use metadata queries with suffixes like <code>filename:OWSTEXT:"example"</code></li>
-            <li>Wildcard searches: <code>exam*</code> or <code>*ample</code></li>
-            <li>Prefix searches: <code>prefix:"doc"</code></li>
-            <li>Term search automatically filters to your container type</li>
-            <li>Exact search uses your query exactly as written</li>
-          </ul>
-        </div>
         
         {renderResults()}
       </div>

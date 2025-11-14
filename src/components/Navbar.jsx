@@ -1,7 +1,7 @@
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { useAuth } from '../AuthContext';
 import { useTheme } from '../context/ThemeContext';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import SearchModal from './SearchModal';
 import { Button } from '@fluentui/react-components';
 import './Navbar.css';
@@ -12,6 +12,11 @@ const Navbar = () => {
   const location = useLocation();
   const navigate = useNavigate();
   const [showMobileMenu, setShowMobileMenu] = useState(false);
+
+  // Close mobile menu when location changes
+  useEffect(() => {
+    setShowMobileMenu(false);
+  }, [location]);
 
   const handleLogout = async () => {
     await logout();
