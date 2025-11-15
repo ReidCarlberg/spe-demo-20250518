@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { useParams, useNavigate } from 'react-router-dom';
+import { useParams, useNavigate, useLocation } from 'react-router-dom';
 import { speService } from '../services';
 import { Button, Spinner } from '@fluentui/react-components';
 import { ArrowLeft24Regular } from '@fluentui/react-icons';
@@ -9,6 +9,7 @@ import './PreviewPage.css';
 const PreviewPage = () => {
   const { driveId, itemId } = useParams();
   const navigate = useNavigate();
+  const location = useLocation();
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [fileDetails, setFileDetails] = useState(null);
@@ -47,7 +48,7 @@ const PreviewPage = () => {
   useEffect(() => {
     const handleEscape = (e) => {
       if (e.key === 'Escape') {
-        navigate(-1);
+        handleGoBack();
       }
     };
 
@@ -61,10 +62,15 @@ const PreviewPage = () => {
       document.body.classList.remove('preview-modal-open');
       document.removeEventListener('keydown', handleEscape);
     };
-  }, [navigate]);
+  }, [navigate, location.state]);
 
   const handleGoBack = () => {
-    navigate(-1);
+    // If we have search state from the previous page, navigate back with it
+    if (location.state?.searchState) {
+      navigate('/search', { state: { searchState: location.state.searchState } });
+    } else {
+      navigate(-1);
+    }
   };
 
   const handleOverlayClick = (e) => {

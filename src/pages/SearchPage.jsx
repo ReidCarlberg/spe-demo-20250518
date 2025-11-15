@@ -1,5 +1,5 @@
 import React, { useState, useContext, useEffect } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { speService } from '../services';
 import { useAuth } from '../AuthContext';
 import '../styles/search-modal.css';
@@ -22,18 +22,31 @@ const formatSummary = (summary) => {
 };
 
 const SearchPage = () => {
-  const [searchQuery, setSearchQuery] = useState('');
-  const [searchMode, setSearchMode] = useState('term');
-  const [fields, setFields] = useState('');
+  const location = useLocation();
+  const navigate = useNavigate();
+  
+  // Try to restore state from location.state if returning from preview
+  const savedState = location.state?.searchState;
+  
+  // Debug logging
+  useEffect(() => {
+    if (savedState) {
+      console.log('[SearchPage] Restoring saved state:', savedState);
+    }
+  }, []);
+  
+  const [searchQuery, setSearchQuery] = useState(savedState?.searchQuery || '');
+  const [searchMode, setSearchMode] = useState(savedState?.searchMode || 'term');
+  const [fields, setFields] = useState(savedState?.fields || '');
   const { accessToken } = useAuth();
-  const [entities, setEntities] = useState({
+  const [entities, setEntities] = useState(savedState?.entities || {
     drive: false,
     driveItem: true
   });
   const [isLoading, setIsLoading] = useState(false);
-  const [results, setResults] = useState(null);
+  const [results, setResults] = useState(savedState?.results || null);
   const [error, setError] = useState(null);
-  const [showAdvancedOptions, setShowAdvancedOptions] = useState(false);
+  const [showAdvancedOptions, setShowAdvancedOptions] = useState(savedState?.showAdvancedOptions || false);
   const { setIsPanelVisible } = useContext(DebugModeContext);
   const [mobileToolsOpen, setMobileToolsOpen] = useState(false);
   const [isMobile, setIsMobile] = useState(() => window.innerWidth <= 768);
@@ -187,10 +200,22 @@ const SearchPage = () => {
           const isEditableOfficeDoc = ['doc', 'docx', 'xls', 'xlsx', 'ppt', 'pptx'].includes(extension);
           const isPdf = extension === 'pdf';
           
+          // Prepare state to pass to preview page
+          const navigationState = {
+            searchState: {
+              searchQuery,
+              searchMode,
+              fields,
+              entities,
+              results,
+              showAdvancedOptions
+            }
+          };
+          
           return (
             <div key={index} className="result-item">
               {isDrive ? (
-                <Link to={appLinkTo} className="result-title">
+                <Link to={appLinkTo} state={navigationState} className="result-title">
                   {resource.name || 'Unnamed resource'}
                 </Link>
               ) : (sharePointEditUrl && isEditableOfficeDoc) ? (
@@ -203,7 +228,7 @@ const SearchPage = () => {
                   {resource.name || 'Unnamed resource'}
                 </a>
               ) : (
-                <Link to={appLinkTo} className="result-title">
+                <Link to={appLinkTo} state={navigationState} className="result-title">
                   {resource.name || 'Unnamed resource'}
                 </Link>
               )}

@@ -351,16 +351,9 @@
     border-radius: 0 4px 4px 0;
   }
 
-  /* Hide toggle button on desktop */
+  /* Show toggle button on desktop too */
   .search-page .advanced-options-toggle {
-    display: none;
-  }
-
-  /* Always show options on desktop */
-  .search-page .advanced-options {
-    max-height: none;
-    opacity: 1;
-    overflow: visible;
+    display: flex;
   }
 
   .search-page .entity-checkboxes,
