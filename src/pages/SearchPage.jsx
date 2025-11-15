@@ -1,9 +1,12 @@
-import React, { useState } from 'react';
+import React, { useState, useContext, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { speService } from '../services';
 import { useAuth } from '../AuthContext';
 import '../styles/search-modal.css';
 import '../styles/search-page.css';
+import './FileBrowserPage.css';
+import { DebugModeContext } from '../context/DebugModeContext';
+import { Button } from '@fluentui/react-components';
 
 // Function to format search result summaries with custom tags
 const formatSummary = (summary) => {
@@ -31,6 +34,15 @@ const SearchPage = () => {
   const [results, setResults] = useState(null);
   const [error, setError] = useState(null);
   const [showAdvancedOptions, setShowAdvancedOptions] = useState(false);
+  const { setIsPanelVisible } = useContext(DebugModeContext);
+  const [mobileToolsOpen, setMobileToolsOpen] = useState(false);
+  const [isMobile, setIsMobile] = useState(() => window.innerWidth <= 768);
+
+  useEffect(() => {
+    const onResize = () => setIsMobile(window.innerWidth <= 768);
+    window.addEventListener('resize', onResize);
+    return () => window.removeEventListener('resize', onResize);
+  }, []);
 
   const handleEntityChange = (entity) => {
     setEntities(prev => ({
@@ -157,7 +169,6 @@ const SearchPage = () => {
         <h3>Search Results ({hits.length})</h3>
         {hits.map((hit, index) => {
           const resource = hit.resource;
-          // More precise check for drive vs. driveItem
           const odataType = resource['@odata.type'] || '';
           const isDrive = odataType.endsWith('drive') && !odataType.endsWith('driveItem');
           const driveId = resource.parentReference?.driveId || resource.id;
@@ -167,7 +178,7 @@ const SearchPage = () => {
           const appLinkTo = isDrive 
             ? `/list/${driveId}` 
             : `/preview/${driveId}/${itemId}`;
-            // Get SharePoint edit URL if possible
+          // Get SharePoint edit URL if possible
           const sharePointEditUrl = buildEditUrlFromHit(hit);
           
           // Determine file extension & editable Office doc types (exclude pdf)
@@ -179,12 +190,10 @@ const SearchPage = () => {
           return (
             <div key={index} className="result-item">
               {isDrive ? (
-                // Drive link - open in same tab
                 <Link to={appLinkTo} className="result-title">
                   {resource.name || 'Unnamed resource'}
                 </Link>
               ) : (sharePointEditUrl && isEditableOfficeDoc) ? (
-                // Editable Office documents open SharePoint edit URL in new tab
                 <a 
                   href={sharePointEditUrl}
                   className="result-title"
@@ -194,11 +203,10 @@ const SearchPage = () => {
                   {resource.name || 'Unnamed resource'}
                 </a>
               ) : (
-                // PDFs and other files -> internal preview route
                 <Link to={appLinkTo} className="result-title">
                   {resource.name || 'Unnamed resource'}
                 </Link>
-              )}{/* ...existing code... */}
+              )}
               {hit.summary ? (
                 <div className="result-summary" dangerouslySetInnerHTML={{ 
                   __html: formatSummary(hit.summary)
@@ -209,14 +217,12 @@ const SearchPage = () => {
                 }} />
               ) : null}
               
-              {/* Hide debugging info unless needed */}
               <div className="result-debug" style={{ display: 'none' }}>
                 {resource.webUrl && (
                   <div className="result-url small">
                     <strong>Original URL:</strong> {resource.webUrl}
                   </div>
                 )}
-                
               </div>
             </div>
           );
@@ -226,109 +232,152 @@ const SearchPage = () => {
   };
 
   return (
-    <div className="page-container search-page">
-      <h1>Search SharePoint Embedded</h1>
-      
-      <div className="search-page-content">
-        <form onSubmit={handleSearch} className="search-form">
-          <div className="search-bar">
-            <input 
-              className="search-input"
-              placeholder="Search query..." 
-              value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
-              autoComplete="off"
-            />
-            <button className="search-submit-button" type="submit">Search</button>
-          </div>
-          
-          <button 
-            type="button" 
-            className="advanced-options-toggle"
-            onClick={() => setShowAdvancedOptions(!showAdvancedOptions)}
-            aria-expanded={showAdvancedOptions}
-          >
-            <span className="toggle-icon">{showAdvancedOptions ? '−' : '+'}</span>
-            Advanced Options
-          </button>
-
-          <div className={`advanced-options ${showAdvancedOptions ? 'open' : 'closed'}`}>
-            <div className="form-row">
-              <label className="section-label">Search Entity Types</label>
-              <div className="entity-checkboxes">
-                <label className="checkbox-label">
-                  <input 
-                    type="checkbox" 
-                    checked={entities.drive}
-                    onChange={() => handleEntityChange('drive')}
-                  />
-                  Drive
-                </label>
-                <label className="checkbox-label">
-                  <input 
-                    type="checkbox" 
-                    checked={entities.driveItem}
-                    onChange={() => handleEntityChange('driveItem')}
-                  />
-                  Drive Item (files/folders)
-                </label>
-              </div>
-            </div>
-            
-            <div className="form-row">
-              <label className="section-label">Search Mode</label>
-              <div className="radio-group">
-                <label className="radio-label">
-                  <input 
-                    type="radio" 
-                    value="term"
-                    checked={searchMode === 'term'}
-                    onChange={() => setSearchMode('term')}
-                  />
-                  Term (auto-append container filter)
-                </label>
-                <label className="radio-label">
-                  <input 
-                    type="radio" 
-                    value="exact"
-                    checked={searchMode === 'exact'}
-                    onChange={() => setSearchMode('exact')}
-                  />
-                  Exact (use query as provided)
-                </label>
-              </div>
-            </div>
-            
-            <div className="form-row">
-              <label htmlFor="fieldsInput">Optional Fields (comma-separated)</label>
-              <input 
-                id="fieldsInput"
-                className="fields-input"
-                placeholder="E.g., name,size,lastModifiedDateTime" 
-                value={fields}
-                onChange={(e) => setFields(e.target.value)}
-              />
-              <div className="help-text">
-                Specify fields to include in results (leave empty for defaults)
-              </div>
-            </div>
-
-            <div className="search-guide">
-              <div className="guide-title">Search Tips</div>
-              <ul className="guide-list">
-                <li>Use metadata queries with suffixes like <code>filename:OWSTEXT:"example"</code></li>
-                <li>Wildcard searches: <code>exam*</code> or <code>*ample</code></li>
-                <li>Prefix searches: <code>prefix:"doc"</code></li>
-                <li>Term search automatically filters to your container type</li>
-                <li>Exact search uses your query exactly as written</li>
-              </ul>
-            </div>
-          </div>
-        </form>
+    <>
+      <div className="page-container search-page">
+        <h1>Search SharePoint Embedded</h1>
         
-        {renderResults()}
+        <div className="search-page-content">
+          <form onSubmit={handleSearch} className="search-form">
+            <div className="search-bar">
+              <input 
+                className="search-input"
+                placeholder="Search query..." 
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                autoComplete="off"
+              />
+              <button className="search-submit-button" type="submit">Search</button>
+            </div>
+            
+            <button 
+              type="button" 
+              className="advanced-options-toggle"
+              onClick={() => setShowAdvancedOptions(!showAdvancedOptions)}
+              aria-expanded={showAdvancedOptions}
+            >
+              <span className="toggle-icon">{showAdvancedOptions ? '−' : '+'}</span>
+              Advanced Options
+            </button>
+
+            <div className={`advanced-options ${showAdvancedOptions ? 'open' : 'closed'}`}>
+              <div className="form-row">
+                <label className="section-label">Search Entity Types</label>
+                <div className="entity-checkboxes">
+                  <label className="checkbox-label">
+                    <input 
+                      type="checkbox" 
+                      checked={entities.drive}
+                      onChange={() => handleEntityChange('drive')}
+                    />
+                    Drive
+                  </label>
+                  <label className="checkbox-label">
+                    <input 
+                      type="checkbox" 
+                      checked={entities.driveItem}
+                      onChange={() => handleEntityChange('driveItem')}
+                    />
+                    Drive Item (files/folders)
+                  </label>
+                </div>
+              </div>
+              
+              <div className="form-row">
+                <label className="section-label">Search Mode</label>
+                <div className="radio-group">
+                  <label className="radio-label">
+                    <input 
+                      type="radio" 
+                      value="term"
+                      checked={searchMode === 'term'}
+                      onChange={() => setSearchMode('term')}
+                    />
+                    Term (auto-append container filter)
+                  </label>
+                  <label className="radio-label">
+                    <input 
+                      type="radio" 
+                      value="exact"
+                      checked={searchMode === 'exact'}
+                      onChange={() => setSearchMode('exact')}
+                    />
+                    Exact (use query as provided)
+                  </label>
+                </div>
+              </div>
+              
+              <div className="form-row">
+                <label htmlFor="fieldsInput">Optional Fields (comma-separated)</label>
+                <input 
+                  id="fieldsInput"
+                  className="fields-input"
+                  placeholder="E.g., name,size,lastModifiedDateTime" 
+                  value={fields}
+                  onChange={(e) => setFields(e.target.value)}
+                />
+                <div className="help-text">
+                  Specify fields to include in results (leave empty for defaults)
+                </div>
+              </div>
+
+              <div className="search-guide">
+                <div className="guide-title">Search Tips</div>
+                <ul className="guide-list">
+                  <li>Use metadata queries with suffixes like <code>filename:OWSTEXT:"example"</code></li>
+                  <li>Wildcard searches: <code>exam*</code> or <code>*ample</code></li>
+                  <li>Prefix searches: <code>prefix:"doc"</code></li>
+                  <li>Term search automatically filters to your container type</li>
+                  <li>Exact search uses your query exactly as written</li>
+                </ul>
+              </div>
+            </div>
+          </form>
+          
+          {renderResults()}
+        </div>
       </div>
-    </div>
+
+      {/* Mobile FAB + Drawer (API Explorer) - positioned outside page container */}
+      {/* Only render mobile UI on mobile screens */}
+      {isMobile && (
+        <>
+          <Button
+            appearance="primary"
+            className={"mobile-fab" + (mobileToolsOpen ? ' open' : '')}
+            onClick={() => {
+              setMobileToolsOpen(s => !s);
+            }}
+            title="Open tools"
+            aria-label="Open tools"
+          >
+            ⋯
+          </Button>
+
+          {mobileToolsOpen && (
+            <div 
+              className="mobile-tools-backdrop open"
+              onClick={() => setMobileToolsOpen(false)}
+              role="presentation"
+              aria-hidden="true"
+            />
+          )}
+
+          <div className={"mobile-tools-drawer" + (mobileToolsOpen ? ' open' : '')} role="dialog" aria-label="Mobile tools drawer">
+            <div className="mobile-tools-header">
+              <strong>Tools</strong>
+              <button className="mobile-tools-close" onClick={() => setMobileToolsOpen(false)} aria-label="Close">✕</button>
+            </div>
+            <div className="mobile-tools-body">
+              <button className="mobile-tool-btn" onClick={() => {
+                console.log('[SearchPage] API Explorer button clicked');
+                setMobileToolsOpen(false);
+                setTimeout(() => { try { setIsPanelVisible && setIsPanelVisible(true); } catch(e) { console.error(e); } }, 250);
+              }}>API Explorer</button>
+            </div>
+          </div>
+        </>
+      )}
+    </>
   );
 };
 

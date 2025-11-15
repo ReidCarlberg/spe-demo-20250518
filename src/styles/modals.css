@@ -18,6 +18,14 @@
   transition: opacity var(--transition-speed) ease;
 }
 
+/* Prevent invisible overlays from intercepting pointer events. When the
+   overlay is opened the class `.open` will enable pointer events so the
+   modal can receive clicks. This avoids a hidden overlay blocking page
+   interactions (e.g. links in the search results). */
+.modal-overlay {
+  pointer-events: none;
+}
+
 /* Overlay background variants */
 .modal-overlay.standard {
   background-color: rgba(0, 0, 0, 0.5);
@@ -51,6 +59,10 @@
 /* Overlay states */
 .modal-overlay.open {
   opacity: 1;
+}
+
+.modal-overlay.open {
+  pointer-events: auto;
 }
 
 .modal-overlay.closing {

@@ -1,8 +1,10 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useContext } from 'react';
 import { speService } from '../speService';
 import { getTokenSilent } from '../authService';
+import { speConfig } from '../authConfig';
 import './AgentPage.css';
 import { Button } from '@fluentui/react-components';
+import { DebugModeContext } from '../context/DebugModeContext';
 
 const AgentPage = () => {
   const [containers, setContainers] = useState([]);
@@ -13,6 +15,8 @@ const AgentPage = () => {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
   const [showResults, setShowResults] = useState(false);
+  const { setIsPanelVisible } = useContext(DebugModeContext);
+  const [mobileToolsOpen, setMobileToolsOpen] = useState(false);
 
   useEffect(() => {
     loadContainers();
@@ -69,9 +73,16 @@ const AgentPage = () => {
 
       const filterExpression = `(path:"${webUrl}")`;
       
+      // Build request using the new SharePointEmbedded retrieval syntax
       const requestBody = {
-        DataSource: 'SharePoint',
         queryString,
+        dataSource: 'SharePointEmbedded',
+        dataSourceConfiguration: {
+          SharePointEmbedded: {
+            ContainerTypeId: speConfig.containerTypeId
+          }
+        },
+        // Keep optional filterExpression to further narrow by path if available
         filterExpression,
         resourceMetadata: ["FileExtension"],
         maximumNumberOfResults: maxResults
@@ -113,30 +124,71 @@ const AgentPage = () => {
 
   if (showResults) {
     return (
-      <div className="agent-page">
-        <div className="container">
-          <h1>Agent Results</h1>
-          {results ? (
-            <div className="results-container">
-              <pre className="results-json">{JSON.stringify(results, null, 2)}</pre>
-            </div>
-          ) : (
-            <p>No results found.</p>
-          )}
-          <Button 
-            type="button" 
-            appearance="secondary" 
-            onClick={backToForm}
-          >
-            Back to Query Form
-          </Button>
+      <>
+        <div className="agent-page">
+          <div className="container">
+            <h1>Agent Results</h1>
+            {results ? (
+              <div className="results-container">
+                <pre className="results-json">{JSON.stringify(results, null, 2)}</pre>
+              </div>
+            ) : (
+              <p>No results found.</p>
+            )}
+            <Button 
+              type="button" 
+              appearance="secondary" 
+              onClick={backToForm}
+            >
+              Back to Query Form
+            </Button>
+          </div>
         </div>
-      </div>
+
+        {/* Mobile FAB + Drawer (API Explorer) */}
+        <>
+          <Button
+            appearance="primary"
+            className={"mobile-fab" + (mobileToolsOpen ? ' open' : '')}
+            onClick={() => setMobileToolsOpen(s => !s)}
+            title="Open tools"
+            aria-label="Open tools"
+          >
+            ⋯
+          </Button>
+
+          {mobileToolsOpen && (
+            <div 
+              className="mobile-tools-backdrop open"
+              onClick={() => setMobileToolsOpen(false)}
+              role="presentation"
+              aria-hidden="true"
+            />
+          )}
+
+          <div className={"mobile-tools-drawer" + (mobileToolsOpen ? ' open' : '')} role="dialog" aria-label="Mobile tools drawer">
+            <div className="mobile-tools-header">
+              <strong>Tools</strong>
+              <button className="mobile-tools-close" onClick={() => setMobileToolsOpen(false)} aria-label="Close">✕</button>
+            </div>
+            <div className="mobile-tools-body">
+              <button className="mobile-tool-btn" onClick={() => {
+                console.log('[AgentPage] API Explorer button clicked');
+                setMobileToolsOpen(false);
+                setTimeout(() => {
+                  try { setIsPanelVisible && setIsPanelVisible(true); } catch(e) { console.error('[AgentPage] Error showing API panel', e); }
+                }, 250);
+              }}>API Explorer</button>
+            </div>
+          </div>
+        </>
+      </>
     );
   }
 
   return (
-    <div className="agent-page">
+    <>
+      <div className="agent-page">
       <div className="container">
         <h1>Copilot Retrieval Query</h1>
         
@@ -205,6 +257,45 @@ const AgentPage = () => {
         </form>
       </div>
     </div>
+
+      {/* Mobile FAB + Drawer (API Explorer) */}
+      <>
+        <Button
+          appearance="primary"
+          className={"mobile-fab" + (mobileToolsOpen ? ' open' : '')}
+          onClick={() => setMobileToolsOpen(s => !s)}
+          title="Open tools"
+          aria-label="Open tools"
+        >
+          ⋯
+        </Button>
+
+        {mobileToolsOpen && (
+          <div 
+            className="mobile-tools-backdrop open"
+            onClick={() => setMobileToolsOpen(false)}
+            role="presentation"
+            aria-hidden="true"
+          />
+        )}
+
+        <div className={"mobile-tools-drawer" + (mobileToolsOpen ? ' open' : '')} role="dialog" aria-label="Mobile tools drawer">
+          <div className="mobile-tools-header">
+            <strong>Tools</strong>
+            <button className="mobile-tools-close" onClick={() => setMobileToolsOpen(false)} aria-label="Close">✕</button>
+          </div>
+          <div className="mobile-tools-body">
+            <button className="mobile-tool-btn" onClick={() => {
+              console.log('[AgentPage] API Explorer button clicked');
+              setMobileToolsOpen(false);
+              setTimeout(() => {
+                try { setIsPanelVisible && setIsPanelVisible(true); } catch(e) { console.error('[AgentPage] Error showing API panel', e); }
+              }, 250);
+            }}>API Explorer</button>
+          </div>
+        </div>
+      </>
+    </>
   );
 };
 

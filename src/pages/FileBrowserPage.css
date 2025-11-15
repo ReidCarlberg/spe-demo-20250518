@@ -514,6 +514,14 @@
 }
 .mobile-fab.open { transform: scale(0.98); }
 
+/* Hide mobile-specific UI on desktop (>=640px) */
+@media (min-width: 640px) {
+  .mobile-fab {
+    display: none !important;
+    pointer-events: none !important;
+  }
+}
+
 /* Semi-transparent backdrop for mobile tools drawer - stays behind API panel */
 .mobile-tools-backdrop {
   display: none;
@@ -531,6 +539,14 @@
   display: block;
 }
 
+/* Hide mobile backdrop on desktop */
+@media (min-width: 640px) {
+  .mobile-tools-backdrop {
+    display: none !important;
+    pointer-events: none !important;
+  }
+}
+
 .mobile-tools-drawer {
   display: none;
   position: fixed;
@@ -546,13 +562,24 @@
   transition: transform 240ms cubic-bezier(0.34, 1.56, 0.64, 1);
   z-index: 1199;
   overflow: hidden;
-  display: flex;
   flex-direction: column;
   -webkit-user-select: none;
   user-select: none;
   touch-action: manipulation;
+  pointer-events: none;
 }
-.mobile-tools-drawer.open { transform: translateY(0); }
+.mobile-tools-drawer.open { 
+  transform: translateY(0); 
+  pointer-events: auto;
+}
+
+/* Hide mobile drawer on desktop */
+@media (min-width: 640px) {
+  .mobile-tools-drawer {
+    display: none !important;
+    pointer-events: none !important;
+  }
+}
 .mobile-tools-header {
   display: flex;
   align-items: center;
@@ -566,7 +593,6 @@
 .mobile-tools-body { padding: 12px 16px; display: flex; flex-direction: column; gap: 10px; }
 .mobile-tool-btn { padding: 12px 16px; border-radius: 8px; background: #0078d4; color: #fff; border: none; font-size: 15px; cursor: pointer; -webkit-user-select: none; user-select: none; touch-action: manipulation; min-height: 44px; }
 
-/* Hide hover-only tooltips on mobile to avoid accidental occlusion */
 @media (max-width: 768px) {
   /* no-op: FAB is intentionally visible on all sizes; primary Button styles control color */
   .mobile-tools-drawer { display: flex; }

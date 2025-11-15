@@ -201,6 +201,9 @@
 
 .search-page .search-results {
   margin-top: 24px;
+  position: relative;
+  z-index: 10;
+  pointer-events: auto;
 }
 
 .search-page .search-results h3 {
@@ -216,6 +219,9 @@
   border-radius: 4px;
   margin-bottom: 12px;
   transition: box-shadow 0.2s;
+  position: relative;
+  z-index: 1;
+  pointer-events: auto;
 }
 
 .search-page .result-item:hover {
@@ -230,6 +236,10 @@
   display: block;
   margin-bottom: 8px;
   word-break: break-word;
+  cursor: pointer;
+  pointer-events: auto;
+  position: relative;
+  z-index: 2;
 }
 
 .search-page .result-title:hover {
