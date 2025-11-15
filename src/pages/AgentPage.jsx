@@ -35,8 +35,8 @@ const AgentPage = () => {
   const executeQuery = async (e) => {
     e.preventDefault();
     
-    if (!selectedContainerId || !queryString) {
-      setError('Please select a container and enter a query string');
+    if (!queryString) {
+      setError('Please enter a query string');
       return;
     }
 
@@ -50,29 +50,6 @@ const AgentPage = () => {
         throw new Error('No access token available');
       }
 
-      // Fetch the container properties to get the webUrl
-      const containerUrl = `https://graph.microsoft.com/v1.0/storage/fileStorage/containers/${selectedContainerId}/drive`;
-      const containerResponse = await fetch(containerUrl, {
-        method: 'GET',
-        headers: {
-          'Authorization': `Bearer ${token}`,
-          'Content-Type': 'application/json'
-        }
-      });
-
-      if (!containerResponse.ok) {
-        throw new Error('Failed to fetch container details');
-      }
-
-      const containerDetails = await containerResponse.json();
-      const webUrl = containerDetails.webUrl;
-      
-      if (!webUrl) {
-        throw new Error('Web URL not found for container');
-      }
-
-      const filterExpression = `(path:"${webUrl}")`;
-      
       // Build request using the new SharePointEmbedded retrieval syntax
       const requestBody = {
         queryString,
@@ -82,11 +59,32 @@ const AgentPage = () => {
             ContainerTypeId: speConfig.containerTypeId
           }
         },
-        // Keep optional filterExpression to further narrow by path if available
-        filterExpression,
         resourceMetadata: ["FileExtension"],
         maximumNumberOfResults: maxResults
       };
+
+      // If a container is selected, fetch its webUrl and add a filter expression
+      if (selectedContainerId) {
+        const containerUrl = `https://graph.microsoft.com/v1.0/storage/fileStorage/containers/${selectedContainerId}/drive`;
+        const containerResponse = await fetch(containerUrl, {
+          method: 'GET',
+          headers: {
+            'Authorization': `Bearer ${token}`,
+            'Content-Type': 'application/json'
+          }
+        });
+
+        if (!containerResponse.ok) {
+          throw new Error('Failed to fetch container details');
+        }
+
+        const containerDetails = await containerResponse.json();
+        const webUrl = containerDetails.webUrl;
+        
+        if (webUrl) {
+          requestBody.filterExpression = `(path:"${webUrl}")`;
+        }
+      }
 
       // Execute the Copilot retrieval query
       const queryUrl = 'https://graph.microsoft.com/beta/copilot/retrieval';
@@ -200,16 +198,15 @@ const AgentPage = () => {
 
         <form onSubmit={executeQuery} className="agent-form">
           <div className="form-group">
-            <label htmlFor="containerId">Select a Container</label>
+            <label htmlFor="containerId">Select a Container (Optional)</label>
             <select
               id="containerId"
               name="containerId"
               value={selectedContainerId}
               onChange={(e) => setSelectedContainerId(e.target.value)}
-              required
               className="form-control"
             >
-              <option value="">-- Select a Container --</option>
+              <option value="">-- All Containers --</option>
               {containers.map((container) => (
                 <option key={container.id} value={container.id}>
                   {container.displayName}
